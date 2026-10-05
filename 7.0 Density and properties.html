@@ -1,0 +1,3452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Density &amp; Viscosity — Chapter 1.7 · Interactive Book</title>
+<style>
+  :root{
+    --paper:#fffefb;
+    --ink:#191c24;
+    --muted:#5d6472;
+    --line:#e5e0d6;
+    --accent:#2f6df6;
+    --accent-soft:#e8efff;
+    --shear:#e8590c;
+    --shear-soft:#ffeee4;
+    --teal:#0f9b8e;
+    --panel:#0e1422;
+    --panel-line:#243049;
+    --radius:16px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 50% -20%, #f4f0e6 0%, transparent 70%),
+      linear-gradient(180deg,#ded7c8,#e9e4d9 60%,#ddd6c7);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.25;margin:0}
+
+  /* ============ FULL SCREEN STAGE ============ */
+  .stage{
+    position:fixed;inset:0;
+    overflow:hidden;
+  }
+
+  /* ============ BOOK = FULL VIEWPORT ============ */
+  .book{
+    position:absolute;inset:0;
+    perspective:2600px;
+    perspective-origin:50% 50%;
+  }
+
+  .page{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,#fffefb 0%,#fdfbf6 100%);
+    padding:44px max(24px, calc(50vw - 420px)) 120px;
+    font-size:16.5px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    transform-origin:left center;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    transition:transform .95s cubic-bezier(.44,.05,.22,1);
+    will-change:transform;
+    scrollbar-width:thin;
+    scrollbar-color:#cfc7b4 transparent;
+  }
+  .page::-webkit-scrollbar{width:8px}
+  .page::-webkit-scrollbar-thumb{background:#d5cdbb;border-radius:6px}
+  .page::-webkit-scrollbar-track{background:transparent}
+  .page.flipped{transform:rotateY(-180deg);}
+
+  /* ============ COVER ============ */
+  .page.cover{
+    background:
+      radial-gradient(700px 400px at 30% 20%, #eef3ff 0%, transparent 65%),
+      radial-gradient(600px 500px at 80% 90%, #ffeede 0%, transparent 60%),
+      linear-gradient(180deg,#fffefb 0%,#fbf8f1 100%);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+    padding:60px max(24px, calc(50vw - 420px)) 120px;
+  }
+  .cover .kicker{
+    font-size:12px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--accent);font-weight:800;margin-bottom:20px;
+  }
+  .cover h1{font-size:clamp(38px,7vw,72px);letter-spacing:-1px;line-height:1.05}
+  .cover h1 em{font-style:italic;color:var(--shear)}
+  .cover p{max-width:540px;color:var(--muted);font-size:17.5px;margin:22px 0 0}
+  .cover .pill{
+    display:inline-block;margin-top:32px;padding:11px 22px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);font-family:var(--mono);font-size:15px;
+    box-shadow:0 8px 24px rgba(25,28,36,.07);
+  }
+  .cover .pill b{color:var(--shear)}
+  .cover .start{
+    margin-top:38px;display:inline-flex;align-items:center;gap:10px;
+    background:var(--accent);color:#fff;border:none;border-radius:12px;
+    padding:13px 24px;font-size:15px;font-weight:600;cursor:pointer;
+    box-shadow:0 10px 26px -8px rgba(47,109,246,.55);
+    transition:.18s;font-family:inherit;
+  }
+  .cover .start:hover{background:#245ad4;transform:translateY(-1px)}
+  .cover .start svg{width:16px;height:16px}
+
+  /* ============ CONTENT ============ */
+  .chip{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:30px;height:30px;padding:0 9px;border-radius:9px;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:700;
+    font-family:var(--mono);margin-right:12px;flex:none;
+  }
+  .chip.hot{background:var(--shear)}
+  .chip.cool{background:var(--teal)}
+  .page h2{
+    font-size:clamp(24px,3.4vw,34px);display:flex;align-items:center;
+    margin-bottom:20px;letter-spacing:-.4px;
+  }
+  .page h3{font-size:18px;margin:26px 0 8px;color:#2a2f3d}
+  .page p{margin:14px 0;color:#333846}
+  .page ul{margin:14px 0;padding-left:22px;color:#333846}
+  .page li{margin:6px 0}
+  strong{color:var(--ink)}
+  em.term{font-style:normal;background:var(--shear-soft);color:var(--shear);
+    padding:1px 6px;border-radius:6px;font-weight:600}
+
+  .callout{
+    background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:12px;padding:16px 20px;margin:22px 0;
+    box-shadow:0 4px 16px rgba(25,28,36,.04);
+  }
+  .callout.shear{border-left-color:var(--shear)}
+  .callout.teal{border-left-color:var(--teal)}
+  .callout p{margin:6px 0}
+
+  .eq{
+    background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:18px 22px;margin:20px 0;text-align:center;
+    font-family:var(--mono);font-size:20px;letter-spacing:.5px;
+    box-shadow:0 4px 16px rgba(25,28,36,.04);
+  }
+  .eq .frac{display:inline-flex;flex-direction:column;vertical-align:middle;
+    text-align:center;font-size:.82em;line-height:1.15;margin:0 4px}
+  .eq .frac .num{border-bottom:1.5px solid currentColor;padding:0 6px 2px}
+  .eq .frac .den{padding:2px 6px 0}
+  .eq .lbl{display:block;font-size:12px;color:var(--muted);margin-top:10px;
+    font-family:-apple-system,sans-serif;letter-spacing:.02em}
+  .eq.two{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+    align-items:stretch;text-align:center}
+  .eq.two > div{flex:1 1 200px;background:#fbfaf6;border:1px solid var(--line);
+    border-radius:11px;padding:12px 14px}
+
+  /* ============ SIM PANEL ============ */
+  .sim{
+    background:var(--panel);border-radius:var(--radius);padding:18px;
+    margin:24px 0;box-shadow:0 18px 40px rgba(14,20,34,.22);
+    color:#dfe6f5;
+  }
+  .sim-head{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;
+    justify-content:space-between;margin-bottom:12px;
+  }
+  .sim-head .t{font-size:13px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:#7f8dab}
+  .sim-head .hint{font-size:12.5px;color:#6c7a97}
+  canvas{display:block;width:100%;border-radius:10px;background:#0b101c}
+
+  .controls{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:14px 20px;margin-top:16px;
+  }
+  .ctrl label{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:12.5px;color:#9aa8c4;margin-bottom:6px;letter-spacing:.02em;
+  }
+  .ctrl label b{color:#7cc4ff;font-family:var(--mono);font-weight:600}
+  input[type=range]{width:100%;accent-color:#4d8dff;height:20px;cursor:pointer;}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  button.tg{
+    background:#1a2438;border:1px solid var(--panel-line);color:#a9b7d3;
+    padding:7px 14px;border-radius:9px;font-size:12.5px;cursor:pointer;
+    transition:.15s;font-family:inherit;
+  }
+  button.tg:hover{border-color:#3c5480;color:#dfe6f5}
+  button.tg.on{background:#22406f;border-color:#3f6fbe;color:#cfe2ff}
+  .readout{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .ro{
+    flex:1 1 130px;background:#141d2f;border:1px solid var(--panel-line);
+    border-radius:10px;padding:10px 14px;
+  }
+  .ro .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7183a3}
+  .ro .v{font-family:var(--mono);font-size:19px;color:#8fd4ff;
+    font-variant-numeric:tabular-nums;margin-top:2px}
+  .ro .v small{font-size:12px;color:#7f8dab}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+  .chips span{
+    background:#fff;border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:14px;color:#3a4152;
+  }
+  .chips span.tag{background:var(--accent-soft);border-color:#cddcff;color:var(--accent);font-weight:600}
+
+  .tbl-wrap{overflow-x:auto;margin:22px 0;border-radius:14px;
+    border:1px solid var(--line);background:#fff}
+  table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px}
+  th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:#faf9f6;font-weight:700;font-size:13px;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--muted)}
+  tbody tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:600;color:#2a2f3d}
+  .solid-col{color:#2f6df6}
+  .fluid-col{color:#e8590c}
+  code.m{font-family:var(--mono);background:#f2f0ea;padding:2px 7px;border-radius:6px;font-size:.92em}
+
+  .chain{display:flex;flex-direction:column;align-items:center;gap:0;margin:26px 0}
+  .chain .node{
+    background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:11px 22px;font-weight:600;font-size:14.5px;text-align:center;
+    box-shadow:0 3px 12px rgba(25,28,36,.05);min-width:200px;color:#2a2f3d;
+  }
+  .chain .node.hot{background:var(--shear-soft);border-color:#ffd2b8;color:var(--shear)}
+  .chain .node.cool{background:var(--accent-soft);border-color:#cddcff;color:var(--accent)}
+  .chain .node.teal{background:#e4f6f4;border-color:#bfe8e4;color:#0b7a70}
+  .chain .arr{color:#b9b3a5;font-size:18px;line-height:1;padding:6px 0}
+  .chain .split{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+  .chain .branch{display:flex;flex-direction:column;align-items:center}
+
+  .deflist{display:grid;gap:14px;margin:22px 0}
+  .def{
+    background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;box-shadow:0 4px 16px rgba(25,28,36,.04);
+  }
+  .def .dt{font-weight:700;color:var(--accent);font-size:14px;
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .def .dd{color:#333846}
+  .def .dd code{font-family:var(--mono);background:#f2f0ea;padding:2px 7px;border-radius:6px}
+
+  /* ============ QUIZ ============ */
+  .quiz{
+    margin:34px 0 12px;
+    background:linear-gradient(180deg,#fffdf8,#fdfaf3);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px 22px 6px;
+    box-shadow:0 6px 22px rgba(25,28,36,.05);
+  }
+  .quiz-head{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    justify-content:space-between;
+    padding-bottom:14px;margin-bottom:4px;
+    border-bottom:1px dashed var(--line);
+  }
+  .quiz-badge{
+    font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);
+  }
+  .quiz-badge.hot{color:var(--shear)}
+  .quiz-badge.cool{color:var(--teal)}
+  .quiz-toggle{
+    background:#fff;border:1px solid var(--line);color:var(--muted);
+    padding:6px 15px;border-radius:999px;font-size:12.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:.15s;
+  }
+  .quiz-toggle:hover{border-color:#b9ae93;color:var(--ink)}
+
+  .q{
+    border-bottom:1px solid #efeae0;
+    padding:16px 0 15px;
+  }
+  .q:last-child{border-bottom:none}
+  .q-top{display:flex;gap:11px;align-items:flex-start}
+  .q-num{
+    flex:none;width:25px;height:25px;border-radius:8px;
+    background:#eef2fb;color:#3a5a9c;
+    font-size:12.5px;font-weight:800;font-family:var(--mono);
+    display:inline-flex;align-items:center;justify-content:center;
+    margin-top:2px;
+  }
+  .q-cog{
+    flex:none;font-size:10.5px;font-weight:800;letter-spacing:.06em;
+    padding:3px 8px;border-radius:6px;margin-top:3px;
+    font-family:var(--mono);
+  }
+  .q-cog.c3{background:#e8efff;color:#2f6df6}
+  .q-cog.c4{background:#ffeee4;color:#e8590c}
+  .q-text{margin:0;color:#2c3140;font-size:15.5px;flex:1;line-height:1.68}
+
+  /* ---- answer input row (NEW) ---- */
+  .q-input-row{
+    display:flex;gap:8px;align-items:center;
+    margin:11px 0 0 36px;
+    flex-wrap:wrap;
+  }
+  .q-input{
+    flex:1 1 180px;min-width:120px;
+    background:#fff;border:1.5px solid var(--line);
+    border-radius:9px;padding:8px 12px;
+    font-family:var(--mono);font-size:13.5px;
+    color:var(--ink);
+    transition:.15s;
+  }
+  .q-input::placeholder{
+    color:#b5ac97;font-family:inherit;font-style:italic;font-size:13px;
+  }
+  .q-input:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,246,.15);
+  }
+  .q-input.q-input-empty{
+    border-color:#e8590c;
+    box-shadow:0 0 0 3px rgba(232,89,12,.18);
+    animation:qshake .35s;
+  }
+  @keyframes qshake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-3px)}
+    75%{transform:translateX(3px)}
+  }
+
+  .q-btn{
+    margin:11px 0 0 36px;
+    background:#fff;border:1px solid var(--line);color:var(--muted);
+    padding:5px 14px;border-radius:8px;font-size:12px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:.15s;
+  }
+  .q-input-row .q-btn{margin:0}
+  .q-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:#f7faff}
+  .q.open .q-btn:not(:disabled){background:var(--accent-soft);border-color:#cddcff;color:var(--accent)}
+
+  /* disabled state — forces the student to type first */
+  .q-btn:disabled{
+    opacity:.42;cursor:not-allowed;
+    background:#f7f5ef;border-color:#e5e0d6;color:#a8a08c;
+  }
+  .q-btn:disabled:hover{
+    border-color:#e5e0d6;color:#a8a08c;background:#f7f5ef;
+  }
+
+  .q-ans{
+    display:none;
+    margin:11px 0 0 36px;
+    background:#f7f9fd;border-left:3px solid var(--accent);
+    border-radius:0 10px 10px 0;
+    padding:12px 17px;
+    font-size:14.5px;color:#333846;
+  }
+  .q.open .q-ans{display:block}
+  .q-ans p{margin:5px 0}
+  .q-ans .step{
+    font-family:var(--mono);font-size:13.5px;color:#2a3550;
+    margin:5px 0;line-height:1.7;
+  }
+  .q-ans .final{
+    font-weight:800;color:var(--accent);font-family:var(--mono);
+    background:#fff;border:1px solid #dfe7f7;border-radius:7px;
+    padding:2px 10px;display:inline-block;margin-top:5px;font-size:14px;
+  }
+  .q-ans .note{color:var(--muted);font-size:13.5px;font-style:italic;margin-top:7px}
+
+  /* ============ NAV BAR (overlay, bottom) ============ */
+  .book-nav{
+    position:fixed;
+    bottom:max(14px, env(safe-area-inset-bottom));
+    left:50%;
+    transform:translateX(-50%);
+    z-index:7000;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,254,251,.95);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid #d8d0bd;
+    border-radius:999px;
+    padding:5px 8px;
+    box-shadow:0 8px 30px -8px rgba(60,50,20,.25);
+    font-family:inherit;
+    user-select:none;
+    max-width:calc(100vw - 20px);
+  }
+  .nav-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:#fff;border:1px solid #e0daca;color:#3a3f4d;
+    width:32px;height:32px;border-radius:50%;cursor:pointer;
+    transition:.15s;padding:0;
+  }
+  .nav-btn:hover:not(:disabled){background:#fffef8;border-color:#b9ae93}
+  .nav-btn:disabled{opacity:.32;cursor:not-allowed}
+  .nav-btn svg{width:14px;height:14px}
+
+  .nav-center{display:flex;flex-direction:column;align-items:center;gap:3px;
+    min-width:0;padding:0 6px}
+  .nav-title{
+    font-size:11.5px;color:#6b6350;letter-spacing:.02em;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;
+  }
+  .dots{display:flex;gap:5px;align-items:center;justify-content:center}
+  .dot{
+    width:7px;height:7px;border-radius:50%;background:#c9c0ab;border:none;
+    cursor:pointer;transition:.18s;padding:0;
+  }
+  .dot:hover{background:#9a8f74;transform:scale(1.25)}
+  .dot.active{background:var(--accent);width:18px;border-radius:4px}
+  .page-num{font-family:var(--mono);font-size:10px;color:#8a8168;letter-spacing:.06em}
+
+  /* ============ EDIT BUTTON (small FAB) ============ */
+  .edit-fab{
+    position:fixed;
+    top:max(14px, env(safe-area-inset-top));
+    right:14px;
+    z-index:7500;
+    width:38px;height:38px;
+    border-radius:50%;
+    background:rgba(255,254,251,.96);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid #d8d0bd;
+    color:#3a3f4d;
+    display:inline-flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.28);
+    transition:.15s;
+    font-family:inherit;
+    padding:0;
+  }
+  .edit-fab:hover{background:#fffef8;border-color:#b9ae93;transform:translateY(-1px)}
+  .edit-fab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .edit-fab svg{width:16px;height:16px}
+
+  /* Edit actions bar — appears under the FAB when editing */
+  .edit-actions{
+    position:fixed;
+    top:max(60px, calc(env(safe-area-inset-top) + 60px));
+    right:14px;
+    z-index:7400;
+    display:flex;flex-direction:column;gap:5px;align-items:flex-end;
+    font-family:inherit;
+  }
+  .edit-actions[hidden]{display:none}
+  .edit-actions input.title-edit{
+    background:rgba(255,254,251,.97);
+    border:1px solid #d8d0bd;border-radius:10px;
+    padding:6px 10px;font-size:12px;font-family:inherit;color:#3a3f4d;
+    width:160px;font-weight:600;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.22);
+  }
+  .edit-actions input.title-edit:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,246,.15);
+  }
+  .edit-actions button{
+    background:rgba(255,254,251,.97);border:1px solid #d8d0bd;color:#3a3f4d;
+    padding:6px 11px;border-radius:9px;cursor:pointer;
+    font-weight:600;font-size:11.5px;display:inline-flex;align-items:center;gap:5px;
+    transition:.15s;font-family:inherit;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.22);
+  }
+  .edit-actions button:hover{background:#fffef8;border-color:#b9ae93}
+  .edit-actions button.danger{color:#c92a2a;border-color:#f0bcbc}
+  .edit-actions button.danger:hover{background:#fff5f5;border-color:#e8a0a0}
+  .edit-actions button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .edit-actions button.primary:hover{background:#245ad4}
+  .edit-actions button svg{width:12px;height:12px}
+
+  /* Edit mode visual cue */
+  body.edit-mode .page{outline:2px dashed rgba(47,109,246,.35);outline-offset:-10px}
+  body.edit-mode .page:focus-within{outline-color:rgba(47,109,246,.85)}
+  body.edit-mode .page [contenteditable="false"]{user-select:none}
+
+  /* ============ MODAL ============ */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(20,18,12,.55);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    z-index:9000;display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .modal-backdrop[hidden]{display:none}
+  .modal{
+    background:#fffefb;border-radius:18px;padding:26px 28px;
+    width:min(440px,100%);max-height:90vh;overflow-y:auto;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.5);
+    font-family:inherit;
+  }
+  .modal.wide{width:min(760px,100%)}
+  .modal h3{font-size:21px;margin-bottom:6px;letter-spacing:-.3px}
+  .modal .sub{color:#6b6350;font-size:13.5px;margin:0 0 6px}
+  .modal label{
+    display:block;font-size:11.5px;font-weight:800;color:#3a3f4d;
+    margin:14px 0 6px;letter-spacing:.08em;text-transform:uppercase;
+  }
+  .modal input[type=text],.modal input[type=password],.modal textarea{
+    width:100%;background:#fbf9f4;border:1px solid #d8d0bd;border-radius:11px;
+    padding:11px 14px;font-family:inherit;font-size:14px;color:#191c24;
+    resize:vertical;
+  }
+  .modal textarea{
+    font-family:var(--mono);font-size:12.5px;line-height:1.55;min-height:220px;
+    white-space:pre;overflow:auto;tab-size:2;
+  }
+  .modal input:focus,.modal textarea:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,246,.15);
+  }
+  .modal .hint{
+    color:#8a8168;font-size:12px;margin-top:8px;line-height:1.55;
+  }
+  .modal .hint code{
+    font-family:var(--mono);background:#f0ece0;padding:1px 6px;
+    border-radius:5px;font-size:11.5px;
+  }
+  .modal .login-error{
+    color:#c92a2a;background:#fff5f5;border:1px solid #f0bcbc;
+    padding:9px 12px;border-radius:9px;font-size:13px;margin-top:14px;
+  }
+  .modal-actions{
+    display:flex;justify-content:flex-end;gap:9px;margin-top:22px;
+    padding-top:18px;border-top:1px solid #eee9de;
+  }
+  .modal-actions button{
+    padding:10px 18px;border-radius:11px;font-size:13.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;border:1px solid #d8d0bd;
+    background:#fff;color:#3a3f4d;transition:.15s;
+  }
+  .modal-actions button:hover{background:#faf7ef}
+  .modal-actions button.primary{
+    background:var(--accent);color:#fff;border-color:var(--accent);
+    box-shadow:0 8px 22px -8px rgba(47,109,246,.6);
+  }
+  .modal-actions button.primary:hover{background:#245ad4}
+
+  /* ============ PHONE ============ */
+  @media (max-width:760px){
+    body{line-height:1.7}
+    .page{
+      padding:22px 20px 110px;
+      font-size:16px;
+    }
+    .page.cover{padding:34px 24px 110px}
+
+    .page h2{font-size:clamp(22px,5.6vw,28px);margin-bottom:16px}
+    .page h3{font-size:16.5px;margin:20px 0 6px}
+    .chip{min-width:26px;height:26px;font-size:12.5px;margin-right:9px}
+
+    .sim{padding:12px;margin:18px 0}
+    .sim canvas{height:230px !important}
+    #cvDensity{height:280px !important}
+    #cvSW{height:260px !important}
+    #cvSG{height:300px !important}
+    #cvVisc{height:300px !important}
+    #cvNewton{height:260px !important}
+    #cvNu{height:300px !important}
+
+    .controls{grid-template-columns:1fr;gap:10px}
+    .readout .ro .v{font-size:16px}
+    .eq{font-size:17px;padding:14px 16px}
+    .eq .lbl{font-size:11px}
+    .callout{padding:14px 16px;margin:18px 0}
+
+    table{font-size:13px;min-width:440px}
+    th,td{padding:9px 12px}
+
+    .chain .node{min-width:0;width:100%;font-size:13.5px;padding:10px 14px}
+    .chain .split{flex-direction:column;gap:14px;align-items:center}
+    .chain .branch{width:100%}
+
+    .nav-btn{width:30px;height:30px}
+    .nav-title{max-width:120px;font-size:11px}
+
+    .edit-fab{width:34px;height:34px;top:10px;right:10px}
+    .edit-fab svg{width:14px;height:14px}
+    .edit-actions{top:52px;right:10px}
+    .edit-actions input.title-edit{width:130px;font-size:11.5px}
+    .edit-actions button{padding:5px 9px;font-size:11px}
+
+    .modal{padding:22px 20px}
+    .modal h3{font-size:19px}
+
+    /* quiz on phone */
+    .quiz{padding:16px 14px 4px;margin:26px 0 10px}
+    .quiz-head{gap:8px}
+    .quiz-badge{font-size:11px;letter-spacing:.1em}
+    .quiz-toggle{font-size:11.5px;padding:5px 12px}
+    .q-text{font-size:14.5px}
+    .q-btn{margin-left:0;font-size:11.5px}
+    .q-ans{margin-left:0;font-size:13.5px;padding:10px 13px}
+    .q-ans .step{font-size:12.5px}
+    .q-ans .final{font-size:13px}
+    .q-num{width:23px;height:23px;font-size:11.5px}
+    .q-cog{font-size:10px;padding:2px 6px}
+
+    /* input row on phone */
+    .q-input-row{margin-left:0;gap:6px}
+    .q-input{font-size:13px;padding:7px 10px;flex:1 1 140px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .page{transition-duration:.35s}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="book" id="book">
+
+    <!-- ============== PAGE 0 · COVER ============== -->
+    <div class="page cover" data-title="Cover">
+      <div class="kicker">Chapter 1.7 · Fluid Properties</div>
+      <h1>Density,<br>Viscosity &amp;<br><em>Their Cousins</em></h1>
+      <p>Mass density, specific weight, relative density, dynamic viscosity and kinematic viscosity — five properties, one clean chain of definitions. Move the sliders and watch each one behave.</p>
+      <div class="pill"><b>ρ</b> = m/V &nbsp;·&nbsp; <b>ω</b> = ρg &nbsp;·&nbsp; <b>ν</b> = μ/ρ</div>
+      <button class="start" id="startBtn">
+        Start reading
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <!-- ============== PAGE 1 · MASS DENSITY ============== -->
+    <div class="page" data-title="1.7 · Mass Density">
+      <h2><span class="chip">1.7</span>Mass Density</h2>
+
+      <p><strong>Density describes the amount of matter contained in a unit volume.</strong></p>
+
+      <div class="eq">
+        ρ = <span class="frac"><span class="num">m</span><span class="den">V</span></span>
+        <span class="lbl">ρ = mass density · m = mass · V = volume</span>
+      </div>
+
+      <div class="eq two">
+        <div>SI unit<br><strong>kg / m³</strong></div>
+        <div>Dimension<br><strong>M L⁻³</strong></div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Typical values</strong></p>
+        <p>Water &nbsp;→&nbsp; <code class="m">1000 kg/m³</code></p>
+        <p>Air &nbsp;→&nbsp; <code class="m">1.23 kg/m³</code></p>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · ρ = m / V</span>
+          <span class="hint">Add mass, shrink the volume → density rises</span>
+        </div>
+        <canvas id="cvDensity" style="height:340px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>Mass m <b><span id="mVal">5.0</span> kg</b></label>
+            <input type="range" id="mSlider" min="5" max="500" step="5" value="50">
+          </div>
+          <div class="ctrl">
+            <label>Volume V <b><span id="vVal">0.005</span> m³</b></label>
+            <input type="range" id="vSlider" min="1" max="50" step="1" value="5">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k">Mass density ρ</div><div class="v" id="rhoOut">1000 <small>kg/m³</small></div></div>
+          <div class="ro"><div class="k">Mass</div><div class="v" id="mOut">5.0 <small>kg</small></div></div>
+          <div class="ro"><div class="k">Volume</div><div class="v" id="vOut">0.005 <small>m³</small></div></div>
+        </div>
+      </div>
+
+      <p>The dots inside the cube represent matter. Pack more mass into the same box and the density climbs — the material gets <strong>heavier per unit volume</strong>.</p>
+
+      <!-- ===== QUIZ · MASS DENSITY ===== -->
+      <div class="quiz">
+        <div class="quiz-head">
+          <span class="quiz-badge">Practice · Mass Density · 10 Questions</span>
+          <button class="quiz-toggle">Show all answers</button>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">1</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A metal block has a mass of 2.7 kg and a volume of 1.0 × 10⁻³ m³. Calculate its density and suggest which metal it could be.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = m / V = 2.7 / (1.0 × 10⁻³)</p>
+            <p class="step">ρ = 2700 kg/m³</p>
+            <p><span class="final">ρ = 2700 kg/m³</span></p>
+            <p class="note">SG = 2.7 → this matches aluminium.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">2</span><span class="q-cog c3">C3</span>
+            <p class="q-text">500 g of a liquid occupies 625 cm³. Determine its density in kg/m³.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">m = 500 g = 0.5 kg</p>
+            <p class="step">V = 625 cm³ = 625 × 10⁻⁶ m³ = 6.25 × 10⁻⁴ m³</p>
+            <p class="step">ρ = 0.5 / (6.25 × 10⁻⁴) = 800</p>
+            <p><span class="final">ρ = 800 kg/m³</span></p>
+            <p class="note">SG = 0.8 → typical of oil or kerosene.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">3</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A rectangular tank 2.0 m × 1.5 m × 1.2 m is completely filled with oil of density 850 kg/m³. Calculate the mass of oil in the tank.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">V = 2.0 × 1.5 × 1.2 = 3.6 m³</p>
+            <p class="step">m = ρV = 850 × 3.6 = 3060 kg</p>
+            <p><span class="final">m = 3060 kg ≈ 3.06 tonne</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">4</span><span class="q-cog c3">C3</span>
+            <p class="q-text">Calculate the volume occupied by 25 kg of mercury. Take ρ<sub>mercury</sub> = 13 600 kg/m³.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">V = m / ρ = 25 / 13 600</p>
+            <p class="step">V = 1.838 × 10⁻³ m³</p>
+            <p><span class="final">V = 1.84 × 10⁻³ m³ ≈ 1.84 litre</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">5</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A gas cylinder of internal volume 0.04 m³ contains gas of density 6.5 kg/m³. Determine the mass of gas inside.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">m = ρV = 6.5 × 0.04</p>
+            <p class="step">m = 0.26 kg</p>
+            <p><span class="final">m = 0.26 kg = 260 g</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">6</span><span class="q-cog c4">C4</span>
+            <p class="q-text">Two liquids are mixed together: 3.0 L of density 800 kg/m³ and 5.0 L of density 1200 kg/m³. Assuming the volumes are additive, determine the density of the mixture.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">m₁ = ρ₁V₁ = 800 × 3.0 × 10⁻³ = 2.4 kg</p>
+            <p class="step">m₂ = ρ₂V₂ = 1200 × 5.0 × 10⁻³ = 6.0 kg</p>
+            <p class="step">m<sub>total</sub> = 8.4 kg</p>
+            <p class="step">V<sub>total</sub> = 8.0 × 10⁻³ m³</p>
+            <p class="step">ρ<sub>mix</sub> = 8.4 / (8.0 × 10⁻³) = 1050</p>
+            <p><span class="final">ρ<sub>mixture</sub> = 1050 kg/m³</span></p>
+            <p class="note">Note: the mixture density is a <em>mass-weighted</em> average, not a simple average of 800 and 1200 (which would give 1000).</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">7</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A hollow metal sphere has an outer diameter of 10 cm and a mass of 1.2 kg. Determine its average density and analyse whether it will float or sink in water.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">r = 0.05 m</p>
+            <p class="step">V = (4/3)πr³ = (4/3)π(0.05)³ = 5.236 × 10⁻⁴ m³</p>
+            <p class="step">ρ<sub>avg</sub> = 1.2 / (5.236 × 10⁻⁴) = 2292 kg/m³</p>
+            <p><span class="final">ρ<sub>avg</sub> = 2292 kg/m³ → SG ≈ 2.29</span></p>
+            <p class="note">Since ρ<sub>avg</sub> &gt; ρ<sub>water</sub> (1000 kg/m³), the sphere <strong>sinks</strong>. The hollow core reduces the average density, but not enough to make it float.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">8</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A block of mass 0.9 kg has its volume reduced by 25% while its mass stays the same. Its new density is then 1200 kg/m³. Determine the block's original density and original volume.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">V<sub>new</sub> = m / ρ<sub>new</sub> = 0.9 / 1200 = 7.5 × 10⁻⁴ m³</p>
+            <p class="step">V<sub>new</sub> = 0.75 V<sub>old</sub>  ⟹  V<sub>old</sub> = 7.5 × 10⁻⁴ / 0.75 = 1.0 × 10⁻³ m³</p>
+            <p class="step">ρ<sub>old</sub> = 0.9 / (1.0 × 10⁻³) = 900</p>
+            <p><span class="final">V<sub>original</sub> = 1.0 × 10⁻³ m³ , ρ<sub>original</sub> = 900 kg/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">9</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A cylindrical container of radius 5 cm and height 20 cm is completely filled with 1.2 kg of a liquid. (a) Find the liquid's density. (b) Half of the liquid is then removed and the container is topped up with water (ρ = 1000 kg/m³). Find the new average density of the contents.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">V = πr²h = π(0.05)²(0.20) = 1.571 × 10⁻³ m³</p>
+            <p class="step">(a) ρ = 1.2 / (1.571 × 10⁻³) = 764 kg/m³</p>
+            <p class="step">Half liquid remaining: m = 0.6 kg in 7.854 × 10⁻⁴ m³</p>
+            <p class="step">Water added: m = 1000 × 7.854 × 10⁻⁴ = 0.785 kg</p>
+            <p class="step">m<sub>total</sub> = 0.6 + 0.785 = 1.385 kg ; V = 1.571 × 10⁻³ m³</p>
+            <p class="step">ρ<sub>avg</sub> = 1.385 / 1.571 × 10⁻³ = 882</p>
+            <p><span class="final">(a) 764 kg/m³ &nbsp; (b) ≈ 882 kg/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">10</span><span class="q-cog c4">C4</span>
+            <p class="q-text">An object of mass 4.8 kg has a density of 800 kg/m³. It is then compressed so that its volume decreases by 40%, while no mass is lost. Determine (a) its new volume, (b) its new density, and (c) explain whether the mass changed.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">V₁ = m / ρ₁ = 4.8 / 800 = 6.0 × 10⁻³ m³</p>
+            <p class="step">V₂ = 0.60 V₁ = 3.6 × 10⁻³ m³</p>
+            <p class="step">ρ₂ = 4.8 / (3.6 × 10⁻³) = 1333 kg/m³</p>
+            <p><span class="final">(a) 3.6 × 10⁻³ m³ &nbsp; (b) 1333 kg/m³</span></p>
+            <p class="note">(c) The mass is unchanged — compression only reduces the volume, so the same matter is packed into a smaller space, raising the density.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 2 · SPECIFIC WEIGHT ============== -->
+    <div class="page" data-title="1.8 · Specific Weight">
+      <h2><span class="chip">1.8</span>Specific Weight</h2>
+
+      <p><strong>Specific weight is the weight per unit volume.</strong></p>
+
+      <div class="eq">
+        ω = ρ g
+        <span class="lbl">ω = specific weight · ρ = density · g = gravitational acceleration</span>
+      </div>
+
+      <div class="eq two">
+        <div>SI unit<br><strong>N / m³</strong></div>
+        <div>Dimension<br><strong>M L⁻² T⁻²</strong></div>
+      </div>
+
+      <div class="callout teal">
+        <p><strong>Easy way to remember</strong></p>
+        <p style="font-family:var(--mono);font-size:17px;text-align:center;margin:10px 0">Specific weight = Density × g</p>
+      </div>
+
+      <p>Typical value for water:</p>
+      <div class="eq">
+        ω = 9.81 × 10³ N/m³
+        <span class="lbl">because 1000 kg/m³ × 9.81 m/s² = 9810 N/m³</span>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · ω = ρ g</span>
+          <span class="hint">Same fluid, different planet → different weight</span>
+        </div>
+        <canvas id="cvSW" style="height:320px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>Density ρ <b><span id="swRhoVal">1000</span> kg/m³</b></label>
+            <input type="range" id="swRhoSlider" min="100" max="2000" step="10" value="1000">
+          </div>
+        </div>
+        <div class="btnrow" id="gravBtns">
+          <button class="tg on" data-g="9.81">🌍 Earth · 9.81</button>
+          <button class="tg" data-g="1.62">🌕 Moon · 1.62</button>
+          <button class="tg" data-g="3.71">🔴 Mars · 3.71</button>
+          <button class="tg" data-g="24.79">🪐 Jupiter · 24.79</button>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k">Specific weight ω</div><div class="v" id="swOut">9810 <small>N/m³</small></div></div>
+          <div class="ro"><div class="k">Density ρ</div><div class="v" id="swRhoOut">1000 <small>kg/m³</small></div></div>
+          <div class="ro"><div class="k">Gravity g</div><div class="v" id="swGOut">9.81 <small>m/s²</small></div></div>
+        </div>
+      </div>
+
+      <p>Density is a property of the <em>material</em>. Specific weight is a property of the material <em>in a given gravitational field</em> — take the water to the Moon and its density is unchanged, but its specific weight drops by a factor of six.</p>
+
+      <!-- ===== QUIZ · SPECIFIC WEIGHT ===== -->
+      <div class="quiz">
+        <div class="quiz-head">
+          <span class="quiz-badge cool">Practice · Specific Weight · 10 Questions</span>
+          <button class="quiz-toggle">Show all answers</button>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">1</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A liquid has a density of 900 kg/m³. Calculate its specific weight on Earth (g = 9.81 m/s²).</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ω = ρg = 900 × 9.81</p>
+            <p class="step">ω = 8829 N/m³</p>
+            <p><span class="final">ω = 8.83 × 10³ N/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">2</span><span class="q-cog c3">C3</span>
+            <p class="q-text">Water has a specific weight of 9810 N/m³ on Earth. Determine its density.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = ω / g = 9810 / 9.81</p>
+            <p class="step">ρ = 1000 kg/m³</p>
+            <p><span class="final">ρ = 1000 kg/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">3</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A container holds 0.5 m³ of a fluid whose specific weight is 7850 N/m³. Calculate the total weight of the fluid.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">W = ω × V = 7850 × 0.5</p>
+            <p class="step">W = 3925 N</p>
+            <p><span class="final">W = 3.93 × 10³ N</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">4</span><span class="q-cog c3">C3</span>
+            <p class="q-text">The specific weight of mercury is 133 416 N/m³. Determine its density on Earth.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = ω / g = 133 416 / 9.81</p>
+            <p class="step">ρ = 13 600 kg/m³</p>
+            <p><span class="final">ρ = 13 600 kg/m³</span> &nbsp;(SG = 13.6)</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">5</span><span class="q-cog c3">C3</span>
+            <p class="q-text">Calculate the specific weight of air at 15 °C, given ρ<sub>air</sub> = 1.23 kg/m³ and g = 9.81 m/s².</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ω = ρg = 1.23 × 9.81</p>
+            <p class="step">ω = 12.07 N/m³</p>
+            <p><span class="final">ω ≈ 12.1 N/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">6</span><span class="q-cog c4">C4</span>
+            <p class="q-text">An astronaut takes 2.0 m³ of water to the Moon, where g = 1.62 m/s². Determine (a) the mass of the water, (b) its specific weight on the Moon, (c) its specific weight on Earth. Explain why the two specific weights differ.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">(a) m = ρV = 1000 × 2.0 = 2000 kg</p>
+            <p class="step">(b) ω<sub>Moon</sub> = 1000 × 1.62 = 1620 N/m³</p>
+            <p class="step">(c) ω<sub>Earth</sub> = 1000 × 9.81 = 9810 N/m³</p>
+            <p><span class="final">m = 2000 kg · ω<sub>Moon</sub> = 1620 N/m³ · ω<sub>Earth</sub> = 9810 N/m³</span></p>
+            <p class="note">The mass and volume of the water are unchanged, so the density is the same in both places. Specific weight, however, is a <em>force</em> per unit volume (weight = mg), so it scales directly with the local gravitational field.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">7</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A fluid has a specific weight of 7.85 × 10³ N/m³ on Earth. Determine its density, and then calculate its specific weight on Mars where g = 3.71 m/s².</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = ω / g = 7850 / 9.81 = 800 kg/m³</p>
+            <p class="step">ω<sub>Mars</sub> = ρ g<sub>Mars</sub> = 800 × 3.71</p>
+            <p class="step">ω<sub>Mars</sub> = 2968 N/m³</p>
+            <p><span class="final">ρ = 800 kg/m³ · ω<sub>Mars</sub> = 2.97 × 10³ N/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">8</span><span class="q-cog c4">C4</span>
+            <p class="q-text">Two fluids each occupy a volume of 0.02 m³. Fluid A has a specific weight of 8000 N/m³; fluid B has a density of 900 kg/m³. Determine which fluid has the greater weight and by how much.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">W<sub>A</sub> = ω<sub>A</sub>V = 8000 × 0.02 = 160 N</p>
+            <p class="step">ω<sub>B</sub> = ρ<sub>B</sub>g = 900 × 9.81 = 8829 N/m³</p>
+            <p class="step">W<sub>B</sub> = 8829 × 0.02 = 176.6 N</p>
+            <p class="step">Difference = 176.6 − 160 = 16.6 N</p>
+            <p><span class="final">Fluid B is heavier by ≈ 16.6 N</span></p>
+            <p class="note">Comparing densities directly is not enough — you must convert to the same quantity (weight) using ω = ρg before comparing.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">9</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A body weighs 500 N on Earth. Determine (a) its mass, (b) its weight on Jupiter where g = 24.79 m/s², and (c) its specific weight on Earth if its volume is 0.08 m³.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">(a) m = W / g = 500 / 9.81 = 50.97 kg</p>
+            <p class="step">(b) W<sub>Jup</sub> = mg<sub>Jup</sub> = 50.97 × 24.79 = 1263.6 N</p>
+            <p class="step">(c) ω = W / V = 500 / 0.08 = 6250 N/m³</p>
+            <p><span class="final">m ≈ 51.0 kg · W<sub>Jupiter</sub> ≈ 1.26 × 10³ N · ω = 6250 N/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">10</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A tank of volume 0.75 m³ contains a fluid of relative density 1.26. Determine (a) the fluid's density, (b) its specific weight on Earth, and (c) the total weight of the fluid in the tank.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">(a) ρ = SG × 1000 = 1.26 × 1000 = 1260 kg/m³</p>
+            <p class="step">(b) ω = ρg = 1260 × 9.81 = 12 360.6 N/m³</p>
+            <p class="step">(c) W = ωV = 12 360.6 × 0.75 = 9270.5 N</p>
+            <p><span class="final">ρ = 1260 kg/m³ · ω ≈ 1.24 × 10⁴ N/m³ · W ≈ 9.27 × 10³ N</span></p>
+            <p class="note">SG 1.26 matches glycerin.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 3 · RELATIVE DENSITY ============== -->
+    <div class="page" data-title="1.9 · Relative Density">
+      <h2><span class="chip">1.9</span>Relative Density / Specific Gravity</h2>
+
+      <p><strong>Relative density (SG) is the ratio of the density of a substance to a standard density.</strong></p>
+
+      <p>For liquids and solids, the standard is the <strong>maximum density of water at 4 °C and atmospheric pressure</strong>.</p>
+
+      <div class="eq">
+        SG = <span class="frac"><span class="num">ρ<sub>substance</sub></span><span class="den">ρ<sub>water</sub></span></span>
+        <span class="lbl">ρ<sub>water</sub> = 1000 kg/m³ at 4 °C</span>
+      </div>
+
+      <div class="callout shear">
+        <p><strong>It has no units and no dimensions</strong> — it is a pure ratio of two densities.</p>
+      </div>
+
+      <p>Typical values: Water <code class="m">SG = 1.0</code> &nbsp;·&nbsp; Oil <code class="m">SG = 0.9</code></p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · Float or Sink?</span>
+          <span class="hint">SG &lt; 1 floats · SG &gt; 1 sinks</span>
+        </div>
+        <canvas id="cvSG" style="height:340px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>Relative density SG <b><span id="sgVal">0.90</span></b></label>
+            <input type="range" id="sgSlider" min="10" max="300" step="1" value="90">
+          </div>
+        </div>
+        <div class="btnrow" id="sgBtns">
+          <button class="tg" data-sg="90">Oil · 0.90</button>
+          <button class="tg" data-sg="92">Ice · 0.92</button>
+          <button class="tg" data-sg="100">Water · 1.00</button>
+          <button class="tg" data-sg="103">Seawater · 1.03</button>
+          <button class="tg" data-sg="126">Glycerin · 1.26</button>
+          <button class="tg" data-sg="270">Aluminium · 2.70</button>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k">ρ substance</div><div class="v" id="sgRhoOut">900 <small>kg/m³</small></div></div>
+          <div class="ro"><div class="k">ρ water (4 °C)</div><div class="v">1000 <small>kg/m³</small></div></div>
+          <div class="ro"><div class="k">Behaviour</div><div class="v" id="sgBehOut">Floats</div></div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Substance</th><th>SG</th><th>ρ (kg/m³)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Air (at 15 °C)</td><td>0.0012</td><td>1.23</td></tr>
+            <tr><td>Petrol</td><td>0.72</td><td>720</td></tr>
+            <tr><td>Oil</td><td>0.90</td><td>900</td></tr>
+            <tr><td>Ice</td><td>0.92</td><td>920</td></tr>
+            <tr><td>Water (4 °C)</td><td>1.00</td><td>1000</td></tr>
+            <tr><td>Seawater</td><td>1.03</td><td>1030</td></tr>
+            <tr><td>Glycerin</td><td>1.26</td><td>1260</td></tr>
+            <tr><td>Mercury</td><td>13.6</td><td>13 600</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===== QUIZ · RELATIVE DENSITY ===== -->
+      <div class="quiz">
+        <div class="quiz-head">
+          <span class="quiz-badge hot">Practice · Relative Density · 10 Questions</span>
+          <button class="quiz-toggle">Show all answers</button>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">1</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A liquid has a density of 840 kg/m³. Calculate its relative density (SG).</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">SG = ρ / ρ<sub>water</sub> = 840 / 1000</p>
+            <p class="step">SG = 0.84</p>
+            <p><span class="final">SG = 0.84</span> (no unit)</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">2</span><span class="q-cog c3">C3</span>
+            <p class="q-text">The relative density of a fluid is 1.26. Calculate its density in kg/m³.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = SG × ρ<sub>water</sub> = 1.26 × 1000</p>
+            <p class="step">ρ = 1260 kg/m³</p>
+            <p><span class="final">ρ = 1260 kg/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">3</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A body of relative density 2.7 has a volume of 4.0 × 10⁻⁴ m³. Determine its mass.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = 2.7 × 1000 = 2700 kg/m³</p>
+            <p class="step">m = ρV = 2700 × 4.0 × 10⁻⁴</p>
+            <p class="step">m = 1.08 kg</p>
+            <p><span class="final">m = 1.08 kg</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">4</span><span class="q-cog c3">C3</span>
+            <p class="q-text">The relative density of mercury is 13.6. Find the mass of 200 cm³ of mercury.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = 13.6 × 1000 = 13 600 kg/m³</p>
+            <p class="step">V = 200 cm³ = 2.0 × 10⁻⁴ m³</p>
+            <p class="step">m = 13 600 × 2.0 × 10⁻⁴</p>
+            <p class="step">m = 2.72 kg</p>
+            <p><span class="final">m = 2.72 kg</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">5</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A liquid has a relative density of 0.85. Calculate its specific weight on Earth.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = 0.85 × 1000 = 850 kg/m³</p>
+            <p class="step">ω = ρg = 850 × 9.81</p>
+            <p class="step">ω = 8338.5 N/m³</p>
+            <p><span class="final">ω ≈ 8.34 × 10³ N/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">6</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A block of wood of relative density 0.65 floats in water. Determine the fraction of its volume that is submerged. Explain your reasoning.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">For a floating body: weight = buoyancy</p>
+            <p class="step">ρ<sub>wood</sub> V g = ρ<sub>water</sub> V<sub>sub</sub> g</p>
+            <p class="step">V<sub>sub</sub> / V = ρ<sub>wood</sub> / ρ<sub>water</sub> = SG</p>
+            <p class="step">V<sub>sub</sub> / V = 0.65 = 65%</p>
+            <p><span class="final">65% of the volume is submerged</span></p>
+            <p class="note">General rule for floating in water: the submerged fraction equals the SG of the body.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">7</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A container holds 2.0 L of water. Then 3.0 L of oil (SG = 0.8) is poured in and the two liquids do not mix. Determine the total mass of liquid and the average density if the total volume is 5.0 L.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">m<sub>water</sub> = 1000 × 2.0 × 10⁻³ = 2.0 kg</p>
+            <p class="step">ρ<sub>oil</sub> = 0.8 × 1000 = 800 kg/m³</p>
+            <p class="step">m<sub>oil</sub> = 800 × 3.0 × 10⁻³ = 2.4 kg</p>
+            <p class="step">m<sub>total</sub> = 4.4 kg ; V<sub>total</sub> = 5.0 × 10⁻³ m³</p>
+            <p class="step">ρ<sub>avg</sub> = 4.4 / (5.0 × 10⁻³) = 880 kg/m³</p>
+            <p><span class="final">m = 4.4 kg · ρ<sub>average</sub> = 880 kg/m³</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">8</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A piece of metal weighs 3.5 N in air. When completely immersed in water it displaces 1.2 × 10⁻⁴ m³ of water. Determine the metal's relative density.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">m = W / g = 3.5 / 9.81 = 0.3568 kg</p>
+            <p class="step">ρ = m / V = 0.3568 / (1.2 × 10⁻⁴)</p>
+            <p class="step">ρ = 2973 kg/m³</p>
+            <p class="step">SG = 2973 / 1000 = 2.97</p>
+            <p><span class="final">SG ≈ 2.97</span></p>
+            <p class="note">The displaced volume equals the volume of the metal (Archimedes' principle).</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">9</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A hydrometer floats with 60% of its volume submerged in liquid A and with 75% of its volume submerged in liquid B. Determine the SG of both liquids and the ratio of their densities.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">For a floating body: SG<sub>liquid</sub> = 1 / (fraction submerged)</p>
+            <p class="step">Liquid A: fraction = 0.60 → SG<sub>A</sub> = 0.60</p>
+            <p class="step">Liquid B: fraction = 0.75 → SG<sub>B</sub> = 0.75</p>
+            <p class="step">ρ<sub>A</sub> / ρ<sub>B</sub> = 0.60 / 0.75 = 0.80</p>
+            <p><span class="final">SG<sub>A</sub> = 0.60 · SG<sub>B</sub> = 0.75 · ρ<sub>A</sub>/ρ<sub>B</sub> = 0.8</span></p>
+            <p class="note">The more a hydrometer sinks, the lower the liquid's density.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">10</span><span class="q-cog c4">C4</span>
+            <p class="q-text">An object of SG 0.9 floats in water. It is then placed in a liquid of SG 1.2. Determine whether it floats, and calculate the new submerged fraction.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">In water: submerged fraction = 0.9 / 1.0 = 0.90 (90%)</p>
+            <p class="step">In liquid (SG 1.2): since SG<sub>object</sub> = 0.9 &lt; 1.2, it still floats.</p>
+            <p class="step">Submerged fraction = ρ<sub>obj</sub> / ρ<sub>liquid</sub> = 0.9 / 1.2</p>
+            <p class="step">= 0.75 = 75%</p>
+            <p><span class="final">It floats, with 75% of its volume submerged</span></p>
+            <p class="note">In the denser liquid, the object floats higher (less of it is submerged).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 4 · DYNAMIC VISCOSITY ============== -->
+    <div class="page" data-title="1.10 · Dynamic Viscosity">
+      <h2><span class="chip hot">1.10</span>Dynamic Viscosity</h2>
+
+      <p><strong>Viscosity is the fluid property associated with its resistance to deformation / flow.</strong></p>
+
+      <p>Dynamic viscosity can be defined as the <em class="term">shear force per unit area</em> required to move one fluid layer relative to another.</p>
+
+      <div class="eq">
+        μ = <span class="frac"><span class="num">τ</span><span class="den">du / dy</span></span>
+        <span class="lbl">τ = shear stress · du/dy = velocity gradient (shear rate)</span>
+      </div>
+
+      <div class="eq two">
+        <div>SI unit<br><strong>N s / m²</strong> &nbsp;or&nbsp; <strong>kg / (m s)</strong></div>
+        <div>Dimension<br><strong>M L⁻¹ T⁻¹</strong></div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Typical values</strong></p>
+        <p>Water &nbsp;→&nbsp; <code class="m">1.14 × 10⁻³ kg/(m s)</code></p>
+        <p>Air &nbsp;→&nbsp; <code class="m">1.78 × 10⁻⁵ kg/(m s)</code></p>
+      </div>
+
+      <div class="callout shear">
+        <p><strong>Important conversion</strong></p>
+        <p style="font-family:var(--mono);font-size:17px;text-align:center;margin:10px 0">10 P = 1 kg/(m s)</p>
+        <p>where <strong>P = poise</strong>. So <code class="m">1 P = 0.1 kg/(m s)</code> and <code class="m">1 cP = 10⁻³ kg/(m s)</code>.</p>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · Falling-Ball Race</span>
+          <span class="hint">Same ball, same size — only μ differs (speeds exaggerated)</span>
+        </div>
+        <canvas id="cvVisc" style="height:360px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="viscRun">⏸ Pause</button>
+          <button class="tg" id="viscReset">↺ Restart race</button>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k">Thinnest fluid</div><div class="v">Water <small>μ = 1.0×10⁻³</small></div></div>
+          <div class="ro"><div class="k">Thickest fluid</div><div class="v">Glycerin <small>μ = 1.5</small></div></div>
+          <div class="ro"><div class="k">Ratio</div><div class="v">1500 : 1</div></div>
+        </div>
+      </div>
+
+      <p>The ball in water sinks almost instantly. The same ball in glycerin crawls. That resistance is the fluid's <strong>internal friction</strong> — its viscosity.</p>
+
+      <!-- ===== QUIZ · DYNAMIC VISCOSITY ===== -->
+      <div class="quiz">
+        <div class="quiz-head">
+          <span class="quiz-badge hot">Practice · Dynamic Viscosity · 10 Questions</span>
+          <button class="quiz-toggle">Show all answers</button>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">1</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A fluid layer experiences a shear stress of 2.5 Pa when the velocity gradient is 500 s⁻¹. Determine the dynamic viscosity.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">μ = τ / (du/dy) = 2.5 / 500</p>
+            <p class="step">μ = 5.0 × 10⁻³ Pa·s</p>
+            <p><span class="final">μ = 5.0 × 10⁻³ kg/(m s)</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">2</span><span class="q-cog c3">C3</span>
+            <p class="q-text">Water has a dynamic viscosity of 1.14 × 10⁻³ Pa·s. Calculate the shear stress produced at a velocity gradient of 200 s⁻¹.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">τ = μ (du/dy) = 1.14 × 10⁻³ × 200</p>
+            <p class="step">τ = 0.228 Pa</p>
+            <p><span class="final">τ = 0.228 Pa</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">3</span><span class="q-cog c3">C3</span>
+            <p class="q-text">Convert 5 poise (P) into SI units of kg/(m s).</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">10 P = 1 kg/(m s) ⟹ 1 P = 0.1 kg/(m s)</p>
+            <p class="step">5 P = 5 × 0.1 = 0.5 kg/(m s)</p>
+            <p><span class="final">5 P = 0.5 kg/(m s) = 0.5 Pa·s</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">4</span><span class="q-cog c3">C3</span>
+            <p class="q-text">Two parallel plates are separated by a 2 mm gap filled with a fluid of μ = 0.8 Pa·s. The top plate moves at 0.5 m/s. Calculate the shear stress on the fluid.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">du/dy = U / h = 0.5 / (2 × 10⁻³) = 250 s⁻¹</p>
+            <p class="step">τ = μ (du/dy) = 0.8 × 250</p>
+            <p class="step">τ = 200 Pa</p>
+            <p><span class="final">τ = 200 Pa</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">5</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A fluid has a dynamic viscosity of 0.05 Pa·s. Determine the shear rate required to produce a shear stress of 12.5 Pa.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">du/dy = τ / μ = 12.5 / 0.05</p>
+            <p class="step">du/dy = 250 s⁻¹</p>
+            <p><span class="final">du/dy = 250 s⁻¹</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">6</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A flat plate of area 0.5 m² slides over a 1.2 mm thick oil film (μ = 0.9 Pa·s) at a speed of 0.3 m/s. Determine the force required to maintain this motion.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">du/dy = U / h = 0.3 / (1.2 × 10⁻³) = 250 s⁻¹</p>
+            <p class="step">τ = μ (du/dy) = 0.9 × 250 = 225 Pa</p>
+            <p class="step">F = τ × A = 225 × 0.5</p>
+            <p class="step">F = 112.5 N</p>
+            <p><span class="final">F = 112.5 N</span></p>
+            <p class="note">The velocity profile is assumed linear (Couette flow), so du/dy = U/h everywhere.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">7</span><span class="q-cog c4">C4</span>
+            <p class="q-text">Water (μ = 1.0 × 10⁻³ Pa·s) and glycerin (μ = 1.5 Pa·s) are sheared at the same velocity gradient. Determine the ratio of the shear stresses and interpret the result physically.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">τ = μ (du/dy), and du/dy is the same for both</p>
+            <p class="step">τ<sub>glycerin</sub> / τ<sub>water</sub> = μ<sub>glycerin</sub> / μ<sub>water</sub></p>
+            <p class="step">= 1.5 / (1.0 × 10⁻³) = 1500</p>
+            <p><span class="final">τ<sub>glycerin</sub> : τ<sub>water</sub> = 1500 : 1</span></p>
+            <p class="note">Glycerin requires 1500× more force per unit area to be sheared at the same rate — it is far more resistant to flow.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">8</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A shaft rotates inside a bearing with a clearance of 0.1 mm, filled with oil of μ = 0.2 Pa·s. If the surface speed of the shaft is 1.5 m/s, determine the shear stress in the oil film.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">h = 0.1 mm = 1.0 × 10⁻⁴ m</p>
+            <p class="step">du/dy = U / h = 1.5 / (1.0 × 10⁻⁴) = 15 000 s⁻¹</p>
+            <p class="step">τ = μ (du/dy) = 0.2 × 15 000</p>
+            <p class="step">τ = 3000 Pa</p>
+            <p><span class="final">τ = 3.0 × 10³ Pa</span></p>
+            <p class="note">A very thin film produces a very large shear rate — this is why tight clearances need low-viscosity oil.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">9</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A fluid is tested in a viscometer: at du/dy = 100 s⁻¹ the shear stress is 4 Pa, and at du/dy = 300 s⁻¹ the shear stress is 12 Pa. Determine μ and state whether the fluid is Newtonian.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">First point: μ = 4 / 100 = 0.04 Pa·s</p>
+            <p class="step">Second point: μ = 12 / 300 = 0.04 Pa·s</p>
+            <p class="step">Same μ at both shear rates</p>
+            <p><span class="final">μ = 0.04 Pa·s — the fluid is Newtonian</span></p>
+            <p class="note">If μ were different at each point, the fluid would be non-Newtonian (shear-thinning or shear-thickening).</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">10</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A fluid sample gives a shear stress of 5 Pa at a velocity gradient of 200 s⁻¹. Determine μ in Pa·s, in poise, and in centipoise. Hence find τ when the velocity gradient is doubled.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">μ = τ / (du/dy) = 5 / 200 = 0.025 Pa·s</p>
+            <p class="step">In poise: μ = 0.025 / 0.1 = 0.25 P</p>
+            <p class="step">In centipoise: 0.25 P = 25 cP</p>
+            <p class="step">Doubled rate (400 s⁻¹): τ = 0.025 × 400 = 10 Pa</p>
+            <p><span class="final">μ = 0.025 Pa·s = 0.25 P = 25 cP · τ<sub>new</sub> = 10 Pa</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 5 · NEWTON'S LAW OF VISCOSITY ============== -->
+    <div class="page" data-title="Newton's Law of Viscosity">
+      <h2><span class="chip hot">1.10</span>Newton's Law of Viscosity</h2>
+
+      <p>The relationship μ = τ / (du/dy) comes directly from <strong>Newton's law of viscosity</strong>:</p>
+
+      <div class="eq">
+        τ = μ <span class="frac"><span class="num">du</span><span class="den">dy</span></span>
+        <span class="lbl">shear stress = viscosity × velocity gradient</span>
+      </div>
+
+      <p>For a fluid between two parallel plates — the bottom fixed, the top moving at speed <strong>U</strong> with gap <strong>h</strong> — the velocity profile is linear, so the shear rate is uniform:</p>
+
+      <div class="eq">
+        <span class="frac"><span class="num">du</span><span class="den">dy</span></span> = <span class="frac"><span class="num">U</span><span class="den">h</span></span>
+        &nbsp;&nbsp;⟹&nbsp;&nbsp;
+        τ = μ <span class="frac"><span class="num">U</span><span class="den">h</span></span>
+        <span class="lbl">Couette flow — constant shear stress at every height</span>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · τ vs du/dy</span>
+          <span class="hint">The slope of the line is the viscosity μ</span>
+        </div>
+        <canvas id="cvNewton" style="height:320px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>Dynamic viscosity μ <b><span id="nMuVal">0.100</span> Pa·s</b></label>
+            <input type="range" id="nMuSlider" min="0" max="1000" step="1" value="741">
+          </div>
+          <div class="ctrl">
+            <label>Shear rate du/dy <b><span id="nRateVal">250</span> s⁻¹</b></label>
+            <input type="range" id="nRateSlider" min="0" max="1000" step="5" value="250">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k">Shear stress τ</div><div class="v" id="nTauOut">25.0 <small>Pa</small></div></div>
+          <div class="ro"><div class="k">Viscosity μ</div><div class="v" id="nMuOut">0.100 <small>Pa·s</small></div></div>
+          <div class="ro"><div class="k">Shear rate</div><div class="v" id="nRateOut">250 <small>s⁻¹</small></div></div>
+        </div>
+      </div>
+
+      <div class="callout teal">
+        <p><strong>Reading the graph:</strong> a steeper line means a larger μ — the same shear rate produces a bigger shear stress. Water (μ ≈ 0.001 Pa·s) gives a nearly flat line; glycerin (μ ≈ 1.5 Pa·s) gives a steep one.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 6 · KINEMATIC VISCOSITY ============== -->
+    <div class="page" data-title="1.11 · Kinematic Viscosity">
+      <h2><span class="chip cool">1.11</span>Kinematic Viscosity</h2>
+
+      <p>Kinematic viscosity is defined as:</p>
+
+      <div class="eq">
+        ν = <span class="frac"><span class="num">μ</span><span class="den">ρ</span></span>
+        <span class="lbl">ν = kinematic viscosity · μ = dynamic viscosity · ρ = mass density</span>
+      </div>
+
+      <div class="eq two">
+        <div>SI unit<br><strong>m² / s</strong></div>
+        <div>Dimension<br><strong>L² T⁻¹</strong></div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Typical values</strong></p>
+        <p>Water &nbsp;→&nbsp; <code class="m">1.14 × 10⁻⁶ m²/s</code></p>
+        <p>Air &nbsp;→&nbsp; <code class="m">1.46 × 10⁻⁵ m²/s</code></p>
+      </div>
+
+      <div class="callout teal">
+        <p><strong>Why "kinematic"?</strong> Dividing μ by ρ removes the mass from the dimensions. What is left — <code class="m">L²T⁻¹</code> — is purely a <em>motion</em> quantity: it has the same dimensions as a diffusion coefficient. It tells you how fast momentum spreads through the fluid, not how much force it takes.</p>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · ν = μ / ρ</span>
+          <span class="hint">Try the presets to see the huge range of real fluids</span>
+        </div>
+        <canvas id="cvNu" style="height:340px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>Dynamic viscosity μ <b><span id="nuMuVal">1.14×10⁻³</span> Pa·s</b></label>
+            <input type="range" id="nuMuSlider" min="0" max="1000" step="1" value="626">
+          </div>
+          <div class="ctrl">
+            <label>Density ρ <b><span id="nuRhoVal">1000</span> kg/m³</b></label>
+            <input type="range" id="nuRhoSlider" min="0" max="1000" step="1" value="596">
+          </div>
+        </div>
+        <div class="btnrow" id="nuBtns">
+          <button class="tg on" data-mu="0.00114" data-rho="1000">Water</button>
+          <button class="tg" data-mu="0.0000178" data-rho="1.23">Air</button>
+          <button class="tg" data-mu="0.1" data-rho="900">Oil</button>
+          <button class="tg" data-mu="1.5" data-rho="1260">Glycerin</button>
+          <button class="tg" data-mu="0.00155" data-rho="13600">Mercury</button>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k">Kinematic viscosity ν</div><div class="v" id="nuOut">1.14×10⁻⁶ <small>m²/s</small></div></div>
+          <div class="ro"><div class="k">Dynamic μ</div><div class="v" id="nuMuOut">1.14×10⁻³ <small>Pa·s</small></div></div>
+          <div class="ro"><div class="k">Density ρ</div><div class="v" id="nuRhoOut">1000 <small>kg/m³</small></div></div>
+        </div>
+      </div>
+
+      <!-- ===== QUIZ · KINEMATIC VISCOSITY ===== -->
+      <div class="quiz">
+        <div class="quiz-head">
+          <span class="quiz-badge cool">Practice · Kinematic Viscosity · 10 Questions</span>
+          <button class="quiz-toggle">Show all answers</button>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">1</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A fluid has a dynamic viscosity of 0.045 Pa·s and a density of 900 kg/m³. Determine its kinematic viscosity.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ν = μ / ρ = 0.045 / 900</p>
+            <p class="step">ν = 5.0 × 10⁻⁵ m²/s</p>
+            <p><span class="final">ν = 5.0 × 10⁻⁵ m²/s</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">2</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A liquid has a kinematic viscosity of 2.0 × 10⁻⁵ m²/s and a density of 800 kg/m³. Determine its dynamic viscosity.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">μ = νρ = 2.0 × 10⁻⁵ × 800</p>
+            <p class="step">μ = 1.6 × 10⁻² Pa·s</p>
+            <p><span class="final">μ = 0.016 Pa·s</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">3</span><span class="q-cog c3">C3</span>
+            <p class="q-text">For water, μ = 1.14 × 10⁻³ Pa·s and ρ = 1000 kg/m³. Calculate its kinematic viscosity.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ν = μ / ρ = 1.14 × 10⁻³ / 1000</p>
+            <p class="step">ν = 1.14 × 10⁻⁶ m²/s</p>
+            <p><span class="final">ν = 1.14 × 10⁻⁶ m²/s</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">4</span><span class="q-cog c3">C3</span>
+            <p class="q-text">A fluid has a kinematic viscosity of 4.0 × 10⁻⁶ m²/s and a dynamic viscosity of 0.0048 Pa·s. Determine its density.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = μ / ν = 0.0048 / (4.0 × 10⁻⁶)</p>
+            <p class="step">ρ = 1200 kg/m³</p>
+            <p><span class="final">ρ = 1200 kg/m³</span> &nbsp;(SG = 1.2)</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">5</span><span class="q-cog c3">C3</span>
+            <p class="q-text">Convert 1 stokes (1 cm²/s) into SI units of m²/s.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">1 stokes = 1 cm²/s = 1 × 10⁻⁴ m²/s</p>
+            <p><span class="final">1 stokes = 1.0 × 10⁻⁴ m²/s</span></p>
+            <p class="note">1 centistokes (cSt) = 1 × 10⁻⁶ m²/s — the unit commonly used for oils.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">6</span><span class="q-cog c4">C4</span>
+            <p class="q-text">Air has μ = 1.78 × 10⁻⁵ Pa·s and ρ = 1.23 kg/m³. Water has μ = 1.14 × 10⁻³ Pa·s and ρ = 1000 kg/m³. Compute ν for both and explain why air has the larger kinematic viscosity despite having the smaller dynamic viscosity.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ν<sub>air</sub> = 1.78 × 10⁻⁵ / 1.23 = 1.447 × 10⁻⁵ m²/s</p>
+            <p class="step">ν<sub>water</sub> = 1.14 × 10⁻³ / 1000 = 1.14 × 10⁻⁶ m²/s</p>
+            <p><span class="final">ν<sub>air</sub> = 1.45 × 10⁻⁵ m²/s · ν<sub>water</sub> = 1.14 × 10⁻⁶ m²/s</span></p>
+            <p class="note">Although air's μ is about 64× smaller than water's, its density is about 813× smaller. Since ν = μ/ρ, dividing by such a small density makes ν<sub>air</sub> about 12.7× larger than ν<sub>water</sub>.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">7</span><span class="q-cog c4">C4</span>
+            <p class="q-text">A fluid has a kinematic viscosity of 5.0 × 10⁻⁴ m²/s and a relative density of 0.9. Determine its dynamic viscosity.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = SG × 1000 = 0.9 × 1000 = 900 kg/m³</p>
+            <p class="step">μ = νρ = 5.0 × 10⁻⁴ × 900</p>
+            <p class="step">μ = 0.45 Pa·s</p>
+            <p><span class="final">μ = 0.45 Pa·s</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">8</span><span class="q-cog c4">C4</span>
+            <p class="q-text">An oil has SG = 0.88 and kinematic viscosity ν = 4.5 × 10⁻⁴ m²/s. Determine its dynamic viscosity in Pa·s and in poise.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ρ = 0.88 × 1000 = 880 kg/m³</p>
+            <p class="step">μ = νρ = 4.5 × 10⁻⁴ × 880 = 0.396 Pa·s</p>
+            <p class="step">In poise: μ = 0.396 / 0.1 = 3.96 P</p>
+            <p><span class="final">μ = 0.396 Pa·s = 3.96 P</span></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">9</span><span class="q-cog c4">C4</span>
+            <p class="q-text">Fluid A has μ = 0.05 Pa·s and ρ = 1000 kg/m³. Fluid B has μ = 0.05 Pa·s and ρ = 1250 kg/m³. Determine which fluid has the larger kinematic viscosity and by what percentage.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">ν<sub>A</sub> = 0.05 / 1000 = 5.0 × 10⁻⁵ m²/s</p>
+            <p class="step">ν<sub>B</sub> = 0.05 / 1250 = 4.0 × 10⁻⁵ m²/s</p>
+            <p class="step">ν<sub>A</sub> &gt; ν<sub>B</sub></p>
+            <p class="step">% difference = (5.0 − 4.0) / 4.0 × 100% = 25%</p>
+            <p><span class="final">Fluid A is larger by 25%</span></p>
+            <p class="note">With the same μ, the less dense fluid has the higher ν.</p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-top"><span class="q-num">10</span><span class="q-cog c4">C4</span>
+            <p class="q-text">The kinematic viscosity of a liquid is 3.0 × 10⁻⁶ m²/s and its specific gravity is 1.2. Determine (a) its density, (b) its dynamic viscosity, and (c) the shear stress at a velocity gradient of 400 s⁻¹.</p>
+          </div>
+          <button class="q-btn">Show answer</button>
+          <div class="q-ans">
+            <p class="step">(a) ρ = 1.2 × 1000 = 1200 kg/m³</p>
+            <p class="step">(b) μ = νρ = 3.0 × 10⁻⁶ × 1200 = 3.6 × 10⁻³ Pa·s</p>
+            <p class="step">(c) τ = μ (du/dy) = 3.6 × 10⁻³ × 400</p>
+            <p class="step">τ = 1.44 Pa</p>
+            <p><span class="final">ρ = 1200 kg/m³ · μ = 3.6 × 10⁻³ Pa·s · τ = 1.44 Pa</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 7 · SUMMARY TABLE ============== -->
+    <div class="page" data-title="Summary Table">
+      <h2><span class="chip">Σ</span>All Five Properties at a Glance</h2>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quantity</th>
+              <th>Symbol</th>
+              <th>Formula</th>
+              <th>SI unit</th>
+              <th>Dimension</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Mass density</td><td>ρ</td>
+              <td><code class="m">ρ = m / V</code></td>
+              <td>kg/m³</td><td>M L⁻³</td>
+            </tr>
+            <tr>
+              <td>Specific weight</td><td>ω</td>
+              <td><code class="m">ω = ρ g</code></td>
+              <td>N/m³</td><td>M L⁻² T⁻²</td>
+            </tr>
+            <tr>
+              <td>Relative density</td><td>SG</td>
+              <td><code class="m">SG = ρ / ρ<sub>water</sub></code></td>
+              <td>— (none)</td><td>— (none)</td>
+            </tr>
+            <tr>
+              <td>Dynamic viscosity</td><td>μ</td>
+              <td><code class="m">μ = τ / (du/dy)</code></td>
+              <td>N s/m² &nbsp;=&nbsp; kg/(m s)</td><td>M L⁻¹ T⁻¹</td>
+            </tr>
+            <tr>
+              <td>Kinematic viscosity</td><td>ν</td>
+              <td><code class="m">ν = μ / ρ</code></td>
+              <td>m²/s</td><td>L² T⁻¹</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Typical values for water and air</h3>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Property</th><th class="solid-col">Water</th><th class="fluid-col">Air</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ρ</td><td>1000 kg/m³</td><td>1.23 kg/m³</td></tr>
+            <tr><td>ω</td><td>9.81 × 10³ N/m³</td><td>12.1 N/m³</td></tr>
+            <tr><td>SG</td><td>1.0</td><td>≈ 0.0012</td></tr>
+            <tr><td>μ</td><td>1.14 × 10⁻³ kg/(m s)</td><td>1.78 × 10⁻⁵ kg/(m s)</td></tr>
+            <tr><td>ν</td><td>1.14 × 10⁻⁶ m²/s</td><td>1.46 × 10⁻⁵ m²/s</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout shear">
+        <p><strong>Watch the units:</strong> air has a <em>smaller</em> μ than water, but a <em>larger</em> ν. That is because air's density is roughly 800 times smaller — and ν = μ/ρ divides by it.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 8 · CONCEPT CHAIN ============== -->
+    <div class="page" data-title="The Complete Concept Chain">
+      <h2><span class="chip">→</span>The Complete Concept Chain</h2>
+      <p>This is the sequence you should be able to reproduce from memory:</p>
+
+      <div class="chain">
+        <div class="node">MASS&nbsp;m &nbsp;+&nbsp; VOLUME&nbsp;V</div>
+        <div class="arr">↓</div>
+        <div class="node cool">MASS DENSITY &nbsp; ρ = m / V</div>
+        <div class="arr">↓</div>
+
+        <div class="split">
+          <div class="branch">
+            <div class="node">× g</div>
+            <div class="arr">↓</div>
+            <div class="node teal">SPECIFIC WEIGHT &nbsp; ω = ρ g</div>
+          </div>
+          <div class="branch">
+            <div class="node">÷ ρ<sub>water</sub></div>
+            <div class="arr">↓</div>
+            <div class="node teal">RELATIVE DENSITY &nbsp; SG</div>
+          </div>
+        </div>
+
+        <div class="arr" style="margin-top:14px">↓</div>
+        <div class="node hot">SHEAR STRESS&nbsp;τ &nbsp;+&nbsp; SHEAR RATE&nbsp;du/dy</div>
+        <div class="arr">↓</div>
+        <div class="node hot">DYNAMIC VISCOSITY &nbsp; μ = τ / (du/dy)</div>
+        <div class="arr">↓</div>
+        <div class="node">÷ ρ</div>
+        <div class="arr">↓</div>
+        <div class="node cool">KINEMATIC VISCOSITY &nbsp; ν = μ / ρ</div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Memory hook:</strong> density is the hub. Everything else is density multiplied, divided, or combined with a motion quantity.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 9 · DEFINITIONS ============== -->
+    <div class="page" data-title="Exam-Friendly Definitions">
+      <h2><span class="chip">✓</span>Exam-Friendly Definitions</h2>
+
+      <div class="deflist">
+        <div class="def">
+          <div class="dt">Mass Density</div>
+          <div class="dd">Density is the amount of matter (mass) contained in a unit volume of a substance. <code>ρ = m / V</code>. Unit: <code>kg/m³</code>.</div>
+        </div>
+
+        <div class="def">
+          <div class="dt">Specific Weight</div>
+          <div class="dd">Specific weight is the weight of a substance per unit volume. <code>ω = ρ g</code>. Unit: <code>N/m³</code>.</div>
+        </div>
+
+        <div class="def">
+          <div class="dt">Relative Density / Specific Gravity</div>
+          <div class="dd">Relative density is the ratio of the density of a substance to the density of water at 4 °C and atmospheric pressure. <code>SG = ρ / ρ<sub>water</sub></code>. It has <strong>no unit and no dimension</strong>.</div>
+        </div>
+
+        <div class="def">
+          <div class="dt">Viscosity (Dynamic)</div>
+          <div class="dd">Viscosity is the fluid property that represents its resistance to deformation or flow. Dynamic viscosity is the shear stress required per unit velocity gradient: <code>μ = τ / (du/dy)</code>. Unit: <code>N s/m² = kg/(m s)</code>.</div>
+        </div>
+
+        <div class="def">
+          <div class="dt">Kinematic Viscosity</div>
+          <div class="dd">Kinematic viscosity is the ratio of dynamic viscosity to mass density. <code>ν = μ / ρ</code>. Unit: <code>m²/s</code>.</div>
+        </div>
+      </div>
+
+      <div class="callout shear" style="text-align:center">
+        <p style="font-family:Georgia,serif;font-size:19px;margin:6px 0"><strong>ρ = m/V</strong> &nbsp;→&nbsp; <strong>ω = ρg</strong> &nbsp;→&nbsp; <strong>SG = ρ/ρ<sub>w</sub></strong></p>
+        <p style="font-family:Georgia,serif;font-size:19px;margin:6px 0"><strong>μ = τ / (du/dy)</strong> &nbsp;→&nbsp; <strong>ν = μ/ρ</strong></p>
+      </div>
+
+      <p style="margin-top:40px;color:var(--muted);font-size:13.5px;text-align:center">— End of chapter —</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============== NAV BAR ============== -->
+<div class="book-nav">
+  <button class="nav-btn" id="prevBtn" title="Previous">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+  </button>
+
+  <div class="nav-center">
+    <div class="nav-title" id="navTitle">Cover</div>
+    <div class="dots" id="dots"></div>
+    <div class="page-num" id="pageNum">1 / 10</div>
+  </div>
+
+  <button class="nav-btn" id="nextBtn" title="Next">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>
+</div>
+
+<!-- ============== EDIT FAB ============== -->
+<button class="edit-fab" id="editToggle" title="Toggle edit mode (E)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+</button>
+
+<!-- ============== EDIT ACTIONS ============== -->
+<div class="edit-actions" id="editActions" hidden>
+  <input type="text" class="title-edit" id="titleInput" placeholder="Page title…" title="Page title">
+  <button id="addPageBtn" title="Add a new page after this one">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    Add
+  </button>
+  <button id="delPageBtn" class="danger" title="Delete this page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+    Delete
+  </button>
+  <button id="saveHtmlBtn" class="primary" title="Download as .html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    Save
+  </button>
+  <button id="resetBtn" class="danger" title="Reset original">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 019-9 9 9 0 016.36 2.64L21 8M21 3v5h-5M21 12a9 9 0 01-9 9 9 9 0 01-6.36-2.64L3 16M3 21v-5h5"/></svg>
+    Reset
+  </button>
+</div>
+
+<!-- ============== LOGIN MODAL ============== -->
+<div class="modal-backdrop" id="loginModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <h3 id="loginTitle">Log in to edit</h3>
+    <p class="sub">Enter your credentials to unlock the editor.</p>
+
+    <label for="loginUser">Username</label>
+    <input type="text" id="loginUser" autocomplete="username" autocapitalize="none" spellcheck="false">
+
+    <label for="loginPass">Password</label>
+    <input type="password" id="loginPass" autocomplete="current-password">
+
+    <div class="login-error" id="loginError" hidden>Invalid username or password.</div>
+
+    <div class="modal-actions">
+      <button id="loginCancel">Cancel</button>
+      <button class="primary" id="loginSubmit">Log in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ADD PAGE MODAL ============== -->
+<div class="modal-backdrop" id="addModal" hidden>
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <h3 id="addTitle">Add a new page</h3>
+    <p class="sub">Paste any HTML — headings, paragraphs, callouts, even your own <code style="font-family:var(--mono);background:#f0ece0;padding:1px 6px;border-radius:5px;font-size:12px">&lt;canvas&gt;</code> or a new simulation block.</p>
+
+    <label for="newPageTitle">Page title (shown in the navigation)</label>
+    <input type="text" id="newPageTitle" placeholder="e.g. 1.12 · Surface Tension">
+
+    <label for="newPageHtml">Page HTML</label>
+    <textarea id="newPageHtml" spellcheck="false"></textarea>
+
+    <p class="hint">
+      Tip: reuse the book's classes — <code>callout</code>, <code>callout shear</code>, <code>callout teal</code>, <code>eq</code>, <code>eq two</code>, <code>chips</code>, <code>tbl-wrap</code>, <code>chain</code>, <code>deflist</code>, <code>quiz</code>, <code>q</code>, <code>q-btn</code>, <code>q-ans</code> — and wrap interactive bits in a <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code>.
+    </p>
+
+    <div class="modal-actions">
+      <button id="addModalCancel">Cancel</button>
+      <button class="primary" id="addModalInsert">Add page</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   AUTH  (edit-mode credentials)
+   ============================================================ */
+const EDIT_USER = 'fluid';
+const EDIT_PASS = 'che233';
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentIdx = 0;
+let animating = false;
+let pages = [];
+let N = 0;
+let editMode = false;
+let dotEls = [];
+let restoredIdx = 0;
+const FLIP_MS = 950;
+
+/* ============================================================
+   STORAGE RESTORE
+   ============================================================ */
+const STORAGE_KEY = 'fluid-book-ch17-v1';
+
+(function restoreFromStorage(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data.pages || !data.pages.length) return;
+    const bookEl = document.getElementById('book');
+    bookEl.innerHTML = '';
+    data.pages.forEach(pd => {
+      const p = document.createElement('div');
+      p.className = (pd.cls || 'page').replace(/\s*flipped\s*/g, ' ').trim();
+      p.dataset.title = pd.title || '';
+      p.innerHTML = pd.html;
+      bookEl.appendChild(p);
+    });
+    restoredIdx = Math.max(0, Math.min(data.idx || 0, data.pages.length - 1));
+  } catch(e){ console.warn('Restore failed', e); }
+})();
+
+currentIdx = restoredIdx;
+
+/* ============================================================
+   PAGE SETUP
+   ============================================================ */
+pages = [...document.querySelectorAll('.page')];
+N = pages.length;
+
+const dotsEl     = document.getElementById('dots');
+const navTitleEl = document.getElementById('navTitle');
+const pageNumEl  = document.getElementById('pageNum');
+const prevBtn    = document.getElementById('prevBtn');
+const nextBtn    = document.getElementById('nextBtn');
+
+function rebuildDots(){
+  dotsEl.innerHTML = '';
+  pages.forEach((p, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.title = p.dataset.title || ('Page ' + (i + 1));
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+  dotEls = [...dotsEl.children];
+}
+
+function updateZ(){
+  pages.forEach((p, i) => {
+    if (i < currentIdx)         p.style.zIndex = i + 1;
+    else if (i === currentIdx)  p.style.zIndex = N + 100;
+    else                        p.style.zIndex = N - (i - currentIdx) + 10;
+  });
+}
+
+function updateUI(){
+  dotEls.forEach((d, i) => d.classList.toggle('active', i === currentIdx));
+  navTitleEl.textContent = pages[currentIdx].dataset.title || '';
+  pageNumEl.textContent = (currentIdx + 1) + ' / ' + N;
+  prevBtn.disabled = currentIdx === 0 || animating;
+  nextBtn.disabled = currentIdx === N - 1 || animating;
+}
+
+function refreshPages(){
+  pages = [...document.querySelectorAll('.page')];
+  N = pages.length;
+  if (currentIdx >= N) currentIdx = N - 1;
+  rebuildDots();
+  updateZ();
+  updateUI();
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function goNext(){
+  if (animating || currentIdx >= N - 1) return;
+  animating = true;
+  updateUI();
+
+  const oldPage = pages[currentIdx];
+  oldPage.style.zIndex = 6000;
+  oldPage.classList.add('flipped');
+
+  currentIdx++;
+  updateZ();
+  oldPage.style.zIndex = 6000;
+
+  setTimeout(() => {
+    animating = false;
+    updateZ();
+    updateUI();
+    resizeAll();
+  }, FLIP_MS + 20);
+}
+
+function goPrev(){
+  if (animating || currentIdx <= 0) return;
+  animating = true;
+  updateUI();
+
+  const newIdx  = currentIdx - 1;
+  const newPage = pages[newIdx];
+
+  newPage.style.zIndex = 6000;
+  newPage.classList.remove('flipped');
+
+  currentIdx = newIdx;
+
+  setTimeout(() => {
+    animating = false;
+    updateZ();
+    updateUI();
+    resizeAll();
+  }, FLIP_MS + 20);
+}
+
+function goTo(idx){
+  if (animating || idx === currentIdx || idx < 0 || idx >= N) return;
+  animating = true;
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < idx));
+  currentIdx = idx;
+  updateZ();
+  updateUI();
+  setTimeout(() => {
+    animating = false;
+    updateUI();
+    resizeAll();
+  }, 60);
+}
+
+prevBtn.addEventListener('click', goPrev);
+nextBtn.addEventListener('click', goNext);
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, button, textarea, select, [contenteditable]')) {
+    if (e.key !== 'Escape') return;
+  }
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); goNext(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'PageUp')                    { e.preventDefault(); goPrev(); }
+  if (e.key === 'Home')  goTo(0);
+  if (e.key === 'End')   goTo(N - 1);
+  if (e.key === 'e' || e.key === 'E') { requestEditToggle(); }
+});
+
+const startBtn = document.getElementById('startBtn');
+if (startBtn) startBtn.addEventListener('click', goNext);
+
+/* ============================================================
+   QUIZ INPUTS  (student must type before answer can be revealed)
+   ============================================================ */
+function setupQuizInputs(root){
+  const scope = root || document;
+  scope.querySelectorAll('.q').forEach(q => {
+    let qBtn = q.querySelector('.q-btn');
+    if (!qBtn) return;
+
+    let row = q.querySelector('.q-input-row');
+    let inp = row ? row.querySelector('.q-input') : null;
+
+    if (!row){
+      /* First time: build the input row and move the button into it */
+      row = document.createElement('div');
+      row.className = 'q-input-row';
+
+      inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'q-input';
+      inp.placeholder = 'Type your answer…';
+      inp.autocomplete = 'off';
+      inp.spellcheck = false;
+      inp.setAttribute('inputmode', 'text');
+
+      qBtn.parentNode.insertBefore(row, qBtn);
+      row.appendChild(inp);
+      row.appendChild(qBtn);
+
+      inp.addEventListener('input', () => {
+        if (!q.classList.contains('open')){
+          qBtn.disabled = inp.value.trim().length === 0;
+        }
+      });
+
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !qBtn.disabled){
+          e.preventDefault();
+          qBtn.click();
+        }
+      });
+    }
+
+    /* Sync initial state */
+    if (inp){
+      if (q.classList.contains('open')){
+        qBtn.disabled = false;
+      } else {
+        qBtn.disabled = inp.value.trim().length === 0;
+      }
+    }
+  });
+}
+
+/* ============================================================
+   QUIZ  (show / hide answers — gated by the input)
+   ============================================================ */
+document.addEventListener('click', (e) => {
+
+  /* single question — reveal one answer */
+  const qBtn = e.target.closest('.q-btn');
+  if (qBtn){
+    if (qBtn.disabled) return;        /* safety: disabled buttons don't fire anyway */
+    const q = qBtn.closest('.q');
+    if (!q) return;
+    const inp = q.querySelector('.q-input');
+    const open = q.classList.toggle('open');
+    qBtn.textContent = open ? 'Hide answer' : 'Show answer';
+    if (!open && inp){
+      /* closing → re-check whether the button should stay enabled */
+      qBtn.disabled = inp.value.trim().length === 0;
+    }
+    return;
+  }
+
+  /* whole quiz — reveal all answers (requires every input filled) */
+  const qAll = e.target.closest('.quiz-toggle');
+  if (qAll){
+    const quiz = qAll.closest('.quiz');
+    if (!quiz) return;
+    const openAll = qAll.dataset.allOpen !== '1';
+
+    if (openAll){
+      /* gate: every question must have a typed attempt */
+      const inputs = [...quiz.querySelectorAll('.q-input')];
+      const empty = inputs.filter(inp => !inp.value.trim());
+      if (empty.length > 0){
+        empty.forEach(inp => {
+          inp.classList.add('q-input-empty');
+          setTimeout(() => inp.classList.remove('q-input-empty'), 1200);
+        });
+        empty[0].focus();
+        empty[0].scrollIntoView({ behavior:'smooth', block:'center' });
+        return;
+      }
+      quiz.querySelectorAll('.q').forEach(q => {
+        q.classList.add('open');
+        const b = q.querySelector('.q-btn');
+        if (b){ b.textContent = 'Hide answer'; b.disabled = false; }
+      });
+      qAll.dataset.allOpen = '1';
+      qAll.textContent = 'Hide all answers';
+    } else {
+      quiz.querySelectorAll('.q').forEach(q => {
+        q.classList.remove('open');
+        const b = q.querySelector('.q-btn');
+        const inp = q.querySelector('.q-input');
+        if (b){
+          b.textContent = 'Show answer';
+          b.disabled = !inp || !inp.value.trim();
+        }
+      });
+      qAll.dataset.allOpen = '0';
+      qAll.textContent = 'Show all answers';
+    }
+    return;
+  }
+});
+
+/* ============================================================
+   CANVAS INFRASTRUCTURE
+   ============================================================ */
+const canvases = [];
+let DT = 0;
+
+function reg(id, draw){
+  const c = document.getElementById(id);
+  if (!c) return null;
+  const pageEl = c.closest('.page');
+  const pageIdx = pages.indexOf(pageEl);
+  const o = { c, ctx: c.getContext('2d'), draw, w: 0, h: 0, pageIdx };
+  canvases.push(o);
+  return o;
+}
+
+function resizeAll(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvases.forEach(o => {
+    const cw = o.c.clientWidth;
+    const ch = o.c.clientHeight;
+    if (cw === 0 || ch === 0) return;
+    o.w = cw; o.h = ch;
+    o.c.width  = Math.round(cw * dpr);
+    o.c.height = Math.round(ch * dpr);
+    o.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  });
+}
+
+function rr(ctx, x, y, w, h, r){
+  r = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function arrow(ctx, x1, y1, x2, y2, head){
+  head = head || 9;
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath();
+  ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - head * Math.cos(a - 0.4), y2 - head * Math.sin(a - 0.4));
+  ctx.lineTo(x2 - head * Math.cos(a + 0.4), y2 - head * Math.sin(a + 0.4));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function txt(ctx, s, x, y, color, size, align, weight){
+  ctx.fillStyle = color || '#8fa0c0';
+  ctx.font = (weight || 500) + ' ' + (size || 12) + 'px -apple-system, Segoe UI, Roboto, sans-serif';
+  ctx.textAlign = align || 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(s, x, y);
+}
+
+/* --- number formatting helpers --- */
+const SUPS = {'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+function sup(n){ return String(n).split('').map(c => SUPS[c] || c).join(''); }
+
+function fmtSci(v, digits){
+  if (!isFinite(v)) return '—';
+  if (v === 0) return '0';
+  const av = Math.abs(v);
+  if (av >= 0.01 && av < 10000){
+    if (av >= 100) return v.toFixed(0);
+    if (av >= 10)  return v.toFixed(1);
+    return v.toFixed(digits === undefined ? 2 : digits);
+  }
+  const e = Math.floor(Math.log10(av));
+  const m = v / Math.pow(10, e);
+  return m.toFixed(2) + '×10' + sup(e);
+}
+
+function fmtWithUnit(v, unit, digits){
+  const s = fmtSci(v, digits);
+  return s + ' <small>' + unit + '</small>';
+}
+
+/* ============================================================
+   EDIT SYSTEM  (password protected)
+   ============================================================ */
+const editToggle  = document.getElementById('editToggle');
+const editActions = document.getElementById('editActions');
+const titleInput  = document.getElementById('titleInput');
+const addPageBtn  = document.getElementById('addPageBtn');
+const delPageBtn  = document.getElementById('delPageBtn');
+const saveHtmlBtn = document.getElementById('saveHtmlBtn');
+const resetBtn    = document.getElementById('resetBtn');
+
+const loginModal   = document.getElementById('loginModal');
+const loginUser    = document.getElementById('loginUser');
+const loginPass    = document.getElementById('loginPass');
+const loginError   = document.getElementById('loginError');
+const loginSubmit  = document.getElementById('loginSubmit');
+const loginCancel  = document.getElementById('loginCancel');
+
+const addModal       = document.getElementById('addModal');
+const newPageTitle   = document.getElementById('newPageTitle');
+const newPageHtml    = document.getElementById('newPageHtml');
+const addModalCancel = document.getElementById('addModalCancel');
+const addModalInsert = document.getElementById('addModalInsert');
+
+/* --- Login gate --- */
+function requestEditToggle(){
+  if (editMode) {
+    setEditMode(false);
+    return;
+  }
+  openLogin();
+}
+
+function openLogin(){
+  loginUser.value = '';
+  loginPass.value = '';
+  loginError.hidden = true;
+  loginModal.hidden = false;
+  setTimeout(() => loginUser.focus(), 40);
+}
+
+function closeLogin(){
+  loginModal.hidden = true;
+}
+
+function submitLogin(){
+  const u = loginUser.value.trim();
+  const p = loginPass.value;
+  if (u === EDIT_USER && p === EDIT_PASS){
+    closeLogin();
+    setEditMode(true);
+  } else {
+    loginError.hidden = false;
+    loginPass.value = '';
+    loginPass.focus();
+  }
+}
+
+loginSubmit.addEventListener('click', submitLogin);
+loginCancel.addEventListener('click', closeLogin);
+loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeLogin(); });
+
+[loginUser, loginPass].forEach(el => {
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter'){ e.preventDefault(); submitLogin(); }
+    if (e.key === 'Escape'){ closeLogin(); }
+  });
+});
+
+/* --- Edit mode --- */
+function setEditMode(on){
+  editMode = on;
+  document.body.classList.toggle('edit-mode', on);
+
+  pages.forEach(p => {
+    if (on) {
+      p.setAttribute('contenteditable', 'true');
+      p.spellcheck = false;
+    } else {
+      p.removeAttribute('contenteditable');
+    }
+  });
+
+  document.querySelectorAll('.sim, .sim *, canvas, button, input, select, textarea, .eq, .tbl-wrap, .quiz').forEach(el => {
+    if (on) el.setAttribute('contenteditable', 'false');
+    else el.removeAttribute('contenteditable');
+  });
+
+  editToggle.classList.toggle('active', on);
+  editToggle.title = on ? 'Exit edit mode (E)' : 'Toggle edit mode (E)';
+  editActions.hidden = !on;
+
+  if (on) {
+    syncTitleInput();
+    if (pages[currentIdx]) pages[currentIdx].scrollTop = 0;
+  } else {
+    saveToStorage();
+  }
+}
+
+function syncTitleInput(){
+  if (!pages[currentIdx]) return;
+  titleInput.value = pages[currentIdx].dataset.title || '';
+}
+
+titleInput.addEventListener('input', () => {
+  if (!pages[currentIdx]) return;
+  pages[currentIdx].dataset.title = titleInput.value;
+  navTitleEl.textContent = titleInput.value;
+  if (dotEls[currentIdx]) dotEls[currentIdx].title = titleInput.value;
+  scheduleSave();
+});
+
+let saveTimer = null;
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToStorage, 1200);
+}
+
+document.getElementById('book').addEventListener('input', () => {
+  if (!editMode) return;
+  scheduleSave();
+});
+
+function saveToStorage(){
+  try {
+    const data = {
+      pages: pages.map(p => ({
+        cls: p.className.replace(/\s*flipped\s*/g, ' ').trim(),
+        title: p.dataset.title || '',
+        html: p.innerHTML
+      })),
+      idx: currentIdx
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) {
+    console.warn('Storage save failed', e);
+  }
+}
+
+/* --- Add Page --- */
+const DEFAULT_NEW_PAGE =
+`<h2><span class="chip">·</span>New chapter</h2>
+<p>Write your content here. You can use any HTML tag — <strong>&lt;strong&gt;</strong>, <em>&lt;em&gt;</em>, lists, tables, images, and even a <code>&lt;canvas&gt;</code>.</p>
+
+<div class="callout">
+  <p><strong>Tip:</strong> reuse the book's classes to keep the style consistent.</p>
+</div>
+
+<div class="eq">
+  y = mx + c
+  <span class="lbl">An equation block</span>
+</div>
+
+<p>Wrap any interactive widget in <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code> so it stays non-editable and fully clickable in edit mode.</p>
+
+<div class="quiz">
+  <div class="quiz-head">
+    <span class="quiz-badge">Practice · 10 Questions</span>
+    <button class="quiz-toggle">Show all answers</button>
+  </div>
+
+  <div class="q">
+    <div class="q-top"><span class="q-num">1</span><span class="q-cog c3">C3</span>
+      <p class="q-text">Write your question here.</p>
+    </div>
+    <button class="q-btn">Show answer</button>
+    <div class="q-ans">
+      <p class="step">Step 1 …</p>
+      <p class="step">Step 2 …</p>
+      <p><span class="final">Final answer</span></p>
+    </div>
+  </div>
+</div>`;
+
+function openAddModal(){
+  newPageTitle.value = '';
+  newPageHtml.value = DEFAULT_NEW_PAGE;
+  addModal.hidden = false;
+  setTimeout(() => newPageTitle.focus(), 30);
+}
+
+function closeAddModal(){ addModal.hidden = true; }
+
+function insertNewPage(){
+  const title = newPageTitle.value.trim() || 'New page';
+  const html  = newPageHtml.value;
+
+  const newPage = document.createElement('div');
+  newPage.className = 'page';
+  newPage.dataset.title = title;
+  newPage.innerHTML = html;
+
+  const bookEl = document.getElementById('book');
+  const anchor = pages[currentIdx];
+  if (anchor && anchor.nextSibling) bookEl.insertBefore(newPage, anchor.nextSibling);
+  else bookEl.appendChild(newPage);
+
+  const newIdx = currentIdx + 1;
+  closeAddModal();
+
+  if (!editMode) setEditMode(true);
+  refreshPages();
+
+  /* inject the answer-input rows on the new page */
+  setupQuizInputs(newPage);
+
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < newIdx));
+  currentIdx = newIdx;
+  updateZ();
+  updateUI();
+  syncTitleInput();
+  saveToStorage();
+
+  setTimeout(() => {
+    if (pages[currentIdx]) pages[currentIdx].scrollTop = 0;
+    resizeAll();
+  }, 60);
+}
+
+/* --- Delete Page --- */
+function deleteCurrentPage(){
+  if (currentIdx === 0) { alert('The cover page cannot be deleted.'); return; }
+  if (!confirm('Delete this page? You can undo by clicking Reset, but that wipes every edit.')) return;
+
+  pages[currentIdx].remove();
+  const newIdx = Math.max(0, currentIdx - 1);
+  currentIdx = newIdx;
+
+  refreshPages();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
+  updateZ();
+  updateUI();
+  syncTitleInput();
+  saveToStorage();
+}
+
+/* --- Save as HTML --- */
+function saveAsHTML(){
+  const clone = document.documentElement.cloneNode(true);
+
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('[spellcheck]').forEach(el => el.removeAttribute('spellcheck'));
+  clone.classList.remove('edit-mode');
+
+  const clonedPages = clone.querySelectorAll('.page');
+  clonedPages.forEach(p => {
+    p.classList.remove('flipped');
+    p.style.zIndex = '';
+    p.style.transform = '';
+    p.style.transition = '';
+  });
+
+  /* Reset any typed answer values in the export so the file is fresh */
+  clone.querySelectorAll('.q-input').forEach(inp => {
+    inp.removeAttribute('value');
+    inp.value = '';
+  });
+  clone.querySelectorAll('.q').forEach(q => q.classList.remove('open'));
+  clone.querySelectorAll('.q-btn').forEach(b => {
+    b.textContent = 'Show answer';
+    b.setAttribute('disabled', '');
+  });
+  clone.querySelectorAll('.quiz-toggle').forEach(t => {
+    t.textContent = 'Show all answers';
+    t.removeAttribute('data-all-open');
+  });
+
+  ['#editToggle','#editActions','#addModal','#loginModal'].forEach(sel => {
+    const el = clone.querySelector(sel);
+    if (el) el.remove();
+  });
+
+  let html = clone.outerHTML.replace(
+    /const STORAGE_KEY = '[^']+';/,
+    "const STORAGE_KEY = 'fluid-book-export-" + Date.now() + "';"
+  );
+
+  const doc = '<!DOCTYPE html>\n' + html;
+  const blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'fluid-chapter-1-7.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+  saveToStorage();
+}
+
+/* --- Reset --- */
+function resetToOriginal(){
+  if (!confirm('Clear all edits and reload the original file? This cannot be undone.')) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+  location.reload();
+}
+
+/* --- Wire up --- */
+editToggle.addEventListener('click', requestEditToggle);
+addPageBtn.addEventListener('click', openAddModal);
+delPageBtn.addEventListener('click', deleteCurrentPage);
+saveHtmlBtn.addEventListener('click', saveAsHTML);
+resetBtn.addEventListener('click', resetToOriginal);
+addModalCancel.addEventListener('click', closeAddModal);
+addModalInsert.addEventListener('click', insertNewPage);
+addModal.addEventListener('click', (e) => { if (e.target === addModal) closeAddModal(); });
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !addModal.hidden) { closeAddModal(); e.stopPropagation(); }
+});
+
+/* ============================================================
+   SIM 1 · MASS DENSITY  ρ = m / V
+   ============================================================ */
+const dens = { m: 5, V: 0.005 };
+
+/* fixed pseudo-random dot positions inside the unit square */
+const DOTS = (function(){
+  const arr = [];
+  let s = 987654321;
+  const rnd = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+  for (let i = 0; i < 120; i++) arr.push([0.08 + rnd() * 0.84, 0.08 + rnd() * 0.84]);
+  return arr;
+})();
+
+reg('cvDensity', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const rho = dens.m / dens.V;
+
+  /* --- cube --- */
+  const maxSide = Math.min(h * 0.56, w * 0.40);
+  const side = maxSide * (0.42 + 0.58 * Math.cbrt(dens.V / 0.05));
+  const depth = side * 0.26;
+  const cx = w * 0.32 - depth / 2;
+  const cy = h * 0.54;
+
+  const fx = cx - side / 2, fy = cy - side / 2;
+
+  /* density colour */
+  const t = Math.max(0, Math.min(1, (Math.log10(Math.max(rho, 1)) - 0.5) / 3.5));
+  const hue = 196 + t * 40;
+  const light = 62 - t * 32;
+
+  /* top face */
+  ctx.beginPath();
+  ctx.moveTo(fx, fy);
+  ctx.lineTo(fx + depth, fy - depth * 0.62);
+  ctx.lineTo(fx + side + depth, fy - depth * 0.62);
+  ctx.lineTo(fx + side, fy);
+  ctx.closePath();
+  ctx.fillStyle = `hsl(${hue} 55% ${light + 12}%)`;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(160,200,255,.35)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  /* right face */
+  ctx.beginPath();
+  ctx.moveTo(fx + side, fy);
+  ctx.lineTo(fx + side + depth, fy - depth * 0.62);
+  ctx.lineTo(fx + side + depth, fy + side - depth * 0.62);
+  ctx.lineTo(fx + side, fy + side);
+  ctx.closePath();
+  ctx.fillStyle = `hsl(${hue} 50% ${light - 14}%)`;
+  ctx.fill();
+  ctx.stroke();
+
+  /* front face */
+  const g = ctx.createLinearGradient(fx, fy, fx, fy + side);
+  g.addColorStop(0, `hsl(${hue} 60% ${light}%)`);
+  g.addColorStop(1, `hsl(${hue} 62% ${light - 16}%)`);
+  ctx.fillStyle = g;
+  ctx.strokeStyle = 'rgba(160,200,255,.5)';
+  ctx.lineWidth = 1.6;
+  rr(ctx, fx, fy, side, side, 8);
+  ctx.fill(); ctx.stroke();
+
+  /* matter dots */
+  const nDots = Math.round(6 + 74 * (dens.m - 0.5) / 49.5);
+  ctx.save();
+  rr(ctx, fx, fy, side, side, 8);
+  ctx.clip();
+  ctx.fillStyle = 'rgba(220,240,255,.85)';
+  for (let i = 0; i < Math.min(nDots, DOTS.length); i++){
+    const px = fx + DOTS[i][0] * side;
+    const py = fy + DOTS[i][1] * side;
+    ctx.beginPath();
+    ctx.arc(px, py, Math.max(1.4, side * 0.016), 0, 7);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  /* labels under the cube */
+  txt(ctx, 'm = ' + dens.m.toFixed(1) + ' kg', cx + depth / 2, fy + side + 22, '#7cc4ff', 12.5, 'center', 700);
+  txt(ctx, 'V = ' + dens.V.toFixed(3) + ' m³', cx + depth / 2, fy + side + 40, '#7f8dab', 12, 'center', 600);
+
+  /* --- density meter (right) --- */
+  const mx = w * 0.80;
+  const mTop = h * 0.13;
+  const mBot = h * 0.86;
+  const mW = Math.min(30, w * 0.055);
+
+  const LMIN = 0.5, LMAX = 4.7;   /* log10 range */
+  const lv = Math.log10(Math.max(rho, 0.1));
+  const frac = Math.max(0, Math.min(1, (lv - LMIN) / (LMAX - LMIN)));
+
+  ctx.fillStyle = '#141d2f';
+  rr(ctx, mx - mW / 2, mTop, mW, mBot - mTop, mW / 2);
+  ctx.fill();
+  ctx.strokeStyle = '#243049';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  const fillH = (mBot - mTop) * frac;
+  const mg = ctx.createLinearGradient(0, mBot, 0, mTop);
+  mg.addColorStop(0, '#2f6df6');
+  mg.addColorStop(1, '#7cc4ff');
+  ctx.save();
+  rr(ctx, mx - mW / 2, mTop, mW, mBot - mTop, mW / 2);
+  ctx.clip();
+  ctx.fillStyle = mg;
+  ctx.fillRect(mx - mW / 2, mBot - fillH, mW, fillH);
+  ctx.restore();
+
+  /* water reference */
+  const wFrac = (Math.log10(1000) - LMIN) / (LMAX - LMIN);
+  const wY = mBot - (mBot - mTop) * wFrac;
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = 'rgba(255,138,61,.75)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(mx - mW / 2 - 12, wY);
+  ctx.lineTo(mx + mW / 2 + 12, wY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  txt(ctx, 'water 1000', mx + mW / 2 + 16, wY, '#ff8a3d', 10.5, 'left', 700);
+
+  /* ticks */
+  ctx.strokeStyle = 'rgba(120,150,200,.35)';
+  ctx.lineWidth = 1;
+  [1, 10, 100, 1000, 10000].forEach(v => {
+    const f = (Math.log10(v) - LMIN) / (LMAX - LMIN);
+    if (f < 0 || f > 1) return;
+    const y = mBot - (mBot - mTop) * f;
+    ctx.beginPath();
+    ctx.moveTo(mx + mW / 2, y);
+    ctx.lineTo(mx + mW / 2 + 5, y);
+    ctx.stroke();
+  });
+
+  txt(ctx, 'ρ', mx, mTop - 14, '#5f7093', 12, 'center', 800);
+  txt(ctx, 'kg/m³', mx, mBot + 16, '#5f7093', 10.5, 'center', 600);
+
+  /* big value */
+  txt(ctx, fmtSci(rho) + ' kg/m³', w / 2, h - 16, '#8fd4ff', 15, 'center', 700);
+});
+
+const mSlider = document.getElementById('mSlider');
+const vSlider = document.getElementById('vSlider');
+
+function updateDensity(){
+  if (!mSlider || !vSlider) return;
+  dens.m = +mSlider.value / 10;
+  dens.V = +vSlider.value / 1000;
+  document.getElementById('mVal').textContent = dens.m.toFixed(1);
+  document.getElementById('vVal').textContent = dens.V.toFixed(3);
+  const rho = dens.m / dens.V;
+  document.getElementById('rhoOut').innerHTML = fmtWithUnit(rho, 'kg/m³');
+  document.getElementById('mOut').innerHTML = dens.m.toFixed(1) + ' <small>kg</small>';
+  document.getElementById('vOut').innerHTML = dens.V.toFixed(3) + ' <small>m³</small>';
+}
+if (mSlider && vSlider){
+  mSlider.addEventListener('input', updateDensity);
+  vSlider.addEventListener('input', updateDensity);
+  updateDensity();
+}
+
+/* ============================================================
+   SIM 2 · SPECIFIC WEIGHT  ω = ρ g
+   ============================================================ */
+const sw = { rho: 1000, g: 9.81 };
+
+reg('cvSW', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const omega = sw.rho * sw.g;
+  const OMEGA_REF = 9810;          /* water on Earth */
+  const OMEGA_MAX = 2000 * 24.79;  /* worst case */
+
+  const cx = w / 2;
+  const blockW = Math.min(150, w * 0.30);
+  const blockH = 62;
+  const blockTop = 58;
+
+  /* block */
+  const bg = ctx.createLinearGradient(0, blockTop, 0, blockTop + blockH);
+  bg.addColorStop(0, 'rgba(77,141,255,.55)');
+  bg.addColorStop(1, 'rgba(34,64,120,.75)');
+  ctx.fillStyle = bg;
+  ctx.strokeStyle = '#4d8dff';
+  ctx.lineWidth = 2;
+  rr(ctx, cx - blockW / 2, blockTop, blockW, blockH, 10);
+  ctx.fill(); ctx.stroke();
+
+  txt(ctx, 'ρ = ' + sw.rho + ' kg/m³', cx, blockTop + blockH / 2, '#cfe2ff', 13, 'center', 700);
+  txt(ctx, 'g = ' + sw.g.toFixed(2) + ' m/s²', cx, blockTop + blockH + 18, '#7f8dab', 11.5, 'center', 600);
+
+  /* weight arrow */
+  const maxLen = h - blockTop - blockH - 78;
+  const len = Math.max(10, maxLen * Math.sqrt(omega / OMEGA_MAX));
+  const ay0 = blockTop + blockH + 34;
+  const ay1 = ay0 + len;
+
+  const ag = ctx.createLinearGradient(0, ay0, 0, ay1);
+  ag.addColorStop(0, '#ffb066');
+  ag.addColorStop(1, '#e8590c');
+  ctx.strokeStyle = ag;
+  ctx.fillStyle = '#e8590c';
+  ctx.lineWidth = 5;
+  arrow(ctx, cx, ay0, cx, ay1, 13);
+
+  /* reference line = water on Earth */
+  const refLen = Math.max(10, maxLen * Math.sqrt(OMEGA_REF / OMEGA_MAX));
+  const refY = ay0 + refLen;
+  ctx.setLineDash([6, 5]);
+  ctx.strokeStyle = 'rgba(15,155,142,.8)';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(cx - blockW * 0.95, refY);
+  ctx.lineTo(cx + blockW * 0.95, refY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  txt(ctx, 'water on Earth · 9.81 kN/m³', cx + blockW * 0.95 + 8, refY, '#0f9b8e', 10.5, 'left', 700);
+
+  /* value label */
+  txt(ctx, fmtSci(omega) + ' N/m³', cx, ay1 + 22, '#ff8a3d', 15, 'center', 800);
+
+  /* headline */
+  txt(ctx, 'ω = ρ × g', w / 2, 26, '#5f7093', 13, 'center', 700);
+});
+
+const swRhoSlider = document.getElementById('swRhoSlider');
+const gravBtns = document.getElementById('gravBtns');
+
+function updateSW(){
+  if (!swRhoSlider) return;
+  sw.rho = +swRhoSlider.value;
+  document.getElementById('swRhoVal').textContent = sw.rho;
+  const omega = sw.rho * sw.g;
+  document.getElementById('swOut').innerHTML = fmtWithUnit(omega, 'N/m³');
+  document.getElementById('swRhoOut').innerHTML = sw.rho + ' <small>kg/m³</small>';
+  document.getElementById('swGOut').innerHTML = sw.g.toFixed(2) + ' <small>m/s²</small>';
+}
+
+if (swRhoSlider) swRhoSlider.addEventListener('input', updateSW);
+if (gravBtns){
+  gravBtns.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-g]');
+    if (!b) return;
+    sw.g = parseFloat(b.dataset.g);
+    [...gravBtns.children].forEach(x => x.classList.toggle('on', x === b));
+    updateSW();
+  });
+}
+updateSW();
+
+/* ============================================================
+   SIM 3 · RELATIVE DENSITY — float or sink
+   ============================================================ */
+const sgState = { SG: 0.90 };
+
+reg('cvSG', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const SG = sgState.SG;
+
+  const tankX = w * 0.16;
+  const tankW = w * 0.68;
+  const tankTop = h * 0.12;
+  const tankBot = h * 0.84;
+  const waterTop = tankTop + (tankBot - tankTop) * 0.20;
+  const waterH = tankBot - waterTop;
+
+  /* water body */
+  const wg = ctx.createLinearGradient(0, waterTop, 0, tankBot);
+  wg.addColorStop(0, 'rgba(77,141,255,.28)');
+  wg.addColorStop(1, 'rgba(30,70,150,.42)');
+  ctx.fillStyle = wg;
+  ctx.fillRect(tankX, waterTop, tankW, waterH);
+
+  /* surface wave */
+  ctx.beginPath();
+  ctx.moveTo(tankX, waterTop);
+  for (let x = 0; x <= tankW; x += 6){
+    const y = waterTop + Math.sin((x / tankW) * Math.PI * 6 + performance.now() / 700) * 1.8;
+    ctx.lineTo(tankX + x, y);
+  }
+  ctx.strokeStyle = 'rgba(140,200,255,.85)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  /* tank walls */
+  ctx.strokeStyle = 'rgba(120,150,200,.45)';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(tankX, tankTop);
+  ctx.lineTo(tankX, tankBot);
+  ctx.lineTo(tankX + tankW, tankBot);
+  ctx.lineTo(tankX + tankW, tankTop);
+  ctx.stroke();
+
+  /* ball */
+  const R = Math.min(tankW * 0.14, waterH * 0.24);
+  const bx = tankX + tankW / 2;
+  let by;
+
+  if (SG < 1){
+    const f = Math.max(0.06, Math.min(0.99, SG));   /* submerged fraction */
+    by = waterTop + f * 2 * R - R;
+  } else {
+    by = tankBot - R - 2;
+  }
+
+  const hue = 30 - Math.min(SG, 3) * 8;
+  const ballGrad = ctx.createRadialGradient(bx - R * 0.35, by - R * 0.35, R * 0.15, bx, by, R);
+  ballGrad.addColorStop(0, `hsl(${hue} 85% 72%)`);
+  ballGrad.addColorStop(1, `hsl(${hue} 75% 40%)`);
+
+  ctx.save();
+  if (SG < 1){
+    /* clip so the submerged part sits behind the water tint */
+    ctx.beginPath();
+    ctx.arc(bx, by, R, 0, 7);
+    ctx.clip();
+    ctx.globalAlpha = 0.45;
+    ctx.fillStyle = '#0b101c';
+    ctx.fillRect(bx - R, waterTop, R * 2, tankBot - waterTop);
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+
+  ctx.beginPath();
+  ctx.arc(bx, by, R, 0, 7);
+  ctx.fillStyle = ballGrad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,220,180,.6)';
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+
+  /* re-draw waterline over the ball */
+  ctx.beginPath();
+  for (let x = 0; x <= tankW; x += 6){
+    const y = waterTop + Math.sin((x / tankW) * Math.PI * 6 + performance.now() / 700) * 1.8;
+    if (x === 0) ctx.moveTo(tankX + x, y);
+    else ctx.lineTo(tankX + x, y);
+  }
+  ctx.strokeStyle = 'rgba(140,200,255,.85)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  /* labels */
+  txt(ctx, 'WATER', tankX + 10, tankTop + 16, '#5f7093', 11, 'left', 700);
+  txt(ctx, 'waterline', tankX + tankW - 10, waterTop - 12, '#7cc4ff', 11, 'right', 600);
+
+  txt(ctx, 'ρ_sub = ' + Math.round(SG * 1000) + ' kg/m³',
+      tankX + tankW / 2, tankTop + 6, '#8fa0c0', 12, 'center', 600);
+
+  txt(ctx, 'SG = ' + SG.toFixed(2), w / 2, h - 18,
+      SG < 1 ? '#7cc4ff' : '#ff8a3d', 16, 'center', 800);
+});
+
+const sgSlider = document.getElementById('sgSlider');
+const sgBtns   = document.getElementById('sgBtns');
+
+function updateSG(){
+  if (!sgSlider) return;
+  sgState.SG = +sgSlider.value / 100;
+  document.getElementById('sgVal').textContent = sgState.SG.toFixed(2);
+
+  const rho = sgState.SG * 1000;
+  document.getElementById('sgRhoOut').innerHTML = Math.round(rho) + ' <small>kg/m³</small>';
+
+  const beh = document.getElementById('sgBehOut');
+  if (sgState.SG < 0.995)      beh.innerHTML = 'Floats <small>partly out</small>';
+  else if (sgState.SG <= 1.005) beh.innerHTML = 'Neutral <small>fully submerged</small>';
+  else                          beh.innerHTML = 'Sinks';
+
+  beh.style.color = sgState.SG < 1 ? '#7cc4ff' : '#ff8a3d';
+}
+if (sgSlider) sgSlider.addEventListener('input', updateSG);
+if (sgBtns){
+  sgBtns.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-sg]');
+    if (!b) return;
+    sgSlider.value = b.dataset.sg;
+    [...sgBtns.children].forEach(x => x.classList.toggle('on', x === b));
+    updateSG();
+  });
+}
+updateSG();
+
+/* ============================================================
+   SIM 4 · FALLING-BALL RACE  (dynamic viscosity)
+   ============================================================ */
+const FLUIDS = [
+  { name: 'Water',     mu: 1.0e-3, color: '#4d8dff', label: '1.0×10⁻³' },
+  { name: 'Kerosene',  mu: 1.6e-3, color: '#8b7ce8', label: '1.6×10⁻³' },
+  { name: 'Olive oil', mu: 8.4e-2, color: '#d4a72c', label: '8.4×10⁻²' },
+  { name: 'Glycerin',  mu: 1.5,    color: '#0f9b8e', label: '1.5' }
+];
+
+const visc = { running: true, t: 0, balls: [], allDone: false, holdT: 0 };
+
+function resetViscBalls(){
+  visc.balls = FLUIDS.map(() => ({ p: 0 }));
+  visc.t = 0;
+  visc.allDone = false;
+  visc.holdT = 0;
+}
+resetViscBalls();
+
+reg('cvVisc', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const n = FLUIDS.length;
+  const padX = Math.max(14, w * 0.04);
+  const gap = Math.max(8, w * 0.018);
+  const tw = (w - padX * 2 - gap * (n - 1)) / n;
+  const top = 54;
+  const bot = h - 76;
+  const tubeH = bot - top;
+
+  /* --- update --- */
+  if (visc.running){
+    let allDone = true;
+    visc.t += DT;
+    visc.balls.forEach((b, i) => {
+      if (b.p < 1){
+        const speed = Math.pow(1.0e-3 / FLUIDS[i].mu, 0.25);
+        b.p = Math.min(1, b.p + DT * 0.42 * speed);
+      }
+      if (b.p < 1) allDone = false;
+    });
+    visc.allDone = allDone;
+    if (allDone){
+      visc.holdT += DT;
+      if (visc.holdT > 1.8) resetViscBalls();
+    }
+  }
+
+  const R = Math.min(tw * 0.20, tubeH * 0.045, 15);
+  const travelTop = top + R + 8;
+  const travelBot = bot - R - 8;
+
+  FLUIDS.forEach((f, i) => {
+    const x = padX + i * (tw + gap);
+
+    /* tube */
+    ctx.fillStyle = '#0f1729';
+    rr(ctx, x, top, tw, tubeH, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#243049';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    /* fluid fill */
+    const fg = ctx.createLinearGradient(0, top, 0, bot);
+    fg.addColorStop(0, hexA(f.color, 0.10));
+    fg.addColorStop(1, hexA(f.color, 0.34));
+    ctx.save();
+    rr(ctx, x, top, tw, tubeH, 10);
+    ctx.clip();
+    ctx.fillStyle = fg;
+    ctx.fillRect(x, top, tw, tubeH);
+    ctx.restore();
+
+    /* finish line */
+    ctx.setLineDash([4, 5]);
+    ctx.strokeStyle = 'rgba(255,255,255,.16)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x + 6, travelBot + R + 4);
+    ctx.lineTo(x + tw - 6, travelBot + R + 4);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* ball */
+    const b = visc.balls[i];
+    const by = travelTop + (travelBot - travelTop) * b.p;
+    const bx = x + tw / 2;
+
+    const bg = ctx.createRadialGradient(bx - R * 0.35, by - R * 0.35, R * 0.15, bx, by, R);
+    bg.addColorStop(0, '#ffe6b8');
+    bg.addColorStop(1, '#c98b1e');
+    ctx.beginPath();
+    ctx.arc(bx, by, R, 0, 7);
+    ctx.fillStyle = bg;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,230,180,.5)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    /* name + mu */
+    txt(ctx, f.name, bx, h - 52, '#a9b7d3', 12, 'center', 700);
+    txt(ctx, 'μ = ' + f.label, bx, h - 34, '#6c7a97', 10.5, 'center', 600);
+    txt(ctx, 'Pa·s', bx, h - 18, '#4f5c78', 9.5, 'center', 500);
+  });
+
+  /* header */
+  txt(ctx, 't = ' + visc.t.toFixed(2) + ' s', w - 14, 24, '#7f8dab', 12, 'right', 700);
+  txt(ctx, 'same ball · same size · different μ', 14, 24, '#5f7093', 11.5, 'left', 600);
+
+  if (visc.allDone && visc.holdT > 0.6){
+    txt(ctx, 'fastest → slowest follows 1/μ', w / 2, bot + 2, '#ff8a3d', 12, 'center', 700);
+  }
+});
+
+function hexA(hex, a){
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+const viscRunBtn = document.getElementById('viscRun');
+if (viscRunBtn){
+  viscRunBtn.addEventListener('click', (e) => {
+    visc.running = !visc.running;
+    e.target.classList.toggle('on', !visc.running);
+    e.target.textContent = visc.running ? '⏸ Pause' : '▶ Play';
+  });
+}
+const viscResetBtn = document.getElementById('viscReset');
+if (viscResetBtn){
+  viscResetBtn.addEventListener('click', () => {
+    resetViscBalls();
+    visc.running = true;
+    if (viscRunBtn){
+      viscRunBtn.classList.add('on');
+      viscRunBtn.textContent = '⏸ Pause';
+    }
+  });
+}
+
+/* ============================================================
+   SIM 5 · NEWTON'S LAW OF VISCOSITY  τ = μ du/dy
+   ============================================================ */
+const newton = { mu: 0.1, rate: 250 };
+
+reg('cvNewton', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const XMAX = 1000;   /* s⁻¹ */
+  const YMAX = 500;    /* Pa   */
+
+  const L = 62, Rr = w - 30, T = 34, B = h - 46;
+  const pw = Rr - L, ph = B - T;
+
+  const px = (v) => L + (v / XMAX) * pw;
+  const py = (v) => B - (v / YMAX) * ph;
+
+  /* grid */
+  ctx.strokeStyle = 'rgba(42,53,80,.55)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i <= 4; i++){
+    const y = B - (ph * i) / 4;
+    ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(Rr, y); ctx.stroke();
+    txt(ctx, String((YMAX * i) / 4), L - 10, y, '#5f7093', 10.5, 'right', 500);
+  }
+  for (let i = 1; i <= 4; i++){
+    const x = L + (pw * i) / 4;
+    ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, B); ctx.stroke();
+    txt(ctx, String((XMAX * i) / 4), x, B + 14, '#5f7093', 10.5, 'center', 500);
+  }
+
+  /* axes */
+  ctx.strokeStyle = '#2a3550';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(L, T); ctx.lineTo(L, B); ctx.lineTo(Rr, B);
+  ctx.stroke();
+
+  txt(ctx, 'τ (Pa)', L - 10, T - 12, '#7f8dab', 11.5, 'right', 700);
+  txt(ctx, 'du/dy (s⁻¹)', Rr, B + 30, '#7f8dab', 11.5, 'right', 700);
+
+  /* reference line — water */
+  const muW = 0.001;
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(77,141,255,.45)';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(0));
+  ctx.lineTo(px(XMAX), py(Math.min(muW * XMAX, YMAX)));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  /* water label */
+  if (muW * XMAX < YMAX){
+    txt(ctx, 'water μ≈0.001', px(XMAX) - 6, py(muW * XMAX) - 12, '#4d8dff', 10.5, 'right', 600);
+  }
+
+  /* main line — slope μ */
+  const yEnd = Math.min(newton.mu * XMAX, YMAX);
+  const xEnd = yEnd / newton.mu;
+
+  ctx.strokeStyle = '#ff8a3d';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(0));
+  ctx.lineTo(px(xEnd), py(yEnd));
+  ctx.stroke();
+
+  /* point at the chosen shear rate */
+  const rate = newton.rate;
+  const tau  = newton.mu * rate;
+  const tauClamped = Math.min(tau, YMAX);
+
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = 'rgba(255,190,130,.55)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(px(rate), B);
+  ctx.lineTo(px(rate), py(tauClamped));
+  ctx.lineTo(L, py(tauClamped));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.beginPath();
+  ctx.arc(px(rate), py(tauClamped), 6, 0, 7);
+  ctx.fillStyle = '#ffb066';
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+
+  /* slope annotation */
+  txt(ctx, 'slope = μ', Math.min(px(rate) + 14, Rr - 90), Math.max(py(tauClamped) - 18, T + 12),
+      '#ffb066', 12, 'left', 700);
+
+  txt(ctx, 'τ = μ · du/dy', w / 2, 20, '#8fa0c0', 13, 'center', 700);
+});
+
+const nMuSlider   = document.getElementById('nMuSlider');
+const nRateSlider = document.getElementById('nRateSlider');
+
+function updateNewton(){
+  if (!nMuSlider || !nRateSlider) return;
+  /* slider 0..1000 → log10(μ) from -3 to -0.3  (μ: 0.001 .. 0.5) */
+  const lv = -3 + 2.7 * (+nMuSlider.value / 1000);
+  newton.mu = Math.pow(10, lv);
+  newton.rate = +nRateSlider.value;
+
+  document.getElementById('nMuVal').textContent = newton.mu < 0.01
+    ? newton.mu.toExponential(1).replace('e-', '×10⁻')
+    : newton.mu.toFixed(3);
+  document.getElementById('nRateVal').textContent = newton.rate;
+
+  const tau = newton.mu * newton.rate;
+  document.getElementById('nTauOut').innerHTML = fmtWithUnit(tau, 'Pa', 2);
+  document.getElementById('nMuOut').innerHTML = fmtWithUnit(newton.mu, 'Pa·s', 3);
+  document.getElementById('nRateOut').innerHTML = newton.rate + ' <small>s⁻¹</small>';
+}
+if (nMuSlider && nRateSlider){
+  nMuSlider.addEventListener('input', updateNewton);
+  nRateSlider.addEventListener('input', updateNewton);
+  updateNewton();
+}
+
+/* ============================================================
+   SIM 6 · KINEMATIC VISCOSITY  ν = μ / ρ
+   ============================================================ */
+const nu = { mu: 1.14e-3, rho: 1000 };
+
+/* log-slider mappings */
+const MU_MIN_LOG  = -4,   MU_MAX_LOG  = 1;    /* 1e-4 .. 10   Pa·s */
+const RHO_MIN_LOG = -1,   RHO_MAX_LOG = 4.2;  /* 0.1  .. ~15849 kg/m³ */
+
+function sliderToMu(v){ return Math.pow(10, MU_MIN_LOG + (MU_MAX_LOG - MU_MIN_LOG) * (v / 1000)); }
+function muToSlider(m){
+  const l = Math.log10(Math.max(m, 1e-12));
+  return Math.round(1000 * (l - MU_MIN_LOG) / (MU_MAX_LOG - MU_MIN_LOG));
+}
+function sliderToRho(v){ return Math.pow(10, RHO_MIN_LOG + (RHO_MAX_LOG - RHO_MIN_LOG) * (v / 1000)); }
+function rhoToSlider(r){
+  const l = Math.log10(Math.max(r, 1e-12));
+  return Math.round(1000 * (l - RHO_MIN_LOG) / (RHO_MAX_LOG - RHO_MIN_LOG));
+}
+
+reg('cvNu', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const mu  = nu.mu;
+  const rho = nu.rho;
+  const nuV = mu / rho;
+
+  /* --- three boxes --- */
+  const boxH = 56;
+  const boxY = 26;
+  const gapW = Math.max(26, w * 0.055);
+  const boxW = Math.min(150, (w - gapW * 2 - 40) / 3);
+
+  const b1x = 20;
+  const b2x = b1x + boxW + gapW;
+  const b3x = b2x + boxW + gapW;
+
+  function box(x, title, value, accent){
+    ctx.fillStyle = accent ? 'rgba(34,64,111,.55)' : 'rgba(20,29,47,.9)';
+    ctx.strokeStyle = accent ? '#3f6fbe' : '#243049';
+    ctx.lineWidth = 1.5;
+    rr(ctx, x, boxY, boxW, boxH, 11);
+    ctx.fill(); ctx.stroke();
+    txt(ctx, title, x + 12, boxY + 16, '#7183a3', 10, 'left', 700);
+    txt(ctx, value, x + 12, boxY + 37, accent ? '#cfe2ff' : '#8fd4ff', 14, 'left', 700);
+  }
+
+  box(b1x, 'μ  DYNAMIC', fmtSci(mu) + ' Pa·s', false);
+  box(b2x, 'ρ  DENSITY', fmtSci(rho) + ' kg/m³', false);
+  box(b3x, 'ν  KINEMATIC', fmtSci(nuV) + ' m²/s', true);
+
+  /* operators */
+  const oy = boxY + boxH / 2;
+  ctx.strokeStyle = '#4d5c7a'; ctx.fillStyle = '#4d5c7a'; ctx.lineWidth = 1.6;
+  txt(ctx, '÷', b1x + boxW + gapW / 2, oy, '#6c7a97', 18, 'center', 700);
+  txt(ctx, '=', b2x + boxW + gapW / 2, oy, '#6c7a97', 18, 'center', 700);
+
+  /* --- log ruler --- */
+  const rL = 40, rR = w - 30;
+  const rY = h * 0.66;
+  const NMIN = -8, NMAX = 0;   /* ν from 1e-8 to 1e0 */
+
+  ctx.strokeStyle = '#2a3550';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(rL, rY); ctx.lineTo(rR, rY);
+  ctx.stroke();
+
+  const logToX = (l) => rL + ((l - NMIN) / (NMAX - NMIN)) * (rR - rL);
+
+  for (let d = NMIN; d <= NMAX; d++){
+    const x = logToX(d);
+    ctx.strokeStyle = 'rgba(90,110,150,.8)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, rY - 7); ctx.lineTo(x, rY + 7);
+    ctx.stroke();
+    txt(ctx, '10' + sup(d), x, rY + 22, '#5f7093', 9.5, 'center', 600);
+  }
+
+  txt(ctx, 'ν (m²/s) — logarithmic scale', rL, rY - 26, '#7f8dab', 11.5, 'left', 700);
+
+  /* reference markers */
+  const refs = [
+    { v: 1.14e-6, name: 'water',   c: '#4d8dff' },
+    { v: 1.46e-5, name: 'air',     c: '#0f9b8e' },
+    { v: 1.19e-7, name: 'mercury', c: '#c9a227' }
+  ];
+
+  refs.forEach((r, i) => {
+    const l = Math.log10(r.v);
+    if (l < NMIN || l > NMAX) return;
+    const x = logToX(l);
+    ctx.beginPath();
+    ctx.arc(x, rY, 4.5, 0, 7);
+    ctx.fillStyle = r.c;
+    ctx.fill();
+    txt(ctx, r.name, x, rY - 16 - (i % 2) * 14, r.c, 10.5, 'center', 700);
+  });
+
+  /* current marker */
+  const lc = Math.log10(Math.max(nuV, 1e-30));
+  const xc = Math.max(rL, Math.min(rR, logToX(lc)));
+
+  ctx.strokeStyle = '#ff8a3d';
+  ctx.fillStyle = '#ff8a3d';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(xc, rY - 46);
+  ctx.lineTo(xc, rY - 14);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(xc, rY - 8);
+  ctx.lineTo(xc - 7, rY - 20);
+  ctx.lineTo(xc + 7, rY - 20);
+  ctx.closePath();
+  ctx.fill();
+
+  txt(ctx, fmtSci(nuV) + ' m²/s', xc, rY - 58, '#ffb066', 13, 'center', 800);
+
+  /* formula banner */
+  txt(ctx, 'ν = μ / ρ', w / 2, h - 22, '#5f7093', 15, 'center', 800);
+});
+
+const nuMuSlider  = document.getElementById('nuMuSlider');
+const nuRhoSlider = document.getElementById('nuRhoSlider');
+const nuBtns      = document.getElementById('nuBtns');
+
+function updateNu(){
+  if (!nuMuSlider || !nuRhoSlider) return;
+  nu.mu  = sliderToMu(+nuMuSlider.value);
+  nu.rho = sliderToRho(+nuRhoSlider.value);
+
+  const nuV = nu.mu / nu.rho;
+
+  document.getElementById('nuMuVal').textContent  = fmtSci(nu.mu);
+  document.getElementById('nuRhoVal').textContent = nu.rho >= 10 ? Math.round(nu.rho) : nu.rho.toFixed(2);
+
+  document.getElementById('nuOut').innerHTML    = fmtWithUnit(nuV, 'm²/s');
+  document.getElementById('nuMuOut').innerHTML  = fmtWithUnit(nu.mu, 'Pa·s');
+  document.getElementById('nuRhoOut').innerHTML = (nu.rho >= 10 ? Math.round(nu.rho) : nu.rho.toFixed(2)) + ' <small>kg/m³</small>';
+}
+
+if (nuMuSlider)  nuMuSlider.addEventListener('input', updateNu);
+if (nuRhoSlider) nuRhoSlider.addEventListener('input', updateNu);
+
+if (nuBtns){
+  nuBtns.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-mu]');
+    if (!b) return;
+    const m = parseFloat(b.dataset.mu);
+    const r = parseFloat(b.dataset.rho);
+    nuMuSlider.value  = Math.max(0, Math.min(1000, muToSlider(m)));
+    nuRhoSlider.value = Math.max(0, Math.min(1000, rhoToSlider(r)));
+    [...nuBtns.children].forEach(x => x.classList.toggle('on', x === b));
+    updateNu();
+  });
+}
+
+/* initialise the ν sim from the water preset */
+(function initNu(){
+  if (!nuMuSlider || !nuRhoSlider) return;
+  nuMuSlider.value  = muToSlider(1.14e-3);
+  nuRhoSlider.value = rhoToSlider(1000);
+  updateNu();
+})();
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+let lastT = performance.now();
+
+function loop(now){
+  DT = Math.min((now - lastT) / 1000, 0.05);
+  lastT = now;
+
+  canvases.forEach(o => {
+    if (o.w === 0) return;
+    if (o.pageIdx === -1 || !o.c.isConnected) {
+      const pageEl = o.c.closest('.page');
+      o.pageIdx = pages.indexOf(pageEl);
+    }
+    if (o.pageIdx === -1) return;
+    if (Math.abs(o.pageIdx - currentIdx) <= 1) o.draw(o);
+  });
+
+  requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   RESIZE
+   ============================================================ */
+let resizeRaf = null;
+function requestResize(){
+  if (resizeRaf) cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resizeAll(); });
+}
+
+window.addEventListener('resize', requestResize);
+window.addEventListener('orientationchange', () => setTimeout(resizeAll, 250));
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot(){
+  rebuildDots();
+  updateZ();
+  updateUI();
+  resizeAll();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
+  /* inject the "type your answer" rows on every quiz question */
+  setupQuizInputs();
+  setTimeout(resizeAll, 120);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => requestResize());
+  }
+}
+
+window.addEventListener('load', boot);
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>

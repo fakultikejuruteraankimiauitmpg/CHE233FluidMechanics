@@ -1,0 +1,3295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shear Stress &amp; Viscosity — Interactive Book</title>
+<style>
+  :root{
+    --paper:#fffefb;
+    --ink:#191c24;
+    --muted:#5d6472;
+    --line:#e5e0d6;
+    --accent:#2f6df6;
+    --accent-soft:#e8efff;
+    --shear:#e8590c;
+    --shear-soft:#ffeee4;
+    --teal:#0f9b8e;
+    --panel:#0e1422;
+    --panel-line:#243049;
+    --radius:16px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 50% -20%, #f4f0e6 0%, transparent 70%),
+      linear-gradient(180deg,#ded7c8,#e9e4d9 60%,#ddd6c7);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.25;margin:0}
+
+  body:not(.bm) .lang-bm { display: none !important; }
+  body.bm .lang-en { display: none !important; }
+
+  .stage{ position:fixed;inset:0;overflow:hidden; }
+  .book{ position:absolute;inset:0;perspective:2600px;perspective-origin:50% 50%; }
+
+  .page{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,#fffefb 0%,#fdfbf6 100%);
+    padding:44px max(24px, calc(50vw - 420px)) 120px;
+    font-size:16.5px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    transform-origin:left center;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    transition:transform .95s cubic-bezier(.44,.05,.22,1);
+    will-change:transform;
+    scrollbar-width:thin;
+    scrollbar-color:#cfc7b4 transparent;
+  }
+  .page::-webkit-scrollbar{width:8px}
+  .page::-webkit-scrollbar-thumb{background:#d5cdbb;border-radius:6px}
+  .page::-webkit-scrollbar-track{background:transparent}
+  .page.flipped{transform:rotateY(-180deg);}
+
+  .page.cover{
+    background:
+      radial-gradient(700px 400px at 30% 20%, #eef3ff 0%, transparent 65%),
+      radial-gradient(600px 500px at 80% 90%, #ffeede 0%, transparent 60%),
+      linear-gradient(180deg,#fffefb 0%,#fbf8f1 100%);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+    padding:60px max(24px, calc(50vw - 420px)) 120px;
+  }
+  .cover .kicker{
+    font-size:12px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--accent);font-weight:800;margin-bottom:20px;
+  }
+  .cover h1{font-size:clamp(36px,6.6vw,68px);letter-spacing:-1px;line-height:1.05}
+  .cover h1 em{font-style:italic;color:var(--shear)}
+  .cover p{max-width:560px;color:var(--muted);font-size:17.5px;margin:22px 0 0}
+  .cover .pill{
+    display:inline-block;margin-top:32px;padding:11px 22px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);font-family:var(--mono);font-size:15px;
+    box-shadow:0 8px 24px rgba(25,28,36,.07);
+  }
+  .cover .pill b{color:var(--shear)}
+  .cover .start{
+    margin-top:38px;display:inline-flex;align-items:center;gap:10px;
+    background:var(--accent);color:#fff;border:none;border-radius:12px;
+    padding:13px 24px;font-size:15px;font-weight:600;cursor:pointer;
+    box-shadow:0 10px 26px -8px rgba(47,109,246,.55);
+    transition:.18s;font-family:inherit;
+  }
+  .cover .start:hover{background:#245ad4;transform:translateY(-1px)}
+  .cover .start svg{width:16px;height:16px}
+
+  .chip{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:30px;height:30px;padding:0 9px;border-radius:9px;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:700;
+    font-family:var(--mono);margin-right:12px;flex:none;
+  }
+  .page h2{
+    font-size:clamp(23px,3.3vw,33px);display:flex;align-items:center;
+    margin-bottom:20px;letter-spacing:-.4px;
+  }
+  .page h3{font-size:18px;margin:26px 0 8px;color:#2a2f3d}
+  .page p{margin:14px 0;color:#333846}
+  .page ul{margin:14px 0;padding-left:22px;color:#333846}
+  .page li{margin:6px 0}
+  strong{color:var(--ink)}
+  em.term{font-style:normal;background:var(--shear-soft);color:var(--shear);
+    padding:1px 6px;border-radius:6px;font-weight:600;}
+
+  .callout{
+    background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:12px;padding:16px 20px;margin:22px 0;
+    box-shadow:0 4px 16px rgba(25,28,36,.04);
+  }
+  .callout.shear{border-left-color:var(--shear)}
+  .callout.teal{border-left-color:var(--teal)}
+  .callout p{margin:6px 0}
+
+  .sim-explain{
+    background:#fbfaf6;
+    border:1px solid var(--line);
+    border-left:4px solid var(--teal);
+    border-radius:12px;
+    padding:16px 20px;
+    margin:-8px 0 24px;
+    box-shadow:0 4px 14px rgba(25,28,36,.04);
+    font-size:15px;
+    color:#333846;
+  }
+  .sim-explain .hd{
+    display:flex;align-items:center;gap:8px;
+    font-weight:800;font-size:12px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--teal);
+    margin-bottom:8px;
+  }
+  .sim-explain .hd svg{width:14px;height:14px}
+  .sim-explain p{margin:8px 0}
+  .sim-explain ul{margin:8px 0;padding-left:20px}
+  .sim-explain li{margin:4px 0}
+  .sim-explain .obs{
+    background:#fff;
+    border:1px dashed #cfd8c8;
+    border-radius:9px;
+    padding:9px 13px;
+    margin-top:10px;
+    font-size:14px;
+    color:#4a5540;
+  }
+  .sim-explain .obs b{color:var(--teal)}
+
+  .eq{
+    background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:18px 22px;margin:20px 0;text-align:center;
+    font-family:var(--mono);font-size:20px;letter-spacing:.5px;
+    box-shadow:0 4px 16px rgba(25,28,36,.04);
+  }
+  .eq .frac{display:inline-flex;flex-direction:column;vertical-align:middle;
+    text-align:center;font-size:.82em;line-height:1.15;margin:0 4px}
+  .eq .frac .num{border-bottom:1.5px solid currentColor;padding:0 6px 2px}
+  .eq .frac .den{padding:2px 6px 0}
+  .eq .lbl{display:block;font-size:12px;color:var(--muted);margin-top:10px;
+    font-family:-apple-system,sans-serif;letter-spacing:.02em}
+
+  .sim{
+    background:var(--panel);border-radius:var(--radius);padding:18px;
+    margin:24px 0;box-shadow:0 18px 40px rgba(14,20,34,.22);
+    color:#dfe6f5;
+  }
+  .sim-head{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;
+    justify-content:space-between;margin-bottom:12px;
+  }
+  .sim-head .t{font-size:13px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:#7f8dab}
+  .sim-head .hint{font-size:12.5px;color:#6c7a97}
+  canvas{display:block;width:100%;border-radius:10px;background:#0b101c}
+
+  .controls{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:14px 20px;margin-top:16px;
+  }
+  .ctrl label{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:12.5px;color:#9aa8c4;margin-bottom:6px;letter-spacing:.02em;
+  }
+  .ctrl label b{color:#7cc4ff;font-family:var(--mono);font-weight:600}
+  input[type=range]{width:100%;accent-color:#4d8dff;height:20px;cursor:pointer;}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  button.tg{
+    background:#1a2438;border:1px solid var(--panel-line);color:#a9b7d3;
+    padding:7px 14px;border-radius:9px;font-size:12.5px;cursor:pointer;
+    transition:.15s;font-family:inherit;
+  }
+  button.tg:hover{border-color:#3c5480;color:#dfe6f5}
+  button.tg.on{background:#22406f;border-color:#3f6fbe;color:#cfe2ff}
+  .readout{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .ro{
+    flex:1 1 130px;background:#141d2f;border:1px solid var(--panel-line);
+    border-radius:10px;padding:10px 14px;
+  }
+  .ro .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7183a3}
+  .ro .v{font-family:var(--mono);font-size:19px;color:#8fd4ff;
+    font-variant-numeric:tabular-nums;margin-top:2px}
+  .ro .v small{font-size:12px;color:#7f8dab}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+  .chips span{
+    background:#fff;border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:14px;color:#3a4152;
+  }
+  .chips span.tag{background:var(--accent-soft);border-color:#cddcff;color:var(--accent);font-weight:600}
+
+  .tbl-wrap{overflow-x:auto;margin:22px 0;border-radius:14px;
+    border:1px solid var(--line);background:#fff}
+  table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px}
+  th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:#faf9f6;font-weight:700;font-size:13px;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--muted)}
+  tbody tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:600;color:#2a2f3d}
+  .solid-col{color:#2f6df6}
+  .fluid-col{color:#e8590c}
+
+  .chain{display:flex;flex-direction:column;align-items:center;gap:0;margin:26px 0}
+  .chain .node{
+    background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:11px 22px;font-weight:600;font-size:14.5px;text-align:center;
+    box-shadow:0 3px 12px rgba(25,28,36,.05);min-width:200px;color:#2a2f3d;
+  }
+  .chain .node.hot{background:var(--shear-soft);border-color:#ffd2b8;color:var(--shear)}
+  .chain .node.cool{background:var(--accent-soft);border-color:#cddcff;color:var(--accent)}
+  .chain .arr{color:#b9b3a5;font-size:18px;line-height:1;padding:6px 0}
+  .chain .split{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+  .chain .branch{display:flex;flex-direction:column;align-items:center}
+
+  .deflist{display:grid;gap:14px;margin:22px 0}
+  .def{
+    background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;box-shadow:0 4px 16px rgba(25,28,36,.04);
+  }
+  .def .dt{font-weight:700;color:var(--accent);font-size:14px;
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .def .dd{color:#333846}
+  .def .dd code{font-family:var(--mono);background:#f2f0ea;padding:2px 7px;border-radius:6px}
+
+  .lang-fab{
+    position:fixed;
+    top:max(14px, env(safe-area-inset-top));
+    left:14px;
+    z-index:7500;
+    height:38px;
+    padding:0 15px;
+    border-radius:19px;
+    background:rgba(255,254,251,.96);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid #d8d0bd;
+    color:#3a3f4d;
+    display:inline-flex;align-items:center;gap:7px;
+    cursor:pointer;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.28);
+    transition:.15s;
+    font-family:inherit;
+    font-weight:800;
+    font-size:12px;
+    letter-spacing:.08em;
+    padding:0 14px;
+  }
+  .lang-fab:hover{background:#fffef8;border-color:#b9ae93;transform:translateY(-1px)}
+  .lang-fab svg{width:14px;height:14px;opacity:.75}
+  .lang-fab .badge{
+    background:var(--accent);color:#fff;font-size:10.5px;
+    padding:2px 7px;border-radius:7px;letter-spacing:.1em;
+    font-family:var(--mono);
+  }
+
+  .book-nav{
+    position:fixed;
+    bottom:max(14px, env(safe-area-inset-bottom));
+    left:50%;
+    transform:translateX(-50%);
+    z-index:7000;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,254,251,.95);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid #d8d0bd;
+    border-radius:999px;
+    padding:5px 8px;
+    box-shadow:0 8px 30px -8px rgba(60,50,20,.25);
+    font-family:inherit;
+    user-select:none;
+    max-width:calc(100vw - 20px);
+  }
+  .nav-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:#fff;border:1px solid #e0daca;color:#3a3f4d;
+    width:32px;height:32px;border-radius:50%;cursor:pointer;
+    transition:.15s;padding:0;
+  }
+  .nav-btn:hover:not(:disabled){background:#fffef8;border-color:#b9ae93}
+  .nav-btn:disabled{opacity:.32;cursor:not-allowed}
+  .nav-btn svg{width:14px;height:14px}
+
+  .nav-center{display:flex;flex-direction:column;align-items:center;gap:3px;
+    min-width:0;padding:0 6px}
+  .nav-title{
+    font-size:11.5px;color:#6b6350;letter-spacing:.02em;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;
+  }
+  .dots{display:flex;gap:5px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:230px}
+  .dot{
+    width:7px;height:7px;border-radius:50%;background:#c9c0ab;border:none;
+    cursor:pointer;transition:.18s;padding:0;
+  }
+  .dot:hover{background:#9a8f74;transform:scale(1.25)}
+  .dot.active{background:var(--accent);width:18px;border-radius:4px}
+  .page-num{font-family:var(--mono);font-size:10px;color:#8a8168;letter-spacing:.06em}
+
+  .edit-fab{
+    position:fixed;
+    top:max(14px, env(safe-area-inset-top));
+    right:14px;
+    z-index:7500;
+    width:38px;height:38px;
+    border-radius:50%;
+    background:rgba(255,254,251,.96);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid #d8d0bd;
+    color:#3a3f4d;
+    display:inline-flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.28);
+    transition:.15s;
+    font-family:inherit;
+    padding:0;
+  }
+  .edit-fab:hover{background:#fffef8;border-color:#b9ae93;transform:translateY(-1px)}
+  .edit-fab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .edit-fab svg{width:16px;height:16px}
+
+  .edit-actions{
+    position:fixed;
+    top:max(60px, calc(env(safe-area-inset-top) + 60px));
+    right:14px;
+    z-index:7400;
+    display:flex;flex-direction:column;gap:5px;align-items:flex-end;
+    font-family:inherit;
+  }
+  .edit-actions[hidden]{display:none}
+  .edit-actions input.title-edit{
+    background:rgba(255,254,251,.97);
+    border:1px solid #d8d0bd;border-radius:10px;
+    padding:6px 10px;font-size:12px;font-family:inherit;color:#3a3f4d;
+    width:160px;font-weight:600;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.22);
+  }
+  .edit-actions input.title-edit:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,246,.15);
+  }
+  .edit-actions button{
+    background:rgba(255,254,251,.97);border:1px solid #d8d0bd;color:#3a3f4d;
+    padding:6px 11px;border-radius:9px;cursor:pointer;
+    font-weight:600;font-size:11.5px;display:inline-flex;align-items:center;gap:5px;
+    transition:.15s;font-family:inherit;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.22);
+  }
+  .edit-actions button:hover{background:#fffef8;border-color:#b9ae93}
+  .edit-actions button.danger{color:#c92a2a;border-color:#f0bcbc}
+  .edit-actions button.danger:hover{background:#fff5f5;border-color:#e8a0a0}
+  .edit-actions button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .edit-actions button.primary:hover{background:#245ad4}
+  .edit-actions button svg{width:12px;height:12px}
+
+  body.edit-mode .page{outline:2px dashed rgba(47,109,246,.35);outline-offset:-10px}
+  body.edit-mode .page:focus-within{outline-color:rgba(47,109,246,.85)}
+  body.edit-mode .page [contenteditable="false"]{user-select:none}
+
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(20,18,12,.55);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    z-index:9000;display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .modal-backdrop[hidden]{display:none}
+  .modal{
+    background:#fffefb;border-radius:18px;padding:26px 28px;
+    width:min(440px,100%);max-height:90vh;overflow-y:auto;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.5);
+    font-family:inherit;
+  }
+  .modal.wide{width:min(760px,100%)}
+  .modal h3{font-size:21px;margin-bottom:6px;letter-spacing:-.3px}
+  .modal .sub{color:#6b6350;font-size:13.5px;margin:0 0 6px}
+  .modal label{
+    display:block;font-size:11.5px;font-weight:800;color:#3a3f4d;
+    margin:14px 0 6px;letter-spacing:.08em;text-transform:uppercase;
+  }
+  .modal input[type=text],.modal input[type=password],.modal textarea{
+    width:100%;background:#fbf9f4;border:1px solid #d8d0bd;border-radius:11px;
+    padding:11px 14px;font-family:inherit;font-size:14px;color:#191c24;
+    resize:vertical;
+  }
+  .modal textarea{
+    font-family:var(--mono);font-size:12.5px;line-height:1.55;min-height:220px;
+    white-space:pre;overflow:auto;tab-size:2;
+  }
+  .modal input:focus,.modal textarea:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,246,.15);
+  }
+  .modal .hint{color:#8a8168;font-size:12px;margin-top:8px;line-height:1.55;}
+  .modal .hint code{
+    font-family:var(--mono);background:#f0ece0;padding:1px 6px;
+    border-radius:5px;font-size:11.5px;
+  }
+  .modal .login-error{
+    color:#c92a2a;background:#fff5f5;border:1px solid #f0bcbc;
+    padding:9px 12px;border-radius:9px;font-size:13px;margin-top:14px;
+  }
+  .modal-actions{
+    display:flex;justify-content:flex-end;gap:9px;margin-top:22px;
+    padding-top:18px;border-top:1px solid #eee9de;
+  }
+  .modal-actions button{
+    padding:10px 18px;border-radius:11px;font-size:13.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;border:1px solid #d8d0bd;
+    background:#fff;color:#3a3f4d;transition:.15s;
+  }
+  .modal-actions button:hover{background:#faf7ef}
+  .modal-actions button.primary{
+    background:var(--accent);color:#fff;border-color:var(--accent);
+    box-shadow:0 8px 22px -8px rgba(47,109,246,.6);
+  }
+  .modal-actions button.primary:hover{background:#245ad4}
+
+  @media (max-width:760px){
+    body{line-height:1.7}
+    .page{ padding:22px 20px 110px; font-size:16px; }
+    .page.cover{padding:34px 24px 110px}
+
+    .page h2{font-size:clamp(21px,5.4vw,27px);margin-bottom:16px}
+    .page h3{font-size:16.5px;margin:20px 0 6px}
+    .chip{min-width:26px;height:26px;font-size:12.5px;margin-right:9px}
+
+    .sim{padding:12px;margin:18px 0}
+    .sim canvas{height:230px !important}
+    #cvLayers{height:260px !important}
+    #cvRiver{height:300px !important}
+    #cvPipe{height:280px !important}
+    #cvVisc{height:280px !important}
+    #cvGrad{height:280px !important}
+    #cvNewton{height:280px !important}
+    #cvDrops{height:300px !important}
+    #cvMu{height:320px !important}
+    #cvPlate{height:300px !important}
+    #cvUniform{height:320px !important}
+
+    .sim-explain{font-size:14.5px;padding:14px 16px}
+    .sim-explain .hd{font-size:11px}
+
+    .controls{grid-template-columns:1fr;gap:10px}
+    .readout .ro .v{font-size:16px}
+    .eq{font-size:17px;padding:14px 16px}
+    .eq .lbl{font-size:11px}
+    .callout{padding:14px 16px;margin:18px 0}
+
+    table{font-size:13px;min-width:440px}
+    th,td{padding:9px 12px}
+
+    .chain .node{min-width:0;width:100%;font-size:13.5px;padding:10px 14px}
+    .chain .split{flex-direction:column;gap:14px;align-items:center}
+    .chain .branch{width:100%}
+
+    .nav-btn{width:30px;height:30px}
+    .nav-title{max-width:120px;font-size:11px}
+    .dots{max-width:150px}
+
+    .lang-fab{height:34px;padding:0 12px;font-size:11px;top:10px;left:10px}
+    .edit-fab{width:34px;height:34px;top:10px;right:10px}
+    .edit-fab svg{width:14px;height:14px}
+    .edit-actions{top:52px;right:10px}
+    .edit-actions input.title-edit{width:130px;font-size:11.5px}
+    .edit-actions button{padding:5px 9px;font-size:11px}
+
+    .modal{padding:22px 20px}
+    .modal h3{font-size:19px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .page{transition-duration:.35s}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="book" id="book">
+
+    <!-- ============== COVER ============== -->
+    <div class="page cover" data-title="Cover">
+      <div class="kicker">
+        <span class="lang-en">Interactive Fluid Mechanics · Chapter 1.5</span>
+        <span class="lang-bm">Mekanik Bendalir Interaktif · Bab 1.5</span>
+      </div>
+      <h1>
+        <span class="lang-en">Shear Stress<br>&amp; <em>Viscosity</em></span>
+        <span class="lang-bm">Tegasan Ricih<br>&amp; <em>Kelikatan</em></span>
+      </h1>
+      <p>
+        <span class="lang-en">Why do fluid layers fight each other? Move the sliders, watch the velocity gradient appear, and see Newton's Law of Viscosity come alive.</span>
+        <span class="lang-bm">Mengapa lapisan bendalir saling bergeser? Gerakkan slider, lihat gradien halaju muncul, dan saksikan Hukum Kelikatan Newton menjadi hidup.</span>
+      </p>
+      <div class="pill"><b>τ</b> = μ · du/dy &nbsp;→&nbsp; <span class="lang-en">viscosity × velocity gradient</span><span class="lang-bm">kelikatan × gradien halaju</span></div>
+      <button class="start" id="startBtn">
+        <span class="lang-en">Start reading</span>
+        <span class="lang-bm">Mula membaca</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <!-- ============== PAGE 1 ============== -->
+    <div class="page" data-title="1 · Shear Stress in a Fluid">
+      <h2>
+        <span class="chip">1</span>
+        <span class="lang-en">What is Shear Stress in a Fluid?</span>
+        <span class="lang-bm">Apakah Tegasan Ricih dalam Bendalir?</span>
+      </h2>
+
+      <p class="lang-en">When a fluid flows, different layers of the fluid may move at <strong>different velocities</strong>.</p>
+      <p class="lang-bm">Apabila bendalir mengalir, lapisan-lapisan bendalir yang berbeza boleh bergerak pada <strong>halaju yang berbeza</strong>.</p>
+
+      <p class="lang-en">When these fluid layers move relative to one another, a <em class="term">shear stress</em> develops.</p>
+      <p class="lang-bm">Apabila lapisan-lapisan bendalir ini bergerak relatif antara satu sama lain, satu <em class="term">tegasan ricih</em> akan terbentuk.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t lang-en">Simulation · Fluid Between Two Plates</span>
+          <span class="t lang-bm">Simulasi · Bendalir Antara Dua Plat</span>
+          <span class="hint lang-en">Top plate drags the fluid — layers slide past each other</span>
+          <span class="hint lang-bm">Plat atas menyeret bendalir — lapisan bergelongsor antara satu sama lain</span>
+        </div>
+        <canvas id="cvLayers" style="height:360px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Top plate speed U</span>
+              <span class="lang-bm">Laju plat atas U</span>
+              <b><span id="lUVal">0.60</span> m/s</b>
+            </label>
+            <input type="range" id="lUSlider" min="0" max="150" step="1" value="60">
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="tg on" id="lPause">⏸ <span class="lang-en">Pause</span><span class="lang-bm">Jeda</span></button>
+          <button class="tg on" id="lParticles"><span class="lang-en">Particles</span><span class="lang-bm">Partikel</span></button>
+          <button class="tg" id="lReset">↺ <span class="lang-en">Reset</span><span class="lang-bm">Set semula</span></button>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>This is <b>Couette flow</b> — the most basic flow in fluid mechanics. The top plate moves to the right at speed <b>U</b>, while the bottom plate is <b>fixed</b>.</p>
+        <ul>
+          <li><b>Blue arrows</b> = the velocity of each fluid layer. The topmost arrow is long (high speed), the bottommost is short (low speed).</li>
+          <li><b>White particles</b> = fluid points drifting with their respective layers. Particles at the top travel further in the same time.</li>
+          <li><b>Moving blue plate</b> = the surface dragging the fluid. <b>Fixed grey plate</b> = the surface holding the fluid back.</li>
+        </ul>
+        <div class="obs">
+          <b>Watch this:</b> as you increase the slider <b>U</b>, the top arrow grows longer, but the bottom arrow stays near zero. The gap between the top and bottom arrow lengths is the <b>velocity gradient (du/dy)</b> — and that is where shear stress exists.
+        </div>
+        <p><b>Why it matters:</b> this is why a fluid "sticks" to a solid surface. The layer touching the moving plate moves at the same speed as the plate (no-slip condition), and each subsequent layer is dragged along by the one below it — producing the gradient.</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Ini adalah <b>aliran Couette</b> — aliran paling asas dalam mekanik bendalir. Plat atas bergerak ke kanan dengan laju <b>U</b>, manakala plat bawah <b>tetap</b>.</p>
+        <ul>
+          <li><b>Anak panah biru</b> = halaju setiap lapisan bendalir. Anak panah paling atas panjang (laju tinggi), paling bawah pendek (laju rendah).</li>
+          <li><b>Partikel putih</b> = titik bendalir yang hanyut mengikut lapisan masing-masing. Partikel di atas bergerak lebih jauh dalam masa yang sama.</li>
+          <li><b>Plat biru bergerak</b> = permukaan yang menarik bendalir. <b>Plat kelabu tetap</b> = permukaan yang menahan bendalir.</li>
+        </ul>
+        <div class="obs">
+          <b>Perhatikan:</b> apabila anda besarkan slider <b>U</b>, anak panah atas menjadi lebih panjang, tetapi anak panah bawah masih hampir sifar. Jurang antara panjang anak panah atas dan bawah itulah <b>gradien halaju (du/dy)</b> — dan di situlah tegasan ricih wujud.
+        </div>
+        <p><b>Mengapa penting:</b> inilah sebabnya bendalir "melekat" pada permukaan pepejal. Lapisan yang bersentuhan dengan plat bergerak sama laju dengan plat (syarat no-slip), dan lapisan seterusnya diseret oleh lapisan di bawahnya — menghasilkan gradien.</p>
+      </div>
+
+      <p class="lang-en">Imagine water flowing between two plates: the fluid layer close to the moving plate moves faster, while the fluid layer close to the fixed plate moves more slowly.</p>
+      <p class="lang-bm">Bayangkan air mengalir antara dua plat: lapisan bendalir yang hampir dengan plat bergerak bergerak lebih cepat, manakala lapisan yang hampir dengan plat tetap bergerak lebih perlahan.</p>
+
+      <p class="lang-en">Therefore, there is a <strong>difference in velocity</strong> between fluid layers. This difference produces a <strong>velocity gradient</strong> — and that gradient is what generates shear stress.</p>
+      <p class="lang-bm">Oleh itu, wujud <strong>perbezaan halaju</strong> antara lapisan bendalir. Perbezaan ini menghasilkan <strong>gradien halaju</strong> — dan gradien itulah yang menjana tegasan ricih.</p>
+
+      <div class="chain">
+        <div class="node">
+          <span class="lang-en">Different velocities between layers</span>
+          <span class="lang-bm">Halaju berbeza antara lapisan</span>
+        </div>
+        <div class="arr">↓</div>
+        <div class="node cool">
+          <span class="lang-en">VELOCITY GRADIENT</span>
+          <span class="lang-bm">GRADIEN HALAJU</span>
+        </div>
+        <div class="arr">↓</div>
+        <div class="node hot">
+          <span class="lang-en">SHEAR STRESS</span>
+          <span class="lang-bm">TEGASAN RICIH</span>
+        </div>
+      </div>
+
+      <div class="callout shear">
+        <p class="lang-en"><strong>Key idea:</strong> shear stress in a fluid is not caused by the fluid "moving" — it is caused by neighbouring layers moving <em>at different velocities</em>.</p>
+        <p class="lang-bm"><strong>Idea utama:</strong> tegasan ricih dalam bendalir bukan disebabkan bendalir "bergerak" — ia disebabkan lapisan bersebelahan bergerak <em>pada halaju yang berbeza</em>.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 2 · RIVER ============== -->
+    <div class="page" data-title="2 · Example: Water in a River">
+      <h2>
+        <span class="chip">2</span>
+        <span class="lang-en">Real-Life Example 1 · Water in a River</span>
+        <span class="lang-bm">Contoh Kehidupan Sebenar 1 · Air di Sungai</span>
+      </h2>
+
+      <p class="lang-en">Think about water flowing along a river.</p>
+      <p class="lang-bm">Fikirkan tentang air yang mengalir di sepanjang sungai.</p>
+
+      <p class="lang-en">The water near the surface can move <strong>faster</strong>, while the water near the river bed moves <strong>more slowly</strong> because of interaction with the river bed.</p>
+      <p class="lang-bm">Air yang dekat dengan permukaan boleh bergerak <strong>lebih cepat</strong>, manakala air yang dekat dengan dasar sungai bergerak <strong>lebih perlahan</strong> kerana interaksi dengan dasar sungai.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t lang-en">Simulation · River Velocity Profile</span>
+          <span class="t lang-bm">Simulasi · Profil Halaju Sungai</span>
+          <span class="hint lang-en">Surface fast, bed slow — layers slide over each other</span>
+          <span class="hint lang-bm">Permukaan laju, dasar perlahan — lapisan bergelongsor</span>
+        </div>
+        <canvas id="cvRiver" style="height:380px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="riverPause">⏸ <span class="lang-en">Pause</span><span class="lang-bm">Jeda</span></button>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>This is a river cross-section. The water surface (wavy line above) and the river bed (brown block below) sandwich the water in between.</p>
+        <ul>
+          <li><b>FAST</b> at the surface — surface water particles do not rub against any solid surface, so they are most free to move.</li>
+          <li><b>MEDIUM</b> in the middle — this layer is dragged by the layer above but held back by the layer below.</li>
+          <li><b>SLOW</b> near the bed — friction with the river bed (no-slip) reduces the speed almost to zero.</li>
+        </ul>
+        <div class="obs">
+          <b>Watch this:</b> the arrows are not equal in length. Each layer moves at a different speed → there is a <b>velocity gradient</b> inside the water → there is <b>shear stress</b> inside the water. This is what causes water to swirl and mix.
+        </div>
+        <p><b>Why it matters:</b> engineers use this velocity profile to calculate discharge (flow rate), kinetic energy, and the drag force on the river bed.</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Ini adalah keratan rentas sungai. Permukaan air (garis bergelombang di atas) dan dasar sungai (blok coklat di bawah) mengapit air di tengah.</p>
+        <ul>
+          <li><b>FAST</b> di permukaan — zarah air di permukaan tidak bergeser dengan apa-apa permukaan pepejal, jadi ia paling bebas bergerak.</li>
+          <li><b>MEDIUM</b> di tengah — lapisan ini diseret oleh lapisan atas tetapi ditahan oleh lapisan bawah.</li>
+          <li><b>SLOW</b> berhampiran dasar — geseran dengan dasar sungai (no-slip) mengurangkan laju hampir kepada sifar.</li>
+        </ul>
+        <div class="obs">
+          <b>Perhatikan:</b> anak panah bukan sama panjang. Setiap lapisan bergerak pada laju berbeza → ada <b>gradien halaju</b> di dalam air → ada <b>tegasan ricih</b> dalaman. Ini yang menyebabkan air "berpusar" dan bercampur.
+        </div>
+        <p><b>Mengapa penting:</b> jurutera menggunakan profil halaju ini untuk mengira kadar aliran (discharge), tenaga kinetik, dan daya seret pada dasar sungai.</p>
+      </div>
+
+      <div class="chips">
+        <span class="tag"><span class="lang-en">Surface</span><span class="lang-bm">Permukaan</span></span>
+        <span>FAST</span>
+        <span class="tag"><span class="lang-en">Middle</span><span class="lang-bm">Tengah</span></span>
+        <span>MEDIUM</span>
+        <span class="tag"><span class="lang-en">Near bed</span><span class="lang-bm">Hampir dasar</span></span>
+        <span>SLOW</span>
+      </div>
+
+      <p class="lang-en">Because adjacent layers travel at different speeds, the river has an internal velocity gradient — and therefore internal shear stress.</p>
+      <p class="lang-bm">Kerana lapisan bersebelahan bergerak pada laju yang berbeza, sungai mempunyai gradien halaju dalaman — dan oleh itu tegasan ricih dalaman.</p>
+
+      <div class="eq">
+        <span class="lang-en">Different velocities → Velocity gradient → Shear stress</span>
+        <span class="lang-bm">Halaju berbeza → Gradien halaju → Tegasan ricih</span>
+        <span class="lbl lang-en">The same chain appears in every real flow</span>
+        <span class="lbl lang-bm">Rantaian yang sama muncul dalam setiap aliran sebenar</span>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 3 · PIPE ============== -->
+    <div class="page" data-title="3 · Example: Flow in a Pipe">
+      <h2>
+        <span class="chip">3</span>
+        <span class="lang-en">Real-Life Example 2 · Water in a Pipe</span>
+        <span class="lang-bm">Contoh Kehidupan Sebenar 2 · Air dalam Paip</span>
+      </h2>
+
+      <p class="lang-en">When water flows through a pipe, the fluid close to the <strong>pipe wall</strong> moves more slowly, while the fluid near the <strong>centre of the pipe</strong> moves faster.</p>
+      <p class="lang-bm">Apabila air mengalir melalui paip, bendalir yang dekat dengan <strong>dinding paip</strong> bergerak lebih perlahan, manakala bendalir yang dekat dengan <strong>tengah paip</strong> bergerak lebih cepat.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t lang-en">Simulation · Pipe Cross-Section</span>
+          <span class="t lang-bm">Simulasi · Keratan Rentas Paip</span>
+          <span class="hint lang-en">The velocity profile is fastest at the centre</span>
+          <span class="hint lang-bm">Profil halaju paling cepat di tengah</span>
+        </div>
+        <canvas id="cvPipe" style="height:340px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Centre-line velocity</span>
+              <span class="lang-bm">Halaju garis pusat</span>
+              <b><span id="pipeVVal">1.00</span> m/s</b>
+            </label>
+            <input type="range" id="pipeVSlider" min="0" max="150" step="1" value="100">
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="tg on" id="pipePause">⏸ <span class="lang-en">Pause</span><span class="lang-bm">Jeda</span></button>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>A pipe cross-section. The pipe walls are above and below (grey blocks), and the fluid is in the middle (blue).</p>
+        <ul>
+          <li><b>The longest arrow</b> sits at the pipe centre — this is the maximum velocity (centre-line velocity).</li>
+          <li><b>The shortest arrow</b> sits at the wall — nearly zero because of the <b>no-slip condition</b>: fluid touching a solid wall does not move relative to it.</li>
+          <li>The shape of this velocity curve is called a <b>parabolic velocity profile</b> for laminar flow (Hagen–Poiseuille).</li>
+        </ul>
+        <div class="obs">
+          <b>Watch this:</b> if you increase the centre speed slider, the parabola becomes "sharper" but the wall velocity <b>stays at zero</b>. The difference between the centre speed and wall speed is what determines the <b>wall shear stress</b> acting on the pipe.
+        </div>
+        <p><b>Why it matters:</b> wall shear stress is what causes energy loss (head loss) in pipes, and it determines how much pump power is needed to maintain the flow.</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Keratan rentas paip. Dinding paip di atas dan bawah (blok kelabu), bendalir di tengah (biru).</p>
+        <ul>
+          <li><b>Anak panah paling panjang</b> berada di tengah paip — inilah halaju maksimum (halaju garis pusat).</li>
+          <li><b>Anak panah paling pendek</b> berada di tepi dinding — hampir sifar kerana <b>syarat no-slip</b>: bendalir yang bersentuhan dengan dinding pepejal tidak bergerak relatif kepadanya.</li>
+          <li>Bentuk lengkung halaju ini dipanggil <b>profil halaju parabola</b> untuk aliran laminar (Hagen–Poiseuille).</li>
+        </ul>
+        <div class="obs">
+          <b>Perhatikan:</b> jika anda naikkan slider laju tengah, bentuk parabola menjadi lebih "tajam" tetapi halaju di dinding <b>kekal sifar</b>. Perbezaan antara halaju tengah dan halaju dinding itulah yang menentukan <b>tegasan ricih dinding</b> yang bertindak ke atas paip.
+        </div>
+        <p><b>Mengapa penting:</b> tegasan ricih dinding inilah yang menyebabkan kehilangan tenaga (head loss) dalam paip, dan ia menentukan berapa banyak kuasa pam diperlukan untuk mengekalkan aliran.</p>
+      </div>
+
+      <p class="lang-en">Because the fluid sticks to the wall (the <strong>no-slip condition</strong>), velocity must rise from zero at the wall to a maximum at the centre. Adjacent fluid layers therefore have different velocities.</p>
+      <p class="lang-bm">Kerana bendalir melekat pada dinding (<strong>syarat no-slip</strong>), halaju mesti naik dari sifar di dinding ke maksimum di tengah. Lapisan bendalir bersebelahan oleh itu mempunyai halaju yang berbeza.</p>
+
+      <div class="chain">
+        <div class="node">
+          <span class="lang-en">Different velocity between layers</span>
+          <span class="lang-bm">Halaju berbeza antara lapisan</span>
+        </div>
+        <div class="arr">↓</div>
+        <div class="node cool">
+          <span class="lang-en">Velocity gradient</span>
+          <span class="lang-bm">Gradien halaju</span>
+        </div>
+        <div class="arr">↓</div>
+        <div class="node hot">
+          <span class="lang-en">Shear stress</span>
+          <span class="lang-bm">Tegasan ricih</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 4 · HONEY ============== -->
+    <div class="page" data-title="4 · Example: Pouring Honey">
+      <h2>
+        <span class="chip">4</span>
+        <span class="lang-en">Real-Life Example 3 · Pouring Honey</span>
+        <span class="lang-bm">Contoh Kehidupan Sebenar 3 · Menuang Madu</span>
+      </h2>
+
+      <p class="lang-en">When honey is poured, different layers of honey move relative to each other as the honey flows.</p>
+      <p class="lang-bm">Apabila madu dituang, lapisan-lapisan madu yang berbeza bergerak relatif antara satu sama lain semasa madu mengalir.</p>
+
+      <p class="lang-en">Because honey has a <strong>relatively high viscosity</strong>, it strongly resists this relative motion. Therefore, shear stress is developed within the flowing honey.</p>
+      <p class="lang-bm">Kerana madu mempunyai <strong>kelikatan yang agak tinggi</strong>, ia sangat menentang gerakan relatif ini. Oleh itu, tegasan ricih terbentuk dalam madu yang mengalir.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t lang-en">Simulation · Same Shear Stress, Different Fluids</span>
+          <span class="t lang-bm">Simulasi · Tegasan Ricih Sama, Bendalir Berbeza</span>
+          <span class="hint lang-en">Same driving force → water shears fast, honey shears slowly</span>
+          <span class="hint lang-bm">Daya penggerak sama → air mengalir cepat, madu mengalir perlahan</span>
+        </div>
+        <canvas id="cvVisc" style="height:360px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="viscPause">⏸ <span class="lang-en">Pause</span><span class="lang-bm">Jeda</span></button>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>Two fluid cells given the <b>same shear stress</b> (same driving force):</p>
+        <ul>
+          <li><b>LEFT — WATER:</b> low μ. For the same τ, water produces a <b>large velocity gradient</b> → long arrows → flows fast.</li>
+          <li><b>RIGHT — HONEY:</b> high μ. For the same τ, honey produces only a <b>small velocity gradient</b> → short arrows → flows slowly.</li>
+        </ul>
+        <div class="obs">
+          <b>Watch this:</b> even though τ is the same, the arrow lengths are very different between the two cells. This is the meaning of <b>τ = μ · du/dy</b>: when μ is large, du/dy must be small for τ to remain the same — and vice versa.
+        </div>
+        <p><b>Why it matters:</b> this is why honey can "stand" on bread without flowing down, while water keeps flowing. High viscosity means the fluid strongly resists relative motion between its layers.</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Dua sel bendalir yang <b>diberi tegasan ricih yang sama</b> (daya penggerak sama):</p>
+        <ul>
+          <li><b>KIRI — AIR:</b> μ rendah. Untuk τ yang sama, air menghasilkan <b>gradien halaju besar</b> → anak panah panjang → mengalir cepat.</li>
+          <li><b>KANAN — MADU:</b> μ tinggi. Untuk τ yang sama, madu hanya menghasilkan <b>gradien halaju kecil</b> → anak panah pendek → mengalir perlahan.</li>
+        </ul>
+        <div class="obs">
+          <b>Perhatikan:</b> walaupun τ sama, panjang anak panah sangat berbeza antara dua sel ini. Inilah maksud persamaan <b>τ = μ · du/dy</b>: apabila μ besar, du/dy mesti kecil supaya τ kekal sama — dan sebaliknya.
+        </div>
+        <p><b>Mengapa penting:</b> sebab itulah madu boleh "berdiri" di atas roti tanpa mengalir turun, sedangkan air akan terus mengalir. Kelikatan tinggi bermakna bendalir sangat menentang gerakan relatif antara lapisannya.</p>
+      </div>
+
+      <div class="callout teal">
+        <p class="lang-en"><strong>Water</strong> → low viscosity → large velocity gradient for the same shear stress.</p>
+        <p class="lang-bm"><strong>Air</strong> → kelikatan rendah → gradien halaju besar untuk tegasan ricih yang sama.</p>
+        <p class="lang-en"><strong>Honey</strong> → high viscosity → small velocity gradient for the same shear stress.</p>
+        <p class="lang-bm"><strong>Madu</strong> → kelikatan tinggi → gradien halaju kecil untuk tegasan ricih yang sama.</p>
+      </div>
+
+      <p class="lang-en">Both fluids experience shear stress — but honey resists the deformation far more strongly.</p>
+      <p class="lang-bm">Kedua-dua bendalir mengalami tegasan ricih — tetapi madu menentang ubah bentuk itu dengan lebih kuat.</p>
+    </div>
+
+    <!-- ============== PAGE 5 · VELOCITY GRADIENT ============== -->
+    <div class="page" data-title="5 · Velocity Gradient">
+      <h2>
+        <span class="chip">5</span>
+        <span class="lang-en">What is Velocity Gradient?</span>
+        <span class="lang-bm">Apakah Gradien Halaju?</span>
+      </h2>
+
+      <p class="lang-en">The velocity gradient describes <strong>how rapidly the fluid velocity changes with distance perpendicular to the flow</strong>.</p>
+      <p class="lang-bm">Gradien halaju menerangkan <strong>betapa cepat halaju bendalir berubah dengan jarak yang berserenjang dengan aliran</strong>.</p>
+
+      <div class="eq">
+        du / dy
+        <span class="lbl lang-en">u = fluid velocity · y = distance perpendicular to the direction of flow</span>
+        <span class="lbl lang-bm">u = halaju bendalir · y = jarak berserenjang dengan arah aliran</span>
+      </div>
+
+      <p class="lang-en">In simple words: <strong>velocity gradient = how quickly the velocity changes from one fluid layer to another.</strong></p>
+      <p class="lang-bm">Secara mudah: <strong>gradien halaju = betapa cepat halaju berubah dari satu lapisan bendalir ke lapisan yang lain.</strong></p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t lang-en">Simulation · Two Layers, One Gradient</span>
+          <span class="t lang-bm">Simulasi · Dua Lapisan, Satu Gradien</span>
+          <span class="hint lang-en">Change the two layer velocities and the gap between them</span>
+          <span class="hint lang-bm">Ubah halaju dua lapisan dan jurang antara mereka</span>
+        </div>
+        <canvas id="cvGrad" style="height:340px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Lower layer velocity u₁</span>
+              <span class="lang-bm">Halaju lapisan bawah u₁</span>
+              <b><span id="u1Val">0.20</span> m/s</b>
+            </label>
+            <input type="range" id="u1Slider" min="0" max="200" step="1" value="20">
+          </div>
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Upper layer velocity u₂</span>
+              <span class="lang-bm">Halaju lapisan atas u₂</span>
+              <b><span id="u2Val">1.60</span> m/s</b>
+            </label>
+            <input type="range" id="u2Slider" min="0" max="200" step="1" value="160">
+          </div>
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Separation Δy</span>
+              <span class="lang-bm">Pemisahan Δy</span>
+              <b><span id="dyVal">4.0</span> mm</b>
+            </label>
+            <input type="range" id="dySlider" min="5" max="100" step="1" value="40">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k">Δu = u₂ − u₁</div><div class="v" id="duOut">1.40 <small>m/s</small></div></div>
+          <div class="ro">
+            <div class="k lang-en">Velocity gradient du/dy</div>
+            <div class="k lang-bm">Gradien halaju du/dy</div>
+            <div class="v" id="gradOut">350 <small>s⁻¹</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>Two fluid layers: one on top (speed u₂), one below (speed u₁), separated by distance Δy.</p>
+        <ul>
+          <li><b>Δu</b> (orange arrow) shows the <b>difference in speed</b> between the two layers.</li>
+          <li><b>Δy</b> (yellow dimension on the right) shows the <b>distance</b> between the two layers.</li>
+          <li><b>du/dy</b> = Δu ÷ Δy. It tells us how "steep" the velocity change is between the two layers.</li>
+        </ul>
+        <div class="obs">
+          <b>Try this:</b> (1) Increase only u₂ → du/dy goes up. (2) Decrease Δy (layers closer together) → du/dy goes up <b>without</b> changing Δu. This is why a narrow pipe produces higher wall shear stress than a wide pipe at the same speed.
+        </div>
+        <p><b>Why it matters:</b> du/dy is the "rate of deformation" of the fluid. The larger the du/dy, the faster the fluid is being kneaded, and the larger the shear stress required.</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Dua lapisan bendalir: satu di atas (laju u₂), satu di bawah (laju u₁), dipisahkan oleh jarak Δy.</p>
+        <ul>
+          <li><b>Δu</b> (anak panah oren) menunjukkan <b>perbezaan laju</b> antara dua lapisan.</li>
+          <li><b>Δy</b> (dimensi kuning di kanan) menunjukkan <b>jarak</b> antara dua lapisan.</li>
+          <li><b>du/dy</b> = Δu ÷ Δy. Ini memberitahu kita betapa "curam" perubahan laju antara dua lapisan.</li>
+        </ul>
+        <div class="obs">
+          <b>Cuba ini:</b> (1) Naikkan u₂ sahaja → du/dy naik. (2) Turunkan Δy (lapisan lebih rapat) → du/dy naik <b>tanpa</b> mengubah Δu. Inilah sebabnya paip sempit menghasilkan tegasan ricih dinding yang lebih tinggi daripada paip besar pada laju yang sama.
+        </div>
+        <p><b>Mengapa penting:</b> du/dy ialah "kadar ubah bentuk" (rate of deformation) bendalir. Semakin besar du/dy, semakin cepat bendalir "diuli", dan semakin besar tegasan ricih yang diperlukan.</p>
+      </div>
+
+      <div class="callout">
+        <p class="lang-en"><strong>Units:</strong> velocity (m/s) ÷ distance (m) → the velocity gradient has units of <strong>s⁻¹</strong> (per second).</p>
+        <p class="lang-bm"><strong>Unit:</strong> halaju (m/s) ÷ jarak (m) → gradien halaju mempunyai unit <strong>s⁻¹</strong> (per saat).</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 6 · NEWTON'S LAW ============== -->
+    <div class="page" data-title="6 · Newton's Law of Viscosity">
+      <h2>
+        <span class="chip">6</span>
+        <span class="lang-en">Newton's Law of Viscosity</span>
+        <span class="lang-bm">Hukum Kelikatan Newton</span>
+      </h2>
+
+      <p class="lang-en">For a <strong>Newtonian fluid</strong>, shear stress is directly proportional to the velocity gradient.</p>
+      <p class="lang-bm">Untuk <strong>bendalir Newtonian</strong>, tegasan ricih berkadar terus dengan gradien halaju.</p>
+
+      <div class="eq">
+        τ ∝ du/dy
+        <span class="lbl lang-en">Shear stress is proportional to the velocity gradient</span>
+        <span class="lbl lang-bm">Tegasan ricih berkadar dengan gradien halaju</span>
+      </div>
+
+      <p class="lang-en">The proportionality constant is called the <strong>dynamic viscosity</strong>, μ. Therefore:</p>
+      <p class="lang-bm">Pemalar berkadar itu dipanggil <strong>kelikatan dinamik</strong>, μ. Oleh itu:</p>
+
+      <div class="eq" style="font-size:23px;color:var(--shear)">
+        τ = μ · du/dy
+        <span class="lbl lang-en">Newton's Law of Viscosity</span>
+        <span class="lbl lang-bm">Hukum Kelikatan Newton</span>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · τ vs du/dy</span>
+          <span class="hint lang-en">The slope of the straight line is the viscosity μ</span>
+          <span class="hint lang-bm">Kecerunan garis lurus ialah kelikatan μ</span>
+        </div>
+        <canvas id="cvNewton" style="height:340px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Dynamic viscosity μ</span>
+              <span class="lang-bm">Kelikatan dinamik μ</span>
+              <b><span id="nMuVal">0.100</span> Pa·s</b>
+            </label>
+            <input type="range" id="nMuSlider" min="1" max="100" step="1" value="10">
+          </div>
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Velocity gradient du/dy</span>
+              <span class="lang-bm">Gradien halaju du/dy</span>
+              <b><span id="nGradVal">200</span> s⁻¹</b>
+            </label>
+            <input type="range" id="nGradSlider" min="0" max="400" step="5" value="200">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k lang-en">Shear stress τ</div><div class="k lang-bm">Tegasan ricih τ</div><div class="v" id="nTauOut">20.0 <small>Pa</small></div></div>
+          <div class="ro"><div class="k lang-en">Viscosity μ</div><div class="k lang-bm">Kelikatan μ</div><div class="v" id="nMuOut">0.100 <small>Pa·s</small></div></div>
+          <div class="ro"><div class="k lang-en">Gradient du/dy</div><div class="k lang-bm">Gradien du/dy</div><div class="v" id="nGradOut">200 <small>s⁻¹</small></div></div>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>A graph of τ against du/dy for a Newtonian fluid. The X-axis is velocity gradient (s⁻¹), the Y-axis is shear stress (Pa).</p>
+        <ul>
+          <li><b>Orange straight line</b> = linear relationship between τ and du/dy. This is the hallmark of a Newtonian fluid (water, air, ordinary oils).</li>
+          <li><b>Slope of the line</b> = μ (dynamic viscosity). The steeper the line, the more viscous the fluid.</li>
+          <li><b>Blue dot</b> shows your current state. It always lies exactly on the straight line.</li>
+        </ul>
+        <div class="obs">
+          <b>Try this:</b> (1) Increase μ → the line becomes steeper. (2) Increase du/dy → the blue dot moves right, τ goes up. (3) Set μ low (water) and compare with μ high (honey) — at the same du/dy, honey gives a much larger τ.
+        </div>
+        <p><b>Why it matters:</b> this graph is the "signature" of a Newtonian fluid. If the line is <b>not</b> straight (curved, or not through the origin), that fluid is non-Newtonian (e.g. blood, paint, ketchup).</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Graf τ melawan du/dy untuk bendalir Newtonian. Paksi-X ialah gradien halaju (s⁻¹), paksi-Y ialah tegasan ricih (Pa).</p>
+        <ul>
+          <li><b>Garis lurus oren</b> = hubungan linear antara τ dan du/dy. Ini ciri khas bendalir Newtonian (air, udara, minyak biasa).</li>
+          <li><b>Kecerunan garis</b> = μ (kelikatan dinamik). Semakin curam garis, semakin likat bendalir.</li>
+          <li><b>Titik biru</b> menunjukkan keadaan semasa anda. Ia sentiasa terletak tepat di atas garis lurus.</li>
+        </ul>
+        <div class="obs">
+          <b>Cuba ini:</b> (1) Naikkan μ → garis menjadi lebih curam. (2) Naikkan du/dy → titik biru bergerak ke kanan, τ naik. (3) Tetapkan μ rendah (air) dan bandingkan dengan μ tinggi (madu) — pada du/dy yang sama, madu memberi τ jauh lebih besar.
+        </div>
+        <p><b>Mengapa penting:</b> graf inilah "tandatangan" bendalir Newtonian. Jika garis <b>tidak</b> lurus (bengkok atau tidak melalui asal), bendalir itu bukan Newtonian (contoh: darah, cat, ketchup).</p>
+      </div>
+
+      <p class="lang-en">Where the line is steeper, the fluid has a higher viscosity — the same velocity gradient produces more shear stress.</p>
+      <p class="lang-bm">Di mana garis lebih curam, bendalir mempunyai kelikatan lebih tinggi — gradien halaju yang sama menghasilkan tegasan ricih yang lebih besar.</p>
+    </div>
+
+    <!-- ============== PAGE 7 · DYNAMIC VISCOSITY ============== -->
+    <div class="page" data-title="7 · Dynamic Viscosity">
+      <h2>
+        <span class="chip">7</span>
+        <span class="lang-en">What Does Dynamic Viscosity Mean?</span>
+        <span class="lang-bm">Apakah Maksud Kelikatan Dinamik?</span>
+      </h2>
+
+      <p class="lang-en">Dynamic viscosity describes <strong>how strongly a fluid resists the relative movement of its layers</strong>.</p>
+      <p class="lang-bm">Kelikatan dinamik menerangkan <strong>betapa kuat bendalir menentang gerakan relatif antara lapisannya</strong>.</p>
+
+      <div class="chips">
+        <span class="tag">Water</span><span class="lang-en">flows easily</span><span class="lang-bm">mengalir dengan mudah</span>
+        <span class="tag">Honey</span><span class="lang-en">flows more slowly</span><span class="lang-bm">mengalir lebih perlahan</span>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t lang-en">Simulation · Falling Through Two Fluids</span>
+          <span class="t lang-bm">Simulasi · Jatuh Melalui Dua Bendalir</span>
+          <span class="hint lang-en">Same object, same gravity — different resistance</span>
+          <span class="hint lang-bm">Objek sama, graviti sama — rintangan berbeza</span>
+        </div>
+        <canvas id="cvDrops" style="height:380px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="dropsPause">⏸ <span class="lang-en">Pause</span><span class="lang-bm">Jeda</span></button>
+          <button class="tg" id="dropsReset">↺ <span class="lang-en">Drop again</span><span class="lang-bm">Jatuhkan semula</span></button>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>Two tubes: left is water (μ ≈ 0.001 Pa·s), right is honey (μ ≈ 2 – 10 Pa·s). The same ball is dropped in both.</p>
+        <ul>
+          <li><b>Ball in water</b> falls quickly — water does not resist the relative motion of its layers much.</li>
+          <li><b>Ball in honey</b> falls slowly — honey strongly resists relative motion, so it "holds" the ball.</li>
+          <li><b>Motion streaks</b> behind the ball show the fluid being "kneaded" and forming layers moving at different speeds.</li>
+        </ul>
+        <div class="obs">
+          <b>Watch this:</b> both balls feel the same gravity. The only difference comes from the <b>viscous resistance</b> produced as fluid layers slide past each other.
+        </div>
+        <p><b>Why it matters:</b> viscosity determines whether a fluid is "easy" or "hard" to pump, mix, or flow. In industry, lubricating oils are chosen based on the viscosity suited to the operating temperature.</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Dua tiub: kiri air (μ ≈ 0.001 Pa·s), kanan madu (μ ≈ 2 – 10 Pa·s). Bola yang sama dijatuhkan dalam kedua-duanya.</p>
+        <ul>
+          <li><b>Bola dalam air</b> jatuh cepat — air tidak banyak menentang gerakan relatif antara lapisannya.</li>
+          <li><b>Bola dalam madu</b> jatuh perlahan — madu sangat menentang gerakan relatif, jadi ia "memegang" bola.</li>
+          <li><b>Jejak gerakan</b> di belakang bola menunjukkan bendalir sedang "diuli" dan membentuk lapisan-lapisan yang bergerak pada laju berbeza.</li>
+        </ul>
+        <div class="obs">
+          <b>Perhatikan:</b> kedua-dua bola mengalami daya graviti yang sama. Perbezaan hanya datang daripada <b>rintangan likat</b> yang dihasilkan apabila lapisan bendalir menggelongsor antara satu sama lain.
+        </div>
+        <p><b>Mengapa penting:</b> kelikatan menentukan sama ada bendalir "senang" atau "susah" dipam, dicampur, atau dialirkan. Dalam industri, minyak pelincir dipilih berdasarkan kelikatan yang sesuai untuk suhu operasi.</p>
+      </div>
+
+      <p class="lang-en">Honey has a higher viscosity than water. Therefore:</p>
+      <p class="lang-bm">Madu mempunyai kelikatan lebih tinggi daripada air. Oleh itu:</p>
+      <ul>
+        <li class="lang-en"><strong>Higher viscosity</strong> → greater resistance to flow</li>
+        <li class="lang-bm"><strong>Kelikatan tinggi</strong> → rintangan aliran lebih besar</li>
+        <li class="lang-en"><strong>Lower viscosity</strong> → easier flow</li>
+        <li class="lang-bm"><strong>Kelikatan rendah</strong> → aliran lebih mudah</li>
+      </ul>
+
+      <div class="callout">
+        <p class="lang-en"><strong>Connection to Newton's Law:</strong> if the velocity gradient is the same, then a higher μ gives a higher shear stress.</p>
+        <p class="lang-bm"><strong>Kaitan dengan Hukum Newton:</strong> jika gradien halaju sama, maka μ yang lebih tinggi memberi tegasan ricih yang lebih tinggi.</p>
+        <p style="text-align:center;font-family:var(--mono);font-size:18px;margin-top:10px">τ = μ · du/dy</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 8 · EFFECT OF VISCOSITY ============== -->
+    <div class="page" data-title="8 · Effect of Viscosity on τ">
+      <h2>
+        <span class="chip">8</span>
+        <span class="lang-en">Effect of Viscosity on Shear Stress</span>
+        <span class="lang-bm">Kesan Kelikatan terhadap Tegasan Ricih</span>
+      </h2>
+
+      <p class="lang-en">From Newton's Law of Viscosity, suppose the velocity gradient remains <strong>constant</strong>.</p>
+      <p class="lang-bm">Daripada Hukum Kelikatan Newton, andaikan gradien halaju kekal <strong>malar</strong>.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t lang-en">Simulation · Same Gradient, Different Viscosity</span>
+          <span class="t lang-bm">Simulasi · Gradien Sama, Kelikatan Berbeza</span>
+          <span class="hint lang-en">Fixed y-axis — watch each bar grow as du/dy increases</span>
+          <span class="hint lang-bm">Paksi-Y tetap — lihat setiap bar membesar apabila du/dy naik</span>
+        </div>
+        <canvas id="cvMu" style="height:380px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Velocity gradient du/dy</span>
+              <span class="lang-bm">Gradien halaju du/dy</span>
+              <b><span id="muRateVal">100</span> s⁻¹</b>
+            </label>
+            <input type="range" id="muRateSlider" min="10" max="400" step="5" value="100">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k">Water τ</div><div class="v" id="tauWater">0.10 <small>Pa</small></div></div>
+          <div class="ro"><div class="k">Oil τ</div><div class="v" id="tauOil">10.0 <small>Pa</small></div></div>
+          <div class="ro"><div class="k">Honey τ</div><div class="v" id="tauHoney">500 <small>Pa</small></div></div>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>A bar chart comparing τ for three fluids at the <b>same du/dy</b> (controlled by the slider). The y-axis is <b>fixed</b> (0 – 2100 Pa) so that changes are visible.</p>
+        <ul>
+          <li><b>Water</b> (μ = 0.001 Pa·s) — a tiny sliver, almost invisible at the bottom.</li>
+          <li><b>Oil</b> (μ = 0.1 Pa·s) — a low bar that grows slowly as du/dy increases.</li>
+          <li><b>Honey</b> (μ = 5 Pa·s) — a tall bar that grows dramatically as du/dy increases.</li>
+        </ul>
+        <div class="obs">
+          <b>Watch this:</b> as you move the du/dy slider from 10 → 400 s⁻¹, the <b>honey bar visibly grows</b> from a small stub to nearly full height. The oil bar also grows, but only a little. The water bar stays almost flat. This is visual proof that <b>τ = μ · du/dy</b> — each fluid's τ grows in proportion to its own μ.
+        </div>
+        <p><b>Why it matters:</b> in pipe system design, you must know how much pressure is needed to move a fluid. Viscous fluids require much higher pressure to achieve the same du/dy — which is why pumping honey needs a far more powerful pump than water.</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Carta bar membandingkan τ untuk tiga bendalir pada <b>du/dy yang sama</b> (dikawal oleh slider). Paksi-Y adalah <b>tetap</b> (0 – 2100 Pa) supaya perubahan kelihatan jelas.</p>
+        <ul>
+          <li><b>Air</b> (μ = 0.001 Pa·s) — bar yang sangat nipis, hampir tidak kelihatan di dasar.</li>
+          <li><b>Minyak</b> (μ = 0.1 Pa·s) — bar rendah yang membesar perlahan apabila du/dy naik.</li>
+          <li><b>Madu</b> (μ = 5 Pa·s) — bar tinggi yang membesar dengan jelas apabila du/dy naik.</li>
+        </ul>
+        <div class="obs">
+          <b>Perhatikan:</b> apabila anda gerakkan slider du/dy dari 10 → 400 s⁻¹, <b>bar madu membesar dengan jelas</b> dari batang kecil ke hampir penuh. Bar minyak juga membesar, tetapi hanya sedikit. Bar air kekal hampir rata. Ini bukti visual bahawa <b>τ = μ · du/dy</b> — τ setiap bendalir membesar mengikut kadar μ-nya sendiri.
+        </div>
+        <p><b>Mengapa penting:</b> dalam reka bentuk sistem paip, anda perlu tahu berapa besar tekanan yang diperlukan untuk menggerakkan bendalir. Bendalir likat memerlukan tekanan yang jauh lebih tinggi untuk mencapai du/dy yang sama — sebab itu memindahkan madu perlukan pam berkuasa besar berbanding air.</p>
+      </div>
+
+      <div class="callout shear">
+        <p class="lang-en"><strong>Higher viscosity → higher shear stress</strong> for the same velocity gradient.</p>
+        <p class="lang-bm"><strong>Kelikatan tinggi → tegasan ricih tinggi</strong> untuk gradien halaju yang sama.</p>
+        <p class="lang-en"><strong>Lower viscosity → lower shear stress</strong> for the same velocity gradient.</p>
+        <p class="lang-bm"><strong>Kelikatan rendah → tegasan ricih rendah</strong> untuk gradien halaju yang sama.</p>
+      </div>
+
+      <p class="lang-en">This is why pushing honey through a pipe needs far more force than pushing water through the same pipe at the same speed.</p>
+      <p class="lang-bm">Inilah sebabnya menolak madu melalui paip memerlukan daya yang jauh lebih besar daripada menolak air melalui paip yang sama pada kelajuan yang sama.</p>
+    </div>
+
+    <!-- ============== PAGE 9 · TWO PLATES ============== -->
+    <div class="page" data-title="9 · Flow Between Two Plates">
+      <h2>
+        <span class="chip">9</span>
+        <span class="lang-en">Shear Stress Between Two Plates</span>
+        <span class="lang-bm">Tegasan Ricih Antara Dua Plat</span>
+      </h2>
+
+      <p class="lang-en">Consider a fluid between two parallel plates. The upper plate moves with velocity <strong>U</strong>; the lower plate is stationary.</p>
+      <p class="lang-bm">Pertimbangkan bendalir antara dua plat selari. Plat atas bergerak dengan halaju <strong>U</strong>; plat bawah pegun.</p>
+
+      <p class="lang-en">Because of the <strong>no-slip condition</strong>, the fluid in contact with each plate has approximately the same velocity as the plate:</p>
+      <p class="lang-bm">Kerana <strong>syarat no-slip</strong>, bendalir yang bersentuhan dengan setiap plat mempunyai halaju yang hampir sama dengan plat:</p>
+
+      <div class="chips">
+        <span class="tag"><span class="lang-en">Bottom plate</span><span class="lang-bm">Plat bawah</span></span><span>u ≈ 0</span>
+        <span class="tag"><span class="lang-en">Top plate</span><span class="lang-bm">Plat atas</span></span><span>u ≈ U</span>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · τ = μU/h</span>
+          <span class="hint lang-en">Change plate speed, gap height and viscosity</span>
+          <span class="hint lang-bm">Ubah laju plat, tinggi jurang dan kelikatan</span>
+        </div>
+        <canvas id="cvPlate" style="height:380px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Plate speed U</span>
+              <span class="lang-bm">Laju plat U</span>
+              <b><span id="pUVal">0.50</span> m/s</b>
+            </label>
+            <input type="range" id="pUSlider" min="0" max="200" step="1" value="50">
+          </div>
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Gap h</span>
+              <span class="lang-bm">Jurang h</span>
+              <b><span id="pHVal">2.0</span> mm</b>
+            </label>
+            <input type="range" id="pHSlider" min="5" max="60" step="1" value="20">
+          </div>
+          <div class="ctrl">
+            <label>
+              <span class="lang-en">Viscosity μ</span>
+              <span class="lang-bm">Kelikatan μ</span>
+              <b><span id="pMuVal">0.100</span> Pa·s</b>
+            </label>
+            <input type="range" id="pMuSlider" min="1" max="200" step="1" value="100">
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="tg on" id="pParticles"><span class="lang-en">Particles</span><span class="lang-bm">Partikel</span></button>
+          <button class="tg" id="pPause">⏸ <span class="lang-en">Pause</span><span class="lang-bm">Jeda</span></button>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k">du/dy = U/h</div><div class="v" id="pRateOut">250 <small>s⁻¹</small></div></div>
+          <div class="ro"><div class="k">τ = μU/h</div><div class="v" id="pTauOut">25.0 <small>Pa</small></div></div>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>This is a special case of Couette flow where the velocity profile is <b>linear</b> (arrows grow steadily from bottom to top).</p>
+        <ul>
+          <li><b>U</b> = top plate speed. If U = 0, there is no motion at all.</li>
+          <li><b>h</b> = gap between the plates. The smaller h is, the "steeper" the velocity profile.</li>
+          <li><b>μ</b> = fluid viscosity.</li>
+          <li><b>du/dy = U/h</b> because the profile is linear. This means a constant gradient across the whole gap.</li>
+        </ul>
+        <div class="obs">
+          <b>Experiment:</b> (1) Reduce h (e.g. 1 mm) → du/dy goes up → τ goes up. (2) Increase μ → τ goes up even though U and h are unchanged. (3) Set μ = 0 (superfluid) → τ = 0 even with motion — proof that shear stress depends on viscosity, not merely on motion.
+        </div>
+        <p><b>Why it matters:</b> the formula τ = μU/h is used in the design of journal bearings, viscometers, and lubrication systems. Engineers control h to obtain the desired τ.</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Ini adalah kes khas aliran Couette di mana profil halaju adalah <b>linear</b> (anak panah membesar secara sekata dari bawah ke atas).</p>
+        <ul>
+          <li><b>U</b> = laju plat atas. Jika U = 0, tiada gerakan langsung.</li>
+          <li><b>h</b> = jurang antara plat. Semakin kecil h, semakin "curam" profil halaju.</li>
+          <li><b>μ</b> = kelikatan bendalir.</li>
+          <li><b>du/dy = U/h</b> kerana profil linear. Ini bermakna gradien malar di seluruh jurang.</li>
+        </ul>
+        <div class="obs">
+          <b>Eksperimen:</b> (1) Kecilkan h (contoh 1 mm) → du/dy naik → τ naik. (2) Naikkan μ → τ naik walaupun U dan h tidak berubah. (3) Tetapkan μ = 0 (superfluid) → τ = 0 walaupun ada gerakan — bukti bahawa tegasan ricih bergantung pada kelikatan, bukan semata-mata pada gerakan.
+        </div>
+        <p><b>Mengapa penting:</b> formula τ = μU/h digunakan dalam reka bentuk galas jurnal (journal bearing), meter viskometer, dan sistem pelinciran. Jurutera mengawal h untuk mendapatkan τ yang diingini.</p>
+      </div>
+
+      <div class="eq">
+        τ = μ · U / h
+        <span class="lbl lang-en">For a linear velocity profile between parallel plates</span>
+        <span class="lbl lang-bm">Untuk profil halaju linear antara plat selari</span>
+      </div>
+
+      <div class="callout teal">
+        <p class="lang-en"><strong>Small gap h</strong> → larger velocity gradient → <strong>higher shear stress</strong>.</p>
+        <p class="lang-bm"><strong>Jurang kecil h</strong> → gradien halaju lebih besar → <strong>tegasan ricih lebih tinggi</strong>.</p>
+        <p class="lang-en"><strong>Large gap h</strong> → smaller velocity gradient → <strong>lower shear stress</strong>.</p>
+        <p class="lang-bm"><strong>Jurang besar h</strong> → gradien halaju lebih kecil → <strong>tegasan ricih lebih rendah</strong>.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 10 · UNITS ============== -->
+    <div class="page" data-title="10 · Units &amp; Definitions">
+      <h2>
+        <span class="chip">10</span>
+        <span class="lang-en">Units &amp; Key Definitions</span>
+        <span class="lang-bm">Unit &amp; Definisi Utama</span>
+      </h2>
+
+      <div class="deflist">
+        <div class="def">
+          <div class="dt"><span class="lang-en">Shear stress τ</span><span class="lang-bm">Tegasan ricih τ</span></div>
+          <div class="dd">
+            <span class="lang-en">The actual stress acting between fluid layers. Unit: <code>Pa = N/m²</code>.</span>
+            <span class="lang-bm">Tegasan sebenar yang bertindak antara lapisan bendalir. Unit: <code>Pa = N/m²</code>.</span>
+          </div>
+        </div>
+        <div class="def">
+          <div class="dt"><span class="lang-en">Dynamic viscosity μ</span><span class="lang-bm">Kelikatan dinamik μ</span></div>
+          <div class="dd">
+            <span class="lang-en">A property of the fluid describing its resistance to relative movement between layers. Unit: <code>Pa·s = N·s/m²</code>.</span>
+            <span class="lang-bm">Sifat bendalir yang menerangkan rintangannya terhadap gerakan relatif antara lapisan. Unit: <code>Pa·s = N·s/m²</code>.</span>
+          </div>
+        </div>
+        <div class="def">
+          <div class="dt"><span class="lang-en">Velocity gradient du/dy</span><span class="lang-bm">Gradien halaju du/dy</span></div>
+          <div class="dd">
+            <span class="lang-en">How quickly velocity changes perpendicular to the flow. Unit: <code>s⁻¹</code>.</span>
+            <span class="lang-bm">Betapa cepat halaju berubah berserenjang dengan aliran. Unit: <code>s⁻¹</code>.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><span class="lang-en">Quantity</span><span class="lang-bm">Kuantiti</span></th>
+              <th><span class="lang-en">Symbol</span><span class="lang-bm">Simbol</span></th>
+              <th><span class="lang-en">SI unit</span><span class="lang-bm">Unit SI</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="lang-en">Shear stress</span><span class="lang-bm">Tegasan ricih</span></td>
+              <td>τ</td><td>Pa = N/m²</td>
+            </tr>
+            <tr>
+              <td><span class="lang-en">Dynamic viscosity</span><span class="lang-bm">Kelikatan dinamik</span></td>
+              <td>μ</td><td>Pa·s = N·s/m²</td>
+            </tr>
+            <tr>
+              <td><span class="lang-en">Velocity</span><span class="lang-bm">Halaju</span></td>
+              <td>u</td><td>m/s</td>
+            </tr>
+            <tr>
+              <td><span class="lang-en">Distance perpendicular to flow</span><span class="lang-bm">Jarak berserenjang aliran</span></td>
+              <td>y</td><td>m</td>
+            </tr>
+            <tr>
+              <td><span class="lang-en">Velocity gradient</span><span class="lang-bm">Gradien halaju</span></td>
+              <td>du/dy</td><td>s⁻¹</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout shear">
+        <h3 style="margin-top:0">
+          <span class="lang-en">Don't confuse the two</span>
+          <span class="lang-bm">Jangan keliru antara dua</span>
+        </h3>
+        <p class="lang-en"><strong>Shear stress τ</strong> — the actual stress acting between layers. It depends on the flow.</p>
+        <p class="lang-bm"><strong>Tegasan ricih τ</strong> — tegasan sebenar yang bertindak antara lapisan. Ia bergantung pada aliran.</p>
+        <p class="lang-en"><strong>Dynamic viscosity μ</strong> — a property of the fluid itself. It does not depend on the flow.</p>
+        <p class="lang-bm"><strong>Kelikatan dinamik μ</strong> — sifat bendalir itu sendiri. Ia tidak bergantung pada aliran.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 11 · MISCONCEPTION ============== -->
+    <div class="page" data-title="11 · Common Misconception">
+      <h2>
+        <span class="chip">11</span>
+        <span class="lang-en">Common Misconception</span>
+        <span class="lang-bm">Salah Faham Biasa</span>
+      </h2>
+
+      <div class="callout shear">
+        <p class="lang-en"><strong>Don't say:</strong> "Shear stress only occurs when the fluid is moving."</p>
+        <p class="lang-bm"><strong>Jangan kata:</strong> "Tegasan ricih hanya berlaku apabila bendalir bergerak."</p>
+        <p class="lang-en">This is too simplistic. The important factor is <strong>relative motion</strong> — the velocity gradient.</p>
+        <p class="lang-bm">Ini terlalu mudah. Faktor penting ialah <strong>gerakan relatif</strong> — gradien halaju.</p>
+      </div>
+
+      <p class="lang-en">A fluid can be moving as a whole with a uniform velocity. If every layer moves at the same velocity, then du/dy = 0 and there is no viscous shear stress.</p>
+      <p class="lang-bm">Bendalir boleh bergerak secara keseluruhan dengan halaju seragam. Jika setiap lapisan bergerak pada halaju yang sama, maka du/dy = 0 dan tiada tegasan ricih likat.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t lang-en">Simulation · Uniform Flow vs Shear Flow</span>
+          <span class="t lang-bm">Simulasi · Aliran Seragam vs Aliran Ricih</span>
+          <span class="hint lang-en">Top: everything moves together. Bottom: layers slide past each other.</span>
+          <span class="hint lang-bm">Atas: semua bergerak bersama. Bawah: lapisan bergelongsor.</span>
+        </div>
+        <canvas id="cvUniform" style="height:400px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="uniPause">⏸ <span class="lang-en">Pause</span><span class="lang-bm">Jeda</span></button>
+        </div>
+      </div>
+
+      <div class="sim-explain lang-en">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          What you are seeing
+        </div>
+        <p>Two panels compared side by side:</p>
+        <ul>
+          <li><b>Top panel (green) — UNIFORM FLOW:</b> all layers move at the <b>same</b> speed. Arrows are equal length. Particles stay aligned with each other.</li>
+          <li><b>Bottom panel (orange) — SHEAR FLOW:</b> the top layer moves faster than the bottom layer. Arrows differ in length. Particles shift relative to each other.</li>
+        </ul>
+        <div class="obs">
+          <b>Watch this:</b> in the top panel, even though the fluid is <b>moving</b>, there is no viscous shear stress because there is no relative motion between layers (du/dy = 0). In the bottom panel, the fluid experiences shear stress because layers slide past each other (du/dy > 0).
+        </div>
+        <p><b>Why it matters:</b> this is the most common student misconception. Shear stress is not about "there is motion" — it is about <b>differences in speed between layers</b>. A fluid moving uniformly does not experience viscous shear stress, even at high speed.</p>
+      </div>
+
+      <div class="sim-explain lang-bm">
+        <div class="hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+          Apa yang anda lihat
+        </div>
+        <p>Dua panel dibandingkan sisi demi sisi:</p>
+        <ul>
+          <li><b>Panel atas (hijau) — ALIRAN SERAGAM:</b> semua lapisan bergerak pada laju yang <b>sama</b>. Anak panah sama panjang. Partikel kekal sejajar antara satu sama lain.</li>
+          <li><b>Panel bawah (oren) — ALIRAN RICIH:</b> lapisan atas bergerak lebih laju daripada lapisan bawah. Anak panah berbeza panjang. Partikel bergeser antara satu sama lain.</li>
+        </ul>
+        <div class="obs">
+          <b>Perhatikan:</b> dalam panel atas, walaupun bendalir <b>bergerak</b>, tiada tegasan ricih likat kerana tiada gerakan relatif antara lapisan (du/dy = 0). Dalam panel bawah, bendalir mengalami tegasan ricih kerana lapisan menggelongsor antara satu sama lain (du/dy > 0).
+        </div>
+        <p><b>Mengapa penting:</b> ini adalah salah faham paling biasa pelajar. Tegasan ricih bukan tentang "ada gerakan" — ia tentang <b>perbezaan laju antara lapisan</b>. Bendalir yang bergerak seragam tidak mengalami tegasan ricih likat, walaupun ia bergerak laju.</p>
+      </div>
+
+      <h3 class="lang-en">Cars on a highway — an analogy</h3>
+      <h3 class="lang-bm">Kereta di lebuh raya — satu analogi</h3>
+
+      <p class="lang-en">Imagine you are driving on a straight highway. All cars travel at the same velocity, say 100 km/h. Relative to each other, the cars are not moving past one another.</p>
+      <p class="lang-bm">Bayangkan anda memandu di lebuh raya lurus. Semua kereta bergerak pada halaju yang sama, katakan 100 km/j. Relatif antara satu sama lain, kereta-kereta tidak memotong satu sama lain.</p>
+
+      <p class="lang-en">Same velocity → no relative motion → no velocity difference between adjacent layers → <strong>velocity gradient = 0</strong>.</p>
+      <p class="lang-bm">Halaju sama → tiada gerakan relatif → tiada perbezaan halaju antara lapisan bersebelahan → <strong>gradien halaju = 0</strong>.</p>
+
+      <div class="eq">
+        du/dy = 0 → τ = μ · 0 = 0
+        <span class="lbl lang-en">No velocity gradient → no viscous shear stress</span>
+        <span class="lbl lang-bm">Tiada gradien halaju → tiada tegasan ricih likat</span>
+      </div>
+
+      <div class="callout">
+        <p class="lang-en"><strong>Important clarification:</strong> the car analogy is only an analogy for <em>relative motion</em>. Cars are not a fluid — tyre–road friction and air resistance can still produce forces.</p>
+        <p class="lang-bm"><strong>Penjelasan penting:</strong> analogi kereta hanyalah analogi untuk <em>gerakan relatif</em>. Kereta bukan bendalir — geseran tayar–jalan dan rintangan udara masih boleh menghasilkan daya.</p>
+        <p class="lang-en">The real fluid example is a whole block of fluid moving together at 5 m/s, with every layer at 5 m/s: no velocity gradient → no shear stress.</p>
+        <p class="lang-bm">Contoh bendalir sebenar ialah satu blok bendalir yang bergerak bersama pada 5 m/s, dengan setiap lapisan pada 5 m/s: tiada gradien halaju → tiada tegasan ricih.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 12 · SUMMARY ============== -->
+    <div class="page" data-title="12 · Summary &amp; Exam Points">
+      <h2>
+        <span class="chip">12</span>
+        <span class="lang-en">Summary &amp; Exam Points</span>
+        <span class="lang-bm">Ringkasan &amp; Mata Peperiksaan</span>
+      </h2>
+
+      <div class="chain">
+        <div class="node"><span class="lang-en">Different fluid velocities</span><span class="lang-bm">Halaju bendalir berbeza</span></div>
+        <div class="arr">↓</div>
+        <div class="node"><span class="lang-en">Relative movement between layers</span><span class="lang-bm">Gerakan relatif antara lapisan</span></div>
+        <div class="arr">↓</div>
+        <div class="node"><span class="lang-en">Molecular interaction</span><span class="lang-bm">Interaksi molekul</span></div>
+        <div class="arr">↓</div>
+        <div class="node cool"><span class="lang-en">Viscous resistance</span><span class="lang-bm">Rintangan likat</span></div>
+        <div class="arr">↓</div>
+        <div class="node cool"><span class="lang-en">Velocity gradient exists</span><span class="lang-bm">Gradien halaju wujud</span></div>
+        <div class="arr">↓</div>
+        <div class="node hot"><span class="lang-en">SHEAR STRESS</span><span class="lang-bm">TEGASAN RICIH</span></div>
+      </div>
+
+      <div class="eq" style="font-size:24px;color:var(--shear)">
+        τ = μ · du/dy
+        <span class="lbl lang-en">Newton's Law of Viscosity — for a Newtonian fluid</span>
+        <span class="lbl lang-bm">Hukum Kelikatan Newton — untuk bendalir Newtonian</span>
+      </div>
+
+      <h3><span class="lang-en">The three quantities</span><span class="lang-bm">Tiga kuantiti</span></h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><span class="lang-en">If…</span><span class="lang-bm">Jika…</span></th>
+              <th><span class="lang-en">Then…</span><span class="lang-bm">Maka…</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="lang-en">Viscosity μ increases</span><span class="lang-bm">Kelikatan μ meningkat</span></td>
+              <td><span class="lang-en">τ increases (same du/dy)</span><span class="lang-bm">τ meningkat (du/dy sama)</span></td>
+            </tr>
+            <tr>
+              <td><span class="lang-en">Velocity gradient du/dy increases</span><span class="lang-bm">Gradien halaju du/dy meningkat</span></td>
+              <td><span class="lang-en">τ increases (same μ)</span><span class="lang-bm">τ meningkat (μ sama)</span></td>
+            </tr>
+            <tr>
+              <td>du/dy = 0</td>
+              <td>τ = 0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="deflist">
+        <div class="def">
+          <div class="dt"><span class="lang-en">Shear stress</span><span class="lang-bm">Tegasan ricih</span></div>
+          <div class="dd">
+            <span class="lang-en">Develops because neighbouring fluid layers move at different velocities, and the fluid's viscosity resists this relative movement.</span>
+            <span class="lang-bm">Terbentuk kerana lapisan bendalir bersebelahan bergerak pada halaju berbeza, dan kelikatan bendalir menentang gerakan relatif ini.</span>
+          </div>
+        </div>
+        <div class="def">
+          <div class="dt"><span class="lang-en">Dynamic viscosity μ</span><span class="lang-bm">Kelikatan dinamik μ</span></div>
+          <div class="dd">
+            <span class="lang-en">How strongly the fluid resists deformation / relative motion. Unit: <code>Pa·s</code>.</span>
+            <span class="lang-bm">Betapa kuat bendalir menentang ubah bentuk / gerakan relatif. Unit: <code>Pa·s</code>.</span>
+          </div>
+        </div>
+        <div class="def">
+          <div class="dt"><span class="lang-en">Velocity gradient du/dy</span><span class="lang-bm">Gradien halaju du/dy</span></div>
+          <div class="dd">
+            <span class="lang-en">How quickly velocity changes from one fluid layer to another. Unit: <code>s⁻¹</code>.</span>
+            <span class="lang-bm">Betapa cepat halaju berubah dari satu lapisan bendalir ke lapisan yang lain. Unit: <code>s⁻¹</code>.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout shear" style="text-align:center">
+        <p class="lang-en" style="font-family:Georgia,serif;font-size:19px;margin:6px 0"><strong>Higher viscosity + higher velocity gradient → higher shear stress</strong></p>
+        <p class="lang-bm" style="font-family:Georgia,serif;font-size:19px;margin:6px 0"><strong>Kelikatan tinggi + gradien halaju tinggi → tegasan ricih tinggi</strong></p>
+        <p class="lang-en" style="font-family:Georgia,serif;font-size:19px;margin:6px 0">If everything moves together at the same velocity → no relative motion → no velocity gradient → <strong>no shear stress</strong></p>
+        <p class="lang-bm" style="font-family:Georgia,serif;font-size:19px;margin:6px 0">Jika semua bergerak bersama pada halaju sama → tiada gerakan relatif → tiada gradien halaju → <strong>tiada tegasan ricih</strong></p>
+      </div>
+
+      <p style="margin-top:40px;color:var(--muted);font-size:13.5px;text-align:center">
+        <span class="lang-en">— End of chapter —</span>
+        <span class="lang-bm">— Tamat bab —</span>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============== LANGUAGE FAB ============== -->
+<button class="lang-fab" id="langToggle" title="Switch language / Tukar bahasa">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>
+  <span class="badge" id="langLabel">BM</span>
+</button>
+
+<!-- ============== NAV BAR ============== -->
+<div class="book-nav">
+  <button class="nav-btn" id="prevBtn" title="Previous">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+  </button>
+
+  <div class="nav-center">
+    <div class="nav-title" id="navTitle">Cover</div>
+    <div class="dots" id="dots"></div>
+    <div class="page-num" id="pageNum">1 / 13</div>
+  </div>
+
+  <button class="nav-btn" id="nextBtn" title="Next">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>
+</div>
+
+<!-- ============== EDIT FAB ============== -->
+<button class="edit-fab" id="editToggle" title="Toggle edit mode (E)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+</button>
+
+<!-- ============== EDIT ACTIONS ============== -->
+<div class="edit-actions" id="editActions" hidden>
+  <input type="text" class="title-edit" id="titleInput" placeholder="Page title…" title="Page title">
+  <button id="addPageBtn" title="Add a new page after this one">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    Add
+  </button>
+  <button id="delPageBtn" class="danger" title="Delete this page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+    Delete
+  </button>
+  <button id="saveHtmlBtn" class="primary" title="Download as .html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    Save
+  </button>
+  <button id="resetBtn" class="danger" title="Reset original">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 019-9 9 9 0 016.36 2.64L21 8M21 3v5h-5M21 12a9 9 0 01-9 9 9 9 0 01-6.36-2.64L3 16M3 21v-5h5"/></svg>
+    Reset
+  </button>
+</div>
+
+<!-- ============== LOGIN MODAL ============== -->
+<div class="modal-backdrop" id="loginModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <h3 id="loginTitle">Log in to edit</h3>
+    <p class="sub">Enter your credentials to unlock the editor.</p>
+
+    <label for="loginUser">Username</label>
+    <input type="text" id="loginUser" autocomplete="username" autocapitalize="none" spellcheck="false">
+
+    <label for="loginPass">Password</label>
+    <input type="password" id="loginPass" autocomplete="current-password">
+
+    <div class="login-error" id="loginError" hidden>Invalid username or password.</div>
+
+    <div class="modal-actions">
+      <button id="loginCancel">Cancel</button>
+      <button class="primary" id="loginSubmit">Log in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ADD PAGE MODAL ============== -->
+<div class="modal-backdrop" id="addModal" hidden>
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <h3 id="addTitle">Add a new page</h3>
+    <p class="sub">Paste any HTML — headings, paragraphs, callouts, even your own <code style="font-family:var(--mono);background:#f0ece0;padding:1px 6px;border-radius:5px;font-size:12px">&lt;canvas&gt;</code> or a new simulation block.</p>
+
+    <label for="newPageTitle">Page title (shown in the navigation)</label>
+    <input type="text" id="newPageTitle" placeholder="e.g. 13 · Reynolds Number">
+
+    <label for="newPageHtml">Page HTML</label>
+    <textarea id="newPageHtml" spellcheck="false"></textarea>
+
+    <p class="hint">
+      Tip: reuse the book's classes — <code>callout</code>, <code>callout shear</code>, <code>eq</code>, <code>chips</code>, <code>tbl-wrap</code>, <code>chain</code>, <code>deflist</code>, <code>sim-explain</code> — and for bilingual text wrap English in <code>&lt;span class="lang-en"&gt;</code> and BM in <code>&lt;span class="lang-bm"&gt;</code>.
+    </p>
+
+    <div class="modal-actions">
+      <button id="addModalCancel">Cancel</button>
+      <button class="primary" id="addModalInsert">Add page</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   AUTH
+   ============================================================ */
+const EDIT_USER = 'fluid';
+const EDIT_PASS = 'che233';
+
+/* ============================================================
+   LANGUAGE TOGGLE
+   ============================================================ */
+const LANG_KEY = 'fluid-chapter15-lang';
+let currentLang = 'en';
+
+(function initLang(){
+  try {
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved === 'bm') {
+      currentLang = 'bm';
+      document.body.classList.add('bm');
+      const lbl = document.getElementById('langLabel');
+      if (lbl) lbl.textContent = 'EN';
+    }
+  } catch(e){}
+})();
+
+function setLang(lang){
+  currentLang = lang;
+  document.body.classList.toggle('bm', lang === 'bm');
+  const lbl = document.getElementById('langLabel');
+  if (lbl) lbl.textContent = lang === 'en' ? 'BM' : 'EN';
+  try { localStorage.setItem(LANG_KEY, lang); } catch(e){}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('langToggle');
+  if (btn) btn.addEventListener('click', () => {
+    setLang(currentLang === 'en' ? 'bm' : 'en');
+  });
+});
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentIdx = 0;
+let animating = false;
+let pages = [];
+let N = 0;
+let editMode = false;
+let dotEls = [];
+let restoredIdx = 0;
+const FLIP_MS = 950;
+
+/* ============================================================
+   STORAGE RESTORE
+   ============================================================ */
+const STORAGE_KEY = 'fluid-chapter15-v4';
+
+(function restoreFromStorage(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data.pages || !data.pages.length) return;
+    const bookEl = document.getElementById('book');
+    bookEl.innerHTML = '';
+    data.pages.forEach(pd => {
+      const p = document.createElement('div');
+      p.className = (pd.cls || 'page').replace(/\s*flipped\s*/g, ' ').trim();
+      p.dataset.title = pd.title || '';
+      p.innerHTML = pd.html;
+      bookEl.appendChild(p);
+    });
+    restoredIdx = Math.max(0, Math.min(data.idx || 0, data.pages.length - 1));
+  } catch(e){ console.warn('Restore failed', e); }
+})();
+
+currentIdx = restoredIdx;
+
+/* ============================================================
+   PAGE SETUP
+   ============================================================ */
+pages = [...document.querySelectorAll('.page')];
+N = pages.length;
+
+const dotsEl     = document.getElementById('dots');
+const navTitleEl = document.getElementById('navTitle');
+const pageNumEl  = document.getElementById('pageNum');
+const prevBtn    = document.getElementById('prevBtn');
+const nextBtn    = document.getElementById('nextBtn');
+
+function rebuildDots(){
+  dotsEl.innerHTML = '';
+  pages.forEach((p, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.title = p.dataset.title || ('Page ' + (i + 1));
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+  dotEls = [...dotsEl.children];
+}
+
+function updateZ(){
+  pages.forEach((p, i) => {
+    if (i < currentIdx)         p.style.zIndex = i + 1;
+    else if (i === currentIdx)  p.style.zIndex = N + 100;
+    else                        p.style.zIndex = N - (i - currentIdx) + 10;
+  });
+}
+
+function updateUI(){
+  dotEls.forEach((d, i) => d.classList.toggle('active', i === currentIdx));
+  navTitleEl.textContent = pages[currentIdx].dataset.title || '';
+  pageNumEl.textContent = (currentIdx + 1) + ' / ' + N;
+  prevBtn.disabled = currentIdx === 0 || animating;
+  nextBtn.disabled = currentIdx === N - 1 || animating;
+}
+
+function refreshPages(){
+  pages = [...document.querySelectorAll('.page')];
+  N = pages.length;
+  if (currentIdx >= N) currentIdx = N - 1;
+  rebuildDots();
+  updateZ();
+  updateUI();
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function goNext(){
+  if (animating || currentIdx >= N - 1) return;
+  animating = true;
+  updateUI();
+
+  const oldPage = pages[currentIdx];
+  oldPage.style.zIndex = 6000;
+  oldPage.classList.add('flipped');
+
+  currentIdx++;
+  updateZ();
+  oldPage.style.zIndex = 6000;
+
+  setTimeout(() => {
+    animating = false;
+    updateZ();
+    updateUI();
+    resizeAll();
+  }, FLIP_MS + 20);
+}
+
+function goPrev(){
+  if (animating || currentIdx <= 0) return;
+  animating = true;
+  updateUI();
+
+  const newIdx  = currentIdx - 1;
+  const newPage = pages[newIdx];
+
+  newPage.style.zIndex = 6000;
+  newPage.classList.remove('flipped');
+
+  currentIdx = newIdx;
+
+  setTimeout(() => {
+    animating = false;
+    updateZ();
+    updateUI();
+    resizeAll();
+  }, FLIP_MS + 20);
+}
+
+function goTo(idx){
+  if (animating || idx === currentIdx || idx < 0 || idx >= N) return;
+  animating = true;
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < idx));
+  currentIdx = idx;
+  updateZ();
+  updateUI();
+  setTimeout(() => {
+    animating = false;
+    updateUI();
+    resizeAll();
+  }, 60);
+}
+
+prevBtn.addEventListener('click', goPrev);
+nextBtn.addEventListener('click', goNext);
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, button, textarea, select, [contenteditable]')) {
+    if (e.key !== 'Escape') return;
+  }
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); goNext(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'PageUp')                    { e.preventDefault(); goPrev(); }
+  if (e.key === 'Home')  goTo(0);
+  if (e.key === 'End')   goTo(N - 1);
+  if (e.key === 'e' || e.key === 'E') { requestEditToggle(); }
+  if (e.key === 'l' || e.key === 'L') { setLang(currentLang === 'en' ? 'bm' : 'en'); }
+});
+
+const startBtn = document.getElementById('startBtn');
+if (startBtn) startBtn.addEventListener('click', goNext);
+
+/* ============================================================
+   CANVAS INFRASTRUCTURE
+   ============================================================ */
+const canvases = [];
+let DT = 0;
+
+function reg(id, draw){
+  const c = document.getElementById(id);
+  if (!c) return null;
+  const pageEl = c.closest('.page');
+  const pageIdx = pages.indexOf(pageEl);
+  const o = { c, ctx: c.getContext('2d'), draw, w: 0, h: 0, pageIdx };
+  canvases.push(o);
+  return o;
+}
+
+function resizeAll(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvases.forEach(o => {
+    const cw = o.c.clientWidth;
+    const ch = o.c.clientHeight;
+    if (cw === 0 || ch === 0) return;
+    o.w = cw; o.h = ch;
+    o.c.width  = Math.round(cw * dpr);
+    o.c.height = Math.round(ch * dpr);
+    o.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  });
+}
+
+function rr(ctx, x, y, w, h, r){
+  r = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function arrow(ctx, x1, y1, x2, y2, head){
+  head = head || 9;
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath();
+  ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - head * Math.cos(a - 0.4), y2 - head * Math.sin(a - 0.4));
+  ctx.lineTo(x2 - head * Math.cos(a + 0.4), y2 - head * Math.sin(a + 0.4));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function txt(ctx, s, x, y, color, size, align, weight){
+  ctx.fillStyle = color || '#8fa0c0';
+  ctx.font = (weight || 500) + ' ' + (size || 12) + 'px -apple-system, Segoe UI, Roboto, sans-serif';
+  ctx.textAlign = align || 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(s, x, y);
+}
+
+/* ============================================================
+   EDIT SYSTEM
+   ============================================================ */
+const editToggle  = document.getElementById('editToggle');
+const editActions = document.getElementById('editActions');
+const titleInput  = document.getElementById('titleInput');
+const addPageBtn  = document.getElementById('addPageBtn');
+const delPageBtn  = document.getElementById('delPageBtn');
+const saveHtmlBtn = document.getElementById('saveHtmlBtn');
+const resetBtn    = document.getElementById('resetBtn');
+
+const loginModal   = document.getElementById('loginModal');
+const loginUser    = document.getElementById('loginUser');
+const loginPass    = document.getElementById('loginPass');
+const loginError   = document.getElementById('loginError');
+const loginSubmit  = document.getElementById('loginSubmit');
+const loginCancel  = document.getElementById('loginCancel');
+
+const addModal       = document.getElementById('addModal');
+const newPageTitle   = document.getElementById('newPageTitle');
+const newPageHtml    = document.getElementById('newPageHtml');
+const addModalCancel = document.getElementById('addModalCancel');
+const addModalInsert = document.getElementById('addModalInsert');
+
+function requestEditToggle(){
+  if (editMode) { setEditMode(false); return; }
+  openLogin();
+}
+
+function openLogin(){
+  loginUser.value = '';
+  loginPass.value = '';
+  loginError.hidden = true;
+  loginModal.hidden = false;
+  setTimeout(() => loginUser.focus(), 40);
+}
+
+function closeLogin(){ loginModal.hidden = true; }
+
+function submitLogin(){
+  const u = loginUser.value.trim();
+  const p = loginPass.value;
+  if (u === EDIT_USER && p === EDIT_PASS){
+    closeLogin();
+    setEditMode(true);
+  } else {
+    loginError.hidden = false;
+    loginPass.value = '';
+    loginPass.focus();
+  }
+}
+
+loginSubmit.addEventListener('click', submitLogin);
+loginCancel.addEventListener('click', closeLogin);
+loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeLogin(); });
+
+[loginUser, loginPass].forEach(el => {
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter'){ e.preventDefault(); submitLogin(); }
+    if (e.key === 'Escape'){ closeLogin(); }
+  });
+});
+
+function setEditMode(on){
+  editMode = on;
+  document.body.classList.toggle('edit-mode', on);
+
+  pages.forEach(p => {
+    if (on) {
+      p.setAttribute('contenteditable', 'true');
+      p.spellcheck = false;
+    } else {
+      p.removeAttribute('contenteditable');
+    }
+  });
+
+  document.querySelectorAll('.sim, .sim *, canvas, button, input, select, textarea, .eq').forEach(el => {
+    if (on) el.setAttribute('contenteditable', 'false');
+    else el.removeAttribute('contenteditable');
+  });
+
+  editToggle.classList.toggle('active', on);
+  editToggle.title = on ? 'Exit edit mode (E)' : 'Toggle edit mode (E)';
+  editActions.hidden = !on;
+
+  if (on) {
+    syncTitleInput();
+    if (pages[currentIdx]) pages[currentIdx].scrollTop = 0;
+  } else {
+    saveToStorage();
+  }
+}
+
+function syncTitleInput(){
+  if (!pages[currentIdx]) return;
+  titleInput.value = pages[currentIdx].dataset.title || '';
+}
+
+titleInput.addEventListener('input', () => {
+  if (!pages[currentIdx]) return;
+  pages[currentIdx].dataset.title = titleInput.value;
+  navTitleEl.textContent = titleInput.value;
+  if (dotEls[currentIdx]) dotEls[currentIdx].title = titleInput.value;
+  scheduleSave();
+});
+
+let saveTimer = null;
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToStorage, 1200);
+}
+
+document.getElementById('book').addEventListener('input', () => {
+  if (!editMode) return;
+  scheduleSave();
+});
+
+function saveToStorage(){
+  try {
+    const data = {
+      pages: pages.map(p => ({
+        cls: p.className.replace(/\s*flipped\s*/g, ' ').trim(),
+        title: p.dataset.title || '',
+        html: p.innerHTML
+      })),
+      idx: currentIdx
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) {
+    console.warn('Storage save failed', e);
+  }
+}
+
+const DEFAULT_NEW_PAGE =
+`<h2><span class="chip">·</span><span class="lang-en">New chapter</span><span class="lang-bm">Bab baharu</span></h2>
+<p class="lang-en">Write your content here. You can use any HTML tag.</p>
+<p class="lang-bm">Tulis kandungan anda di sini. Anda boleh guna mana-mana tag HTML.</p>
+
+<div class="callout">
+  <p class="lang-en"><strong>Tip:</strong> reuse the book's classes to keep the style consistent.</p>
+  <p class="lang-bm"><strong>Tip:</strong> guna semula kelas buku untuk mengekalkan gaya yang konsisten.</p>
+</div>
+
+<div class="sim-explain lang-en">
+  <div class="hd">What you are seeing</div>
+  <p>Explain the simulation here so the reader understands what is happening.</p>
+  <div class="obs"><b>Watch this:</b> add an observation hint here.</div>
+</div>
+<div class="sim-explain lang-bm">
+  <div class="hd">Apa yang anda lihat</div>
+  <p>Terangkan simulasi di sini supaya pembaca faham apa yang berlaku.</p>
+  <div class="obs"><b>Perhatikan:</b> tambah petunjuk pemerhatian di sini.</div>
+</div>`;
+
+function openAddModal(){
+  newPageTitle.value = '';
+  newPageHtml.value = DEFAULT_NEW_PAGE;
+  addModal.hidden = false;
+  setTimeout(() => newPageTitle.focus(), 30);
+}
+
+function closeAddModal(){ addModal.hidden = true; }
+
+function insertNewPage(){
+  const title = newPageTitle.value.trim() || 'New page';
+  const html  = newPageHtml.value;
+
+  const newPage = document.createElement('div');
+  newPage.className = 'page';
+  newPage.dataset.title = title;
+  newPage.innerHTML = html;
+
+  const bookEl = document.getElementById('book');
+  const anchor = pages[currentIdx];
+  if (anchor && anchor.nextSibling) bookEl.insertBefore(newPage, anchor.nextSibling);
+  else bookEl.appendChild(newPage);
+
+  const newIdx = currentIdx + 1;
+  closeAddModal();
+
+  if (!editMode) setEditMode(true);
+  refreshPages();
+
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < newIdx));
+  currentIdx = newIdx;
+  updateZ();
+  updateUI();
+  syncTitleInput();
+  saveToStorage();
+
+  setTimeout(() => {
+    if (pages[currentIdx]) pages[currentIdx].scrollTop = 0;
+    resizeAll();
+  }, 60);
+}
+
+function deleteCurrentPage(){
+  if (currentIdx === 0) { alert('The cover page cannot be deleted.'); return; }
+  if (!confirm('Delete this page? You can undo by clicking Reset, but that wipes every edit.')) return;
+
+  pages[currentIdx].remove();
+  const newIdx = Math.max(0, currentIdx - 1);
+  currentIdx = newIdx;
+
+  refreshPages();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
+  updateZ();
+  updateUI();
+  syncTitleInput();
+  saveToStorage();
+}
+
+function saveAsHTML(){
+  const clone = document.documentElement.cloneNode(true);
+
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('[spellcheck]').forEach(el => el.removeAttribute('spellcheck'));
+  clone.classList.remove('edit-mode');
+
+  const clonedPages = clone.querySelectorAll('.page');
+  clonedPages.forEach(p => {
+    p.classList.remove('flipped');
+    p.style.zIndex = '';
+    p.style.transform = '';
+    p.style.transition = '';
+  });
+
+  ['#editToggle','#editActions','#addModal','#loginModal'].forEach(sel => {
+    const el = clone.querySelector(sel);
+    if (el) el.remove();
+  });
+
+  let html = clone.outerHTML.replace(
+    /const STORAGE_KEY = '[^']+';/,
+    "const STORAGE_KEY = 'fluid-chapter15-export-" + Date.now() + "';"
+  );
+
+  const doc = '<!DOCTYPE html>\n' + html;
+  const blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'fluid-chapter-1-5.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+  saveToStorage();
+}
+
+function resetToOriginal(){
+  if (!confirm('Clear all edits and reload the original file? This cannot be undone.')) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+  location.reload();
+}
+
+editToggle.addEventListener('click', requestEditToggle);
+addPageBtn.addEventListener('click', openAddModal);
+delPageBtn.addEventListener('click', deleteCurrentPage);
+saveHtmlBtn.addEventListener('click', saveAsHTML);
+resetBtn.addEventListener('click', resetToOriginal);
+addModalCancel.addEventListener('click', closeAddModal);
+addModalInsert.addEventListener('click', insertNewPage);
+addModal.addEventListener('click', (e) => { if (e.target === addModal) closeAddModal(); });
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !addModal.hidden) { closeAddModal(); e.stopPropagation(); }
+});
+
+/* ============================================================
+   1 · FLUID LAYERS BETWEEN PLATES
+   ============================================================ */
+const layers = { U: 0.6, playing: true, showParticles: true, particles: [] };
+(function(){
+  for (let i = 0; i < 90; i++)
+    layers.particles.push({ x: Math.random(), yn: Math.random() * 0.94 + 0.03 });
+})();
+
+reg('cvLayers', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const padX = Math.max(30, w * 0.08);
+  const x0 = padX, x1 = w - padX;
+  const fluidW = x1 - x0;
+  const topY = 48, botY = h - 48;
+  const fluidH = botY - topY;
+  const MAXLEN = Math.min(fluidW * 0.62, 230);
+
+  const fg = ctx.createLinearGradient(0, topY, 0, botY);
+  fg.addColorStop(0, 'rgba(77,141,255,.20)');
+  fg.addColorStop(1, 'rgba(15,155,142,.08)');
+  ctx.fillStyle = fg;
+  ctx.fillRect(x0, topY, fluidW, fluidH);
+
+  const NL = 7;
+  for (let i = 1; i <= NL; i++){
+    const yn = i / (NL + 1);
+    const y = botY - yn * fluidH;
+    const len = yn * layers.U * MAXLEN;
+    ctx.strokeStyle = 'rgba(140,200,255,.80)';
+    ctx.fillStyle   = 'rgba(140,200,255,.80)';
+    ctx.lineWidth = 1.8;
+    if (len > 3) arrow(ctx, x0 + 6, y, x0 + 6 + len, y, 7);
+  }
+
+  if (layers.showParticles){
+    const dt = layers.playing ? DT : 0;
+    ctx.fillStyle = 'rgba(190,230,255,.8)';
+    for (const p of layers.particles){
+      p.x += (p.yn * layers.U * MAXLEN * dt) / fluidW;
+      if (p.x > 1) p.x -= 1;
+      if (p.x < 0) p.x += 1;
+      const sx = x0 + p.x * fluidW;
+      const sy = botY - p.yn * fluidH;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 2, 0, 7);
+      ctx.fill();
+    }
+  }
+
+  const bg = ctx.createLinearGradient(0, botY, 0, botY + 18);
+  bg.addColorStop(0, '#3b4a68'); bg.addColorStop(1, '#1d2637');
+  ctx.fillStyle = bg;
+  rr(ctx, x0 - 12, botY, fluidW + 24, 18, 6);
+  ctx.fill();
+  ctx.strokeStyle = '#4a5c80'; ctx.lineWidth = 1; ctx.stroke();
+  txt(ctx, 'FIXED PLATE', x0 - 6, botY + 30, '#6c7a97', 11.5, 'left', 700);
+  txt(ctx, 'u ≈ 0', x1 + 2, botY - 10, '#5f7093', 11.5, 'right', 600);
+
+  const tg = ctx.createLinearGradient(0, topY - 18, 0, topY);
+  tg.addColorStop(0, '#4d8dff'); tg.addColorStop(1, '#2c5db8');
+  ctx.fillStyle = tg;
+  rr(ctx, x0 - 12, topY - 18, fluidW + 24, 18, 6);
+  ctx.fill();
+  ctx.strokeStyle = '#7cb4ff'; ctx.lineWidth = 1; ctx.stroke();
+
+  ctx.save();
+  ctx.beginPath(); rr(ctx, x0 - 12, topY - 18, fluidW + 24, 18, 6); ctx.clip();
+  const scroll = (performance.now() / 1000) * (0.3 + layers.U) * 70;
+  ctx.strokeStyle = 'rgba(200,225,255,.45)';
+  ctx.lineWidth = 2;
+  for (let i = -1; i < fluidW / 26 + 2; i++){
+    const px = x0 - 12 + ((i * 26 + scroll) % (fluidW + 40));
+    ctx.beginPath();
+    ctx.moveTo(px, topY - 18);
+    ctx.lineTo(px + 9, topY);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  if (layers.U > 0.01){
+    ctx.strokeStyle = '#7cb4ff'; ctx.fillStyle = '#7cb4ff'; ctx.lineWidth = 2.4;
+    const alen = Math.min(60 + layers.U * 130, fluidW * 0.42);
+    arrow(ctx, x0 + 4, topY - 34, x0 + 4 + alen, topY - 34, 9);
+    txt(ctx, 'U = ' + layers.U.toFixed(2) + ' m/s',
+        x0 + 10 + alen, topY - 34, '#7cb4ff', 12, 'left', 700);
+  }
+  txt(ctx, 'MOVING PLATE', x1, topY - 34, '#5f7093', 11.5, 'right', 700);
+  txt(ctx, 'u ≈ U', x1 + 2, topY + 12, '#5f7093', 11.5, 'right', 600);
+});
+
+const lUSlider = document.getElementById('lUSlider');
+if (lUSlider) lUSlider.addEventListener('input', () => {
+  layers.U = +lUSlider.value / 100;
+  document.getElementById('lUVal').textContent = layers.U.toFixed(2);
+});
+const lPause = document.getElementById('lPause');
+if (lPause) lPause.addEventListener('click', (e) => {
+  layers.playing = !layers.playing;
+  e.target.classList.toggle('on', layers.playing);
+  const en = e.target.querySelector('.lang-en');
+  const bm = e.target.querySelector('.lang-bm');
+  if (en) en.textContent = layers.playing ? 'Pause' : 'Play';
+  if (bm) bm.textContent = layers.playing ? 'Jeda' : 'Main';
+});
+const lParticles = document.getElementById('lParticles');
+if (lParticles) lParticles.addEventListener('click', (e) => {
+  layers.showParticles = !layers.showParticles;
+  e.target.classList.toggle('on', layers.showParticles);
+});
+const lReset = document.getElementById('lReset');
+if (lReset) lReset.addEventListener('click', () => {
+  layers.U = 0.6;
+  lUSlider.value = 60;
+  document.getElementById('lUVal').textContent = '0.60';
+  layers.playing = true;
+  lPause.classList.add('on');
+  const en = lPause.querySelector('.lang-en');
+  const bm = lPause.querySelector('.lang-bm');
+  if (en) en.textContent = 'Pause';
+  if (bm) bm.textContent = 'Jeda';
+});
+
+/* ============================================================
+   2 · RIVER
+   ============================================================ */
+const river = { playing: true, particles: [] };
+(function(){
+  for (let i = 0; i < 120; i++)
+    river.particles.push({ x: Math.random(), yn: Math.random() * 0.95 + 0.02 });
+})();
+
+reg('cvRiver', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const padX = Math.max(22, w * 0.06);
+  const x0 = padX, x1 = w - padX;
+  const W = x1 - x0;
+  const surfaceY = 54;
+  const bedY = h - 52;
+  const H = bedY - surfaceY;
+  const MAXLEN = Math.min(W * 0.56, 230);
+
+  const wg = ctx.createLinearGradient(0, surfaceY, 0, bedY);
+  wg.addColorStop(0, 'rgba(90,175,255,.34)');
+  wg.addColorStop(1, 'rgba(22,64,124,.62)');
+  ctx.fillStyle = wg;
+  ctx.fillRect(x0, surfaceY, W, H);
+
+  ctx.strokeStyle = 'rgba(160,215,255,.85)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x0, surfaceY);
+  for (let x = x0; x <= x1; x += 6){
+    const yy = surfaceY + Math.sin((x / 34) + performance.now() / 620) * 2.2;
+    ctx.lineTo(x, yy);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = '#2b2417';
+  rr(ctx, x0 - 8, bedY, W + 16, 22, 6);
+  ctx.fill();
+  ctx.strokeStyle = '#4a3f27'; ctx.lineWidth = 1; ctx.stroke();
+  txt(ctx, 'RIVER BED', x0 - 4, bedY + 32, '#8a7a5a', 11.5, 'left', 700);
+
+  const NL = 6;
+  for (let i = 1; i <= NL; i++){
+    const yn = i / (NL + 1);
+    const y = bedY - yn * H;
+    const speed = 0.25 + 0.75 * yn;
+    const len = speed * MAXLEN;
+    ctx.strokeStyle = 'rgba(150,215,255,.82)';
+    ctx.fillStyle   = 'rgba(150,215,255,.82)';
+    ctx.lineWidth = 1.9;
+    arrow(ctx, x0 + 10, y, x0 + 10 + len, y, 7);
+  }
+
+  if (river.playing){
+    ctx.fillStyle = 'rgba(200,235,255,.75)';
+    for (const p of river.particles){
+      const speed = 0.25 + 0.75 * p.yn;
+      p.x += (speed * MAXLEN * DT * 0.55) / W;
+      if (p.x > 1) p.x -= 1;
+      const sx = x0 + p.x * W;
+      const sy = bedY - p.yn * H;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.9, 0, 7);
+      ctx.fill();
+    }
+  }
+
+  txt(ctx, 'FAST',   x1 - 4, surfaceY + H * 0.12, '#9fd4ff', 12.5, 'right', 800);
+  txt(ctx, 'MEDIUM', x1 - 4, surfaceY + H * 0.50, '#7fb6e6', 12.5, 'right', 800);
+  txt(ctx, 'SLOW',   x1 - 4, surfaceY + H * 0.86, '#5f8fbf', 12.5, 'right', 800);
+
+  txt(ctx, 'WATER SURFACE', x0 - 4, surfaceY - 22, '#7f8dab', 11.5, 'left', 700);
+  txt(ctx, 'velocity increases toward the surface', w / 2, 20, '#6c7a97', 11.5, 'center', 600);
+});
+
+const riverPause = document.getElementById('riverPause');
+if (riverPause) riverPause.addEventListener('click', (e) => {
+  river.playing = !river.playing;
+  e.target.classList.toggle('on', river.playing);
+  const en = e.target.querySelector('.lang-en');
+  const bm = e.target.querySelector('.lang-bm');
+  if (en) en.textContent = river.playing ? 'Pause' : 'Play';
+  if (bm) bm.textContent = river.playing ? 'Jeda' : 'Main';
+});
+
+/* ============================================================
+   3 · PIPE
+   ============================================================ */
+const pipe = { V: 1.0, playing: true, particles: [] };
+(function(){
+  for (let i = 0; i < 130; i++)
+    pipe.particles.push({ x: Math.random(), yn: Math.random() });
+})();
+
+reg('cvPipe', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const padX = Math.max(28, w * 0.07);
+  const x0 = padX, x1 = w - padX;
+  const W = x1 - x0;
+  const wallT = 16;
+  const topWallY = 46;
+  const botWallY = h - 46;
+  const innerTop = topWallY + wallT;
+  const innerBot = botWallY - wallT;
+  const H = innerBot - innerTop;
+  const yC = (innerTop + innerBot) / 2;
+  const MAXLEN = Math.min(W * 0.55, 230);
+
+  const fg = ctx.createLinearGradient(0, innerTop, 0, innerBot);
+  fg.addColorStop(0, 'rgba(20,70,140,.55)');
+  fg.addColorStop(0.5, 'rgba(70,150,255,.30)');
+  fg.addColorStop(1, 'rgba(20,70,140,.55)');
+  ctx.fillStyle = fg;
+  ctx.fillRect(x0, innerTop, W, H);
+
+  const NL = 9;
+  for (let i = 1; i < NL; i++){
+    const f = i / NL;
+    const yn = 1 - Math.abs(2 * f - 1);
+    const y = innerTop + f * H;
+    const len = (0.12 + 0.88 * yn) * pipe.V * MAXLEN;
+    ctx.strokeStyle = 'rgba(150,215,255,.80)';
+    ctx.fillStyle   = 'rgba(150,215,255,.80)';
+    ctx.lineWidth = 1.8;
+    if (len > 3) arrow(ctx, x0 + 8, y, x0 + 8 + len, y, 7);
+  }
+
+  if (pipe.playing){
+    ctx.fillStyle = 'rgba(200,235,255,.7)';
+    for (const p of pipe.particles){
+      const yn = 1 - Math.abs(2 * p.yn - 1);
+      const speed = 0.12 + 0.88 * yn;
+      p.x += (speed * pipe.V * MAXLEN * DT * 0.6) / W;
+      if (p.x > 1) p.x -= 1;
+      const sx = x0 + p.x * W;
+      const sy = innerTop + p.yn * H;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.8, 0, 7);
+      ctx.fill();
+    }
+  }
+
+  function wall(y){
+    const g = ctx.createLinearGradient(0, y, 0, y + wallT);
+    g.addColorStop(0, '#3b4a68'); g.addColorStop(1, '#1d2637');
+    ctx.fillStyle = g;
+    rr(ctx, x0 - 12, y, W + 24, wallT, 5);
+    ctx.fill();
+    ctx.strokeStyle = '#4a5c80'; ctx.lineWidth = 1; ctx.stroke();
+  }
+  wall(topWallY);
+  wall(botWallY - wallT);
+
+  txt(ctx, 'PIPE WALL', x0 - 6, topWallY + wallT / 2, '#8ea2c4', 11, 'left', 700);
+  txt(ctx, 'PIPE WALL', x0 - 6, botWallY - wallT / 2, '#8ea2c4', 11, 'left', 700);
+
+  txt(ctx, 'Slow', x1 + 4, innerTop + H * 0.06, '#5f8fbf', 12, 'left', 700);
+  txt(ctx, 'Fast', x1 + 4, yC, '#9fd4ff', 12.5, 'left', 800);
+  txt(ctx, 'Slow', x1 + 4, innerBot - H * 0.06, '#5f8fbf', 12, 'left', 700);
+
+  txt(ctx, 'FLOW', x0 + 8, topWallY - 20, '#7f8dab', 11.5, 'left', 700);
+  txt(ctx, 'no-slip at the wall → u = 0', w / 2, 20, '#6c7a97', 11.5, 'center', 600);
+});
+
+const pipeVSlider = document.getElementById('pipeVSlider');
+if (pipeVSlider) pipeVSlider.addEventListener('input', () => {
+  pipe.V = +pipeVSlider.value / 100;
+  document.getElementById('pipeVVal').textContent = pipe.V.toFixed(2);
+});
+const pipePause = document.getElementById('pipePause');
+if (pipePause) pipePause.addEventListener('click', (e) => {
+  pipe.playing = !pipe.playing;
+  e.target.classList.toggle('on', pipe.playing);
+  const en = e.target.querySelector('.lang-en');
+  const bm = e.target.querySelector('.lang-bm');
+  if (en) en.textContent = pipe.playing ? 'Pause' : 'Play';
+  if (bm) bm.textContent = pipe.playing ? 'Jeda' : 'Main';
+});
+
+/* ============================================================
+   4 · SAME SHEAR STRESS — WATER vs HONEY
+   ============================================================ */
+const visc = { playing: true, t: 0, water: [], honey: [] };
+(function(){
+  for (let i = 0; i < 60; i++) visc.water.push({ x: Math.random(), yn: Math.random() * 0.9 + 0.05 });
+  for (let i = 0; i < 60; i++) visc.honey.push({ x: Math.random(), yn: Math.random() * 0.9 + 0.05 });
+})();
+
+reg('cvVisc', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  if (visc.playing) visc.t += DT;
+
+  const padX = Math.max(20, w * 0.05);
+  const gap = Math.max(18, w * 0.05);
+  const cellW = (w - padX * 2 - gap) / 2;
+  const topY = 62, botY = h - 62;
+  const H = botY - topY;
+
+  function cell(x, title, subtitle, maxSpeed, particles, color, colorSoft){
+    const g = ctx.createLinearGradient(0, topY, 0, botY);
+    g.addColorStop(0, colorSoft);
+    g.addColorStop(1, 'rgba(10,20,40,.25)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, topY, cellW, H);
+
+    const NL = 6;
+    for (let i = 1; i <= NL; i++){
+      const yn = i / (NL + 1);
+      const y = botY - yn * H;
+      const len = yn * maxSpeed * (cellW * 0.62);
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = 1.8;
+      if (len > 3) arrow(ctx, x + 6, y, x + 6 + len, y, 7);
+      ctx.globalAlpha = 1;
+    }
+
+    if (visc.playing){
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.65;
+      for (const p of particles){
+        p.x += (p.yn * maxSpeed * cellW * 0.62 * DT * 0.6) / cellW;
+        if (p.x > 1) p.x -= 1;
+        const sx = x + p.x * cellW;
+        const sy = botY - p.yn * H;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.8, 0, 7);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    const tg = ctx.createLinearGradient(0, topY - 14, 0, topY);
+    tg.addColorStop(0, color); tg.addColorStop(1, 'rgba(0,0,0,.35)');
+    ctx.fillStyle = tg;
+    rr(ctx, x - 6, topY - 14, cellW + 12, 14, 5);
+    ctx.fill();
+
+    ctx.fillStyle = '#1d2637';
+    rr(ctx, x - 6, botY, cellW + 12, 14, 5);
+    ctx.fill();
+    ctx.strokeStyle = '#4a5c80'; ctx.lineWidth = 1; ctx.stroke();
+
+    txt(ctx, title, x + cellW / 2, 24, color, 14, 'center', 800);
+    txt(ctx, subtitle, x + cellW / 2, 44, '#7f8dab', 11.5, 'center', 600);
+
+    txt(ctx, 'u = 0', x + cellW / 2, botY + 28, '#6c7a97', 11, 'center', 600);
+  }
+
+  cell(padX, 'WATER', 'low μ → large du/dy', 1.00, visc.water, '#7cc4ff', 'rgba(77,141,255,.22)');
+  cell(padX + cellW + gap, 'HONEY', 'high μ → small du/dy', 0.22, visc.honey, '#ff9b55', 'rgba(255,138,61,.18)');
+
+  txt(ctx, 'same shear stress τ applied to both', w / 2, h - 14, '#6c7a97', 11.5, 'center', 600);
+});
+
+const viscPause = document.getElementById('viscPause');
+if (viscPause) viscPause.addEventListener('click', (e) => {
+  visc.playing = !visc.playing;
+  e.target.classList.toggle('on', visc.playing);
+  const en = e.target.querySelector('.lang-en');
+  const bm = e.target.querySelector('.lang-bm');
+  if (en) en.textContent = visc.playing ? 'Pause' : 'Play';
+  if (bm) bm.textContent = visc.playing ? 'Jeda' : 'Main';
+});
+
+/* ============================================================
+   5 · VELOCITY GRADIENT
+   ============================================================ */
+const grad = { u1: 0.2, u2: 1.6, dy: 4.0 };
+
+reg('cvGrad', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const padX = Math.max(30, w * 0.08);
+  const x0 = padX, x1 = w - padX;
+  const W = x1 - x0;
+  const MAXLEN = Math.min(W * 0.55, 220);
+
+  const yTop = h * 0.30;
+  const yBot = h * 0.70;
+  const yMid = (yTop + yBot) / 2;
+
+  ctx.fillStyle = 'rgba(77,141,255,.10)';
+  ctx.fillRect(x0 - 14, yTop - 22, W + 28, (yBot - yTop) + 44);
+
+  ctx.setLineDash([4, 5]);
+  ctx.strokeStyle = 'rgba(120,160,220,.30)';
+  ctx.lineWidth = 1.4;
+  ctx.strokeRect(x0 - 14, yTop - 22, W + 28, (yBot - yTop) + 44);
+  ctx.setLineDash([]);
+
+  const lenU = grad.u2 * MAXLEN;
+  ctx.strokeStyle = '#7cc4ff'; ctx.fillStyle = '#7cc4ff'; ctx.lineWidth = 2.2;
+  if (lenU > 3) arrow(ctx, x0, yTop, x0 + lenU, yTop, 9);
+  txt(ctx, 'u₂ = ' + grad.u2.toFixed(2) + ' m/s', x0 + 6, yTop - 16, '#7cc4ff', 12.5, 'left', 700);
+
+  const lenL = grad.u1 * MAXLEN;
+  ctx.strokeStyle = '#4d8dff'; ctx.fillStyle = '#4d8dff'; ctx.lineWidth = 2.2;
+  if (lenL > 3) arrow(ctx, x0, yBot, x0 + lenL, yBot, 9);
+  txt(ctx, 'u₁ = ' + grad.u1.toFixed(2) + ' m/s', x0 + 6, yBot + 18, '#4d8dff', 12.5, 'left', 700);
+
+  const dx = x1 + 6;
+  ctx.strokeStyle = 'rgba(255,190,130,.9)';
+  ctx.fillStyle = 'rgba(255,190,130,.9)';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(dx, yTop); ctx.lineTo(dx, yBot);
+  ctx.moveTo(dx - 6, yTop); ctx.lineTo(dx + 6, yTop);
+  ctx.moveTo(dx - 6, yBot); ctx.lineTo(dx + 6, yBot);
+  ctx.stroke();
+  ctx.save();
+  ctx.translate(dx + 22, yMid);
+  ctx.rotate(-Math.PI / 2);
+  txt(ctx, 'Δy = ' + grad.dy.toFixed(1) + ' mm', 0, 0, '#ffbe82', 11.5, 'center', 700);
+  ctx.restore();
+
+  const xA = x0 + Math.min(lenL, lenU);
+  const xB = x0 + Math.max(lenL, lenU);
+  if (xB - xA > 6){
+    ctx.strokeStyle = 'rgba(255,138,61,.95)';
+    ctx.fillStyle = 'rgba(255,138,61,.95)';
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(xA, yBot); ctx.lineTo(xA, yMid);
+    ctx.moveTo(xB, yTop); ctx.lineTo(xB, yMid);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(xA, yMid); ctx.lineTo(xB, yMid);
+    ctx.stroke();
+    const d = Math.sign(xB - xA);
+    ctx.beginPath();
+    ctx.moveTo(xB, yMid);
+    ctx.lineTo(xB - d * 8, yMid - 5);
+    ctx.lineTo(xB - d * 8, yMid + 5);
+    ctx.closePath();
+    ctx.fill();
+    txt(ctx, 'Δu = ' + Math.abs(grad.u2 - grad.u1).toFixed(2) + ' m/s',
+        (xA + xB) / 2, yMid - 16, '#ff8a3d', 12, 'center', 700);
+  }
+
+  const rate = (grad.u2 - grad.u1) / (grad.dy / 1000);
+  txt(ctx, 'du/dy = Δu / Δy = ' + Math.round(rate) + ' s⁻¹',
+      w / 2, 20, '#8fd4ff', 12.5, 'center', 700);
+});
+
+function updateGrad(){
+  grad.u1 = +document.getElementById('u1Slider').value / 100;
+  grad.u2 = +document.getElementById('u2Slider').value / 100;
+  grad.dy = +document.getElementById('dySlider').value / 10;
+  document.getElementById('u1Val').textContent = grad.u1.toFixed(2);
+  document.getElementById('u2Val').textContent = grad.u2.toFixed(2);
+  document.getElementById('dyVal').textContent = grad.dy.toFixed(1);
+  const du = grad.u2 - grad.u1;
+  const rate = du / (grad.dy / 1000);
+  document.getElementById('duOut').innerHTML = du.toFixed(2) + ' <small>m/s</small>';
+  document.getElementById('gradOut').innerHTML = Math.round(rate) + ' <small>s⁻¹</small>';
+}
+['u1Slider','u2Slider','dySlider'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateGrad);
+});
+if (document.getElementById('u1Slider')) updateGrad();
+
+/* ============================================================
+   6 · NEWTON'S LAW GRAPH
+   ============================================================ */
+const newton = { mu: 0.1, rate: 200 };
+
+reg('cvNewton', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const L = Math.max(46, w * 0.13);
+  const R = w - 26;
+  const T = 30;
+  const B = h - 42;
+
+  const xMax = 400;
+  const yMax = Math.max(0.001, newton.mu * xMax);
+  const niceY = niceCeil(yMax);
+
+  const px = (v) => L + (v / xMax) * (R - L);
+  const py = (v) => B - (v / niceY) * (B - T);
+
+  ctx.strokeStyle = 'rgba(42,53,80,.75)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i <= 4; i++){
+    const yy = B - ((B - T) * i) / 4;
+    ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(R, yy); ctx.stroke();
+    txt(ctx, (niceY * i / 4).toFixed(niceY < 10 ? 2 : 0), L - 8, yy, '#5f7093', 10.5, 'right', 500);
+  }
+  for (let i = 1; i <= 4; i++){
+    const xx = L + ((R - L) * i) / 4;
+    ctx.beginPath(); ctx.moveTo(xx, T); ctx.lineTo(xx, B); ctx.stroke();
+    txt(ctx, Math.round(xMax * i / 4), xx, B + 14, '#5f7093', 10.5, 'center', 500);
+  }
+
+  ctx.strokeStyle = '#2a3550'; ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(L, T); ctx.lineTo(L, B); ctx.lineTo(R, B);
+  ctx.stroke();
+
+  txt(ctx, 'τ  (Pa)', L - 8, T - 12, '#7f8dab', 11.5, 'right', 600);
+  txt(ctx, 'du/dy  (s⁻¹)', R, B + 30, '#7f8dab', 11.5, 'right', 600);
+
+  const yEnd = newton.mu * xMax;
+  ctx.strokeStyle = '#ff8a3d';
+  ctx.lineWidth = 2.8;
+  ctx.beginPath();
+  ctx.moveTo(px(0), py(0));
+  if (yEnd <= niceY) ctx.lineTo(px(xMax), py(yEnd));
+  else ctx.lineTo(px(niceY / newton.mu), py(niceY));
+  ctx.stroke();
+
+  const tau = newton.mu * newton.rate;
+  const cx = px(newton.rate);
+  const cy = py(Math.min(tau, niceY));
+  ctx.setLineDash([3, 4]);
+  ctx.strokeStyle = 'rgba(140,200,255,.55)';
+  ctx.lineWidth = 1.3;
+  ctx.beginPath();
+  ctx.moveTo(cx, B); ctx.lineTo(cx, cy); ctx.lineTo(L, cy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = '#7cc4ff';
+  ctx.beginPath(); ctx.arc(cx, cy, 5.5, 0, 7); ctx.fill();
+  ctx.strokeStyle = '#0b101c'; ctx.lineWidth = 2; ctx.stroke();
+
+  txt(ctx, 'slope = μ = ' + newton.mu.toFixed(3) + ' Pa·s',
+      Math.min(px(xMax * 0.55), R - 10), Math.max(T + 16, py(yEnd * 0.86) - 12),
+      '#ff8a3d', 12, 'left', 700);
+
+  txt(ctx, 'τ = ' + (tau >= 100 ? tau.toFixed(0) : tau.toFixed(1)) + ' Pa',
+      cx + 10, cy - 14, '#8fd4ff', 12.5, 'left', 700);
+});
+
+function niceCeil(v){
+  if (v <= 0) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v / p;
+  let m;
+  if (n <= 1) m = 1;
+  else if (n <= 2) m = 2;
+  else if (n <= 5) m = 5;
+  else m = 10;
+  return m * p;
+}
+
+function updateNewton(){
+  const mu = +document.getElementById('nMuSlider').value / 100;
+  const rate = +document.getElementById('nGradSlider').value;
+  newton.mu = mu;
+  newton.rate = rate;
+  document.getElementById('nMuVal').textContent = mu.toFixed(3);
+  document.getElementById('nGradVal').textContent = rate;
+  const tau = mu * rate;
+  document.getElementById('nTauOut').innerHTML = (tau >= 100 ? tau.toFixed(0) : tau.toFixed(2)) + ' <small>Pa</small>';
+  document.getElementById('nMuOut').innerHTML = mu.toFixed(3) + ' <small>Pa·s</small>';
+  document.getElementById('nGradOut').innerHTML = rate + ' <small>s⁻¹</small>';
+}
+['nMuSlider','nGradSlider'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateNewton);
+});
+if (document.getElementById('nMuSlider')) updateNewton();
+
+/* ============================================================
+   7 · FALLING OBJECT
+   ============================================================ */
+const drops = { playing: true, t: 0 };
+
+reg('cvDrops', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  if (drops.playing) drops.t += DT * 0.42;
+
+  const padX = Math.max(20, w * 0.06);
+  const gap = Math.max(16, w * 0.06);
+  const tubeW = (w - padX * 2 - gap) / 2;
+  const topY = 62;
+  const botY = h - 46;
+  const H = botY - topY;
+
+  function tube(x, title, subtitle, speed, color, fillTop, fillBot){
+    const g = ctx.createLinearGradient(0, topY, 0, botY);
+    g.addColorStop(0, fillTop);
+    g.addColorStop(1, fillBot);
+    ctx.fillStyle = g;
+    rr(ctx, x, topY, tubeW, H, 14);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(120,160,220,.35)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    const t = (drops.t * speed) % 1;
+    const by = topY + 14 + t * (H - 34);
+    const bx = x + tubeW / 2;
+    const br = 9;
+
+    const bg2 = ctx.createRadialGradient(bx - 3, by - 3, 1, bx, by, br);
+    bg2.addColorStop(0, '#ffffff');
+    bg2.addColorStop(1, color);
+    ctx.fillStyle = bg2;
+    ctx.beginPath(); ctx.arc(bx, by, br, 0, 7); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1; ctx.stroke();
+
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = 0.35;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(bx, by - br - 4);
+    ctx.lineTo(bx, by - br - 18);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    txt(ctx, title, x + tubeW / 2, 24, color, 14, 'center', 800);
+    txt(ctx, subtitle, x + tubeW / 2, 44, '#7f8dab', 11.5, 'center', 600);
+    txt(ctx, 'μ ≈ ' + (title === 'WATER' ? '0.001' : '2 – 10') + ' Pa·s',
+        x + tubeW / 2, botY + 20, '#6c7a97', 11.5, 'center', 600);
+  }
+
+  tube(padX, 'WATER', 'low viscosity → easy flow',
+       1.0, '#7cc4ff', 'rgba(77,141,255,.22)', 'rgba(20,50,110,.40)');
+
+  tube(padX + tubeW + gap, 'HONEY', 'high viscosity → strong resistance',
+       0.20, '#ff9b55', 'rgba(255,170,80,.20)', 'rgba(120,60,15,.42)');
+});
+
+const dropsPause = document.getElementById('dropsPause');
+if (dropsPause) dropsPause.addEventListener('click', (e) => {
+  drops.playing = !drops.playing;
+  e.target.classList.toggle('on', drops.playing);
+  const en = e.target.querySelector('.lang-en');
+  const bm = e.target.querySelector('.lang-bm');
+  if (en) en.textContent = drops.playing ? 'Pause' : 'Play';
+  if (bm) bm.textContent = drops.playing ? 'Jeda' : 'Main';
+});
+const dropsReset = document.getElementById('dropsReset');
+if (dropsReset) dropsReset.addEventListener('click', () => {
+  drops.t = 0;
+  drops.playing = true;
+  dropsPause.classList.add('on');
+  const en = dropsPause.querySelector('.lang-en');
+  const bm = dropsPause.querySelector('.lang-bm');
+  if (en) en.textContent = 'Pause';
+  if (bm) bm.textContent = 'Jeda';
+});
+
+/* ============================================================
+   8 · EFFECT OF VISCOSITY — BAR CHART (FIXED Y-AXIS)
+   ============================================================ */
+const muSim = { rate: 100 };
+const MU_WATER = 0.001, MU_OIL = 0.1, MU_HONEY = 5.0;
+/* Fixed y-axis max: honey at max rate (5.0 × 400 = 2000 Pa) + headroom */
+const MU_YMAX = 2200;
+
+reg('cvMu', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const L = Math.max(56, w * 0.16);
+  const R = w - 30;
+  const T = 44;
+  const B = h - 56;
+
+  const fluids = [
+    { name: 'WATER', mu: MU_WATER, color: '#7cc4ff' },
+    { name: 'OIL',   mu: MU_OIL,   color: '#ffbe82' },
+    { name: 'HONEY', mu: MU_HONEY, color: '#ff8a3d' }
+  ];
+
+  /* --- horizontal grid lines (fixed scale) --- */
+  ctx.strokeStyle = 'rgba(42,53,80,.75)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i <= 4; i++){
+    const yy = B - ((B - T) * i) / 4;
+    ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(R, yy); ctx.stroke();
+    txt(ctx, Math.round(MU_YMAX * i / 4) + '', L - 8, yy, '#5f7093', 10.5, 'right', 500);
+  }
+
+  /* --- axes --- */
+  ctx.strokeStyle = '#2a3550'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, B); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(L, B); ctx.lineTo(R, B); ctx.stroke();
+
+  txt(ctx, 'τ (Pa)', L - 8, T - 14, '#7f8dab', 11.5, 'right', 700);
+
+  /* --- bars --- */
+  const n = fluids.length;
+  const slot = (R - L) / n;
+  const barW = Math.min(slot * 0.5, 78);
+  const scale = (B - T - 14) / MU_YMAX;
+
+  fluids.forEach((f, i) => {
+    const tau = f.mu * muSim.rate;
+    const bh = Math.min(tau * scale, B - T - 14);
+    const x = L + slot * i + (slot - barW) / 2;
+    const y = B - bh;
+
+    const g = ctx.createLinearGradient(0, y, 0, B);
+    g.addColorStop(0, f.color);
+    g.addColorStop(1, 'rgba(0,0,0,.55)');
+    ctx.fillStyle = g;
+    rr(ctx, x, y, barW, Math.max(bh, 3), 8);
+    ctx.fill();
+    ctx.strokeStyle = f.color; ctx.lineWidth = 1.4; ctx.stroke();
+
+    txt(ctx, f.name, x + barW / 2, B + 18, f.color, 12.5, 'center', 800);
+    txt(ctx, 'μ = ' + f.mu, x + barW / 2, B + 34, '#6c7a97', 10.5, 'center', 500);
+
+    const label = tau >= 100 ? tau.toFixed(0) : tau.toFixed(2);
+    txt(ctx, label + ' Pa', x + barW / 2, y - 12, '#cfe2ff', 12, 'center', 700);
+  });
+
+  /* --- header formula --- */
+  txt(ctx, 'τ = μ · du/dy   with du/dy = ' + muSim.rate + ' s⁻¹',
+      w / 2, 18, '#8fd4ff', 12, 'center', 700);
+
+  /* --- note about water being tiny on this scale --- */
+  txt(ctx, '* note: water τ is ~5000× smaller than honey',
+      w / 2, h - 14, '#6c7a97', 10.5, 'center', 500);
+});
+
+function updateMuSim(){
+  const r = +document.getElementById('muRateSlider').value;
+  muSim.rate = r;
+  document.getElementById('muRateVal').textContent = r;
+  const f = (v) => v >= 100 ? v.toFixed(0) : (v >= 10 ? v.toFixed(1) : v.toFixed(2));
+  document.getElementById('tauWater').innerHTML = f(MU_WATER * r) + ' <small>Pa</small>';
+  document.getElementById('tauOil').innerHTML   = f(MU_OIL   * r) + ' <small>Pa</small>';
+  document.getElementById('tauHoney').innerHTML = f(MU_HONEY * r) + ' <small>Pa</small>';
+}
+const muRateSlider = document.getElementById('muRateSlider');
+if (muRateSlider) { muRateSlider.addEventListener('input', updateMuSim); updateMuSim(); }
+
+/* ============================================================
+   9 · PARALLEL PLATES
+   ============================================================ */
+const plate = { U: 0.5, hmm: 2.0, mu: 0.1, playing: true, showParticles: true, particles: [], t: 0 };
+(function(){
+  for (let i = 0; i < 100; i++)
+    plate.particles.push({ x: Math.random(), yn: Math.random() * 0.96 + 0.02 });
+})();
+
+reg('cvPlate', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const padX = Math.max(34, w * 0.08);
+  const x0 = padX, x1 = w - padX;
+  const fluidW = x1 - x0;
+  const topPlateY = 52;
+  const botPlateY = h - 52;
+  const fluidH = botPlateY - topPlateY;
+
+  const hM = plate.hmm / 1000;
+  const rate = plate.U / hM;
+  const tau = plate.mu * rate;
+  const PX_PER = 105;
+
+  const fg = ctx.createLinearGradient(0, topPlateY, 0, botPlateY);
+  fg.addColorStop(0, 'rgba(77,141,255,.20)');
+  fg.addColorStop(1, 'rgba(15,155,142,.10)');
+  ctx.fillStyle = fg;
+  ctx.fillRect(x0, topPlateY, fluidW, fluidH);
+
+  const NL = 7;
+  for (let i = 1; i < NL; i++){
+    const yn = i / NL;
+    const y = botPlateY - yn * fluidH;
+    const len = yn * plate.U * PX_PER;
+    ctx.setLineDash([3, 4]);
+    ctx.strokeStyle = 'rgba(140,200,255,.28)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + len + 12, y); ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = 'rgba(140,200,255,.85)';
+    ctx.fillStyle   = 'rgba(140,200,255,.85)';
+    ctx.lineWidth = 1.8;
+    if (len > 3) arrow(ctx, x0, y, x0 + len, y, 7);
+  }
+
+  if (plate.showParticles){
+    const dt = plate.playing ? DT : 0;
+    ctx.fillStyle = 'rgba(190,230,255,.75)';
+    for (const p of plate.particles){
+      p.x += (p.yn * plate.U * PX_PER * dt) / fluidW;
+      if (p.x > 1) p.x -= 1;
+      if (p.x < 0) p.x += 1;
+      const sx = x0 + p.x * fluidW;
+      const sy = botPlateY - p.yn * fluidH;
+      ctx.beginPath(); ctx.arc(sx, sy, 1.9, 0, 7); ctx.fill();
+    }
+  }
+
+  const bg = ctx.createLinearGradient(0, botPlateY, 0, botPlateY + 18);
+  bg.addColorStop(0, '#3b4a68'); bg.addColorStop(1, '#1d2637');
+  ctx.fillStyle = bg;
+  rr(ctx, x0 - 12, botPlateY, fluidW + 24, 18, 6);
+  ctx.fill();
+  ctx.strokeStyle = '#4a5c80'; ctx.lineWidth = 1; ctx.stroke();
+  txt(ctx, 'FIXED PLATE', x0 - 6, botPlateY + 30, '#6c7a97', 11.5, 'left', 700);
+  txt(ctx, 'u = 0', x1 + 2, botPlateY - 12, '#5f7093', 11.5, 'right', 600);
+
+  const tg = ctx.createLinearGradient(0, topPlateY - 18, 0, topPlateY);
+  tg.addColorStop(0, '#4d8dff'); tg.addColorStop(1, '#2c5db8');
+  ctx.fillStyle = tg;
+  rr(ctx, x0 - 12, topPlateY - 18, fluidW + 24, 18, 6);
+  ctx.fill();
+  ctx.strokeStyle = '#7cb4ff'; ctx.lineWidth = 1; ctx.stroke();
+
+  ctx.save();
+  ctx.beginPath(); rr(ctx, x0 - 12, topPlateY - 18, fluidW + 24, 18, 6); ctx.clip();
+  const scroll = (performance.now() / 1000) * (0.3 + plate.U) * 80;
+  ctx.strokeStyle = 'rgba(200,225,255,.45)';
+  ctx.lineWidth = 2;
+  for (let i = -1; i < fluidW / 26 + 2; i++){
+    const px = x0 - 12 + ((i * 26 + scroll) % (fluidW + 40));
+    ctx.beginPath();
+    ctx.moveTo(px, topPlateY - 18);
+    ctx.lineTo(px + 9, topPlateY);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  if (plate.U > 0.01){
+    ctx.strokeStyle = '#7cb4ff'; ctx.fillStyle = '#7cb4ff'; ctx.lineWidth = 2.4;
+    const alen = Math.min(20 + plate.U * 130, fluidW * 0.40);
+    arrow(ctx, x0 + 4, topPlateY - 34, x0 + 4 + alen, topPlateY - 34, 9);
+    txt(ctx, 'U = ' + plate.U.toFixed(2) + ' m/s',
+        x0 + 10 + alen, topPlateY - 34, '#7cb4ff', 12, 'left', 700);
+  }
+  txt(ctx, 'MOVING PLATE', x1, topPlateY - 34, '#5f7093', 11.5, 'right', 700);
+  txt(ctx, 'u = U', x1 + 2, topPlateY + 12, '#5f7093', 11.5, 'right', 600);
+
+  const dimX = x1 + 10;
+  ctx.strokeStyle = 'rgba(255,190,130,.85)';
+  ctx.fillStyle = 'rgba(255,190,130,.85)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(dimX, topPlateY); ctx.lineTo(dimX, botPlateY);
+  ctx.moveTo(dimX - 5, topPlateY); ctx.lineTo(dimX + 5, topPlateY);
+  ctx.moveTo(dimX - 5, botPlateY); ctx.lineTo(dimX + 5, botPlateY);
+  ctx.stroke();
+
+  txt(ctx, 'τ = μ·U/h = ' + (tau >= 100 ? tau.toFixed(0) : tau.toFixed(2)) + ' Pa',
+      w / 2, 22, '#8fd4ff', 12.5, 'center', 700);
+
+  const r1 = document.getElementById('pRateOut');
+  const r2 = document.getElementById('pTauOut');
+  if (r1) r1.innerHTML = Math.round(rate) + ' <small>s⁻¹</small>';
+  if (r2) r2.innerHTML = (tau >= 100 ? tau.toFixed(0) : tau.toFixed(2)) + ' <small>Pa</small>';
+});
+
+const pUSlider = document.getElementById('pUSlider');
+const pHSlider = document.getElementById('pHSlider');
+const pMuSlider = document.getElementById('pMuSlider');
+
+if (pUSlider) pUSlider.addEventListener('input', () => {
+  plate.U = +pUSlider.value / 100;
+  document.getElementById('pUVal').textContent = plate.U.toFixed(2);
+});
+if (pHSlider) pHSlider.addEventListener('input', () => {
+  plate.hmm = +pHSlider.value / 10;
+  document.getElementById('pHVal').textContent = plate.hmm.toFixed(1);
+});
+if (pMuSlider) pMuSlider.addEventListener('input', () => {
+  plate.mu = +pMuSlider.value / 1000;
+  document.getElementById('pMuVal').textContent = plate.mu.toFixed(3);
+});
+
+const pParticles = document.getElementById('pParticles');
+if (pParticles) pParticles.addEventListener('click', (e) => {
+  plate.showParticles = !plate.showParticles;
+  e.target.classList.toggle('on', plate.showParticles);
+});
+const pPause = document.getElementById('pPause');
+if (pPause) pPause.addEventListener('click', (e) => {
+  plate.playing = !plate.playing;
+  e.target.classList.toggle('on', plate.playing);
+  const en = e.target.querySelector('.lang-en');
+  const bm = e.target.querySelector('.lang-bm');
+  if (en) en.textContent = plate.playing ? 'Pause' : 'Play';
+  if (bm) bm.textContent = plate.playing ? 'Jeda' : 'Main';
+});
+
+/* ============================================================
+   10 · UNIFORM FLOW vs SHEAR FLOW
+   ============================================================ */
+const uni = { playing: true, t: 0, particles: [] };
+(function(){
+  for (let i = 0; i < 70; i++)
+    uni.particles.push({ x: Math.random(), yn: Math.random() * 0.8 + 0.1 });
+})();
+
+reg('cvUniform', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  if (uni.playing) uni.t += DT;
+
+  const padX = Math.max(26, w * 0.07);
+  const x0 = padX, x1 = w - padX;
+  const W = x1 - x0;
+  const MAXLEN = Math.min(W * 0.55, 210);
+
+  const panelH = (h - 46) / 2;
+  const padTop = 30;
+
+  function panel(yTop, title, subtitle, color, uniformFlag){
+    const H = panelH - 26;
+    const yBot = yTop + H;
+
+    const g = ctx.createLinearGradient(0, yTop, 0, yBot);
+    g.addColorStop(0, uniformFlag ? 'rgba(15,155,142,.16)' : 'rgba(255,138,61,.14)');
+    g.addColorStop(1, 'rgba(10,20,40,.20)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x0, yTop, W, H);
+
+    ctx.setLineDash([4, 5]);
+    ctx.strokeStyle = 'rgba(120,160,220,.25)';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(x0, yTop, W, H);
+    ctx.setLineDash([]);
+
+    const NL = 5;
+    for (let i = 1; i <= NL; i++){
+      const yn = i / (NL + 1);
+      const y = yBot - yn * H;
+      const len = uniformFlag ? MAXLEN * 0.72 : (0.12 + 0.88 * yn) * MAXLEN;
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = 1.9;
+      if (len > 3) arrow(ctx, x0 + 8, y, x0 + 8 + len, y, 7);
+      ctx.globalAlpha = 1;
+    }
+
+    if (uni.playing){
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.6;
+      for (const p of uni.particles){
+        const yn = p.yn;
+        const speed = uniformFlag ? 1 : (0.12 + 0.88 * yn);
+        p.x += (speed * MAXLEN * DT * 0.55) / W;
+        if (p.x > 1) p.x -= 1;
+        const sx = x0 + p.x * W;
+        const sy = yBot - (yn * 0.9 + 0.05) * H;
+        ctx.beginPath(); ctx.arc(sx, sy, 1.8, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    txt(ctx, title, x0, yTop - 12, color, 13, 'left', 800);
+    txt(ctx, subtitle, x1, yTop - 12, '#7f8dab', 11.5, 'right', 600);
+  }
+
+  panel(padTop, 'UNIFORM FLOW', 'all layers at the same velocity  →  du/dy = 0  →  τ = 0',
+        '#0f9b8e', true);
+
+  panel(padTop + panelH, 'SHEAR FLOW', 'layers at different velocities  →  du/dy > 0  →  τ > 0',
+        '#ff8a3d', false);
+});
+
+const uniPause = document.getElementById('uniPause');
+if (uniPause) uniPause.addEventListener('click', (e) => {
+  uni.playing = !uni.playing;
+  e.target.classList.toggle('on', uni.playing);
+  const en = e.target.querySelector('.lang-en');
+  const bm = e.target.querySelector('.lang-bm');
+  if (en) en.textContent = uni.playing ? 'Pause' : 'Play';
+  if (bm) bm.textContent = uni.playing ? 'Jeda' : 'Main';
+});
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+let lastT = performance.now();
+
+function loop(now){
+  DT = Math.min((now - lastT) / 1000, 0.05);
+  lastT = now;
+
+  canvases.forEach(o => {
+    if (o.w === 0) return;
+    if (o.pageIdx === -1 || !o.c.isConnected) {
+      const pageEl = o.c.closest('.page');
+      o.pageIdx = pages.indexOf(pageEl);
+    }
+    if (o.pageIdx === -1) return;
+    if (Math.abs(o.pageIdx - currentIdx) <= 1) o.draw(o);
+  });
+
+  requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   RESIZE
+   ============================================================ */
+let resizeRaf = null;
+function requestResize(){
+  if (resizeRaf) cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resizeAll(); });
+}
+
+window.addEventListener('resize', requestResize);
+window.addEventListener('orientationchange', () => setTimeout(resizeAll, 250));
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot(){
+  rebuildDots();
+  updateZ();
+  updateUI();
+  resizeAll();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
+  setTimeout(resizeAll, 120);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => requestResize());
+  }
+}
+
+window.addEventListener('load', boot);
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>

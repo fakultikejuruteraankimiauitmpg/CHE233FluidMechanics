@@ -1,0 +1,2222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Liquid vs Gas — Interactive Book</title>
+<style>
+  :root{
+    --paper:#fffefb;
+    --ink:#191c24;
+    --muted:#5d6472;
+    --line:#e5e0d6;
+    --accent:#2f6df6;
+    --accent-soft:#e8efff;
+    --shear:#e8590c;
+    --shear-soft:#ffeee4;
+    --teal:#0f9b8e;
+    --panel:#0e1422;
+    --panel-line:#243049;
+    --radius:16px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 50% -20%, #f4f0e6 0%, transparent 70%),
+      linear-gradient(180deg,#ded7c8,#e9e4d9 60%,#ddd6c7);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.25;margin:0}
+  .stage{position:fixed;inset:0;overflow:hidden}
+  .book{position:absolute;inset:0;perspective:2600px;perspective-origin:50% 50%}
+  .page{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,#fffefb 0%,#fdfbf6 100%);
+    padding:44px max(24px, calc(50vw - 420px)) 120px;
+    font-size:16.5px;
+    overflow-y:auto;overflow-x:hidden;
+    transform-origin:left center;
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    transition:transform .95s cubic-bezier(.44,.05,.22,1);
+    will-change:transform;
+    scrollbar-width:thin;scrollbar-color:#cfc7b4 transparent;
+  }
+  .page::-webkit-scrollbar{width:8px}
+  .page::-webkit-scrollbar-thumb{background:#d5cdbb;border-radius:6px}
+  .page::-webkit-scrollbar-track{background:transparent}
+  .page.flipped{transform:rotateY(-180deg);}
+
+  .page.cover{
+    background:
+      radial-gradient(700px 400px at 30% 20%, #eef3ff 0%, transparent 65%),
+      radial-gradient(600px 500px at 80% 90%, #e6faf6 0%, transparent 60%),
+      linear-gradient(180deg,#fffefb 0%,#fbf8f1 100%);
+    display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+    padding:60px max(24px, calc(50vw - 420px)) 120px;
+  }
+  .cover .kicker{font-size:12px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--accent);font-weight:800;margin-bottom:20px}
+  .cover h1{font-size:clamp(38px,7vw,72px);letter-spacing:-1px;line-height:1.05}
+  .cover h1 em{font-style:italic;color:var(--teal)}
+  .cover p{max-width:540px;color:var(--muted);font-size:17.5px;margin:22px 0 0}
+  .cover .pill{display:inline-block;margin-top:32px;padding:11px 22px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);font-family:var(--mono);font-size:15px;
+    box-shadow:0 8px 24px rgba(25,28,36,.07)}
+  .cover .pill b{color:var(--teal)}
+  .cover .start{margin-top:38px;display:inline-flex;align-items:center;gap:10px;
+    background:var(--accent);color:#fff;border:none;border-radius:12px;
+    padding:13px 24px;font-size:15px;font-weight:600;cursor:pointer;
+    box-shadow:0 10px 26px -8px rgba(47,109,246,.55);
+    transition:.18s;font-family:inherit}
+  .cover .start:hover{background:#245ad4;transform:translateY(-1px)}
+  .cover .start svg{width:16px;height:16px}
+
+  .chip{display:inline-flex;align-items:center;justify-content:center;
+    min-width:30px;height:30px;padding:0 9px;border-radius:9px;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:700;
+    font-family:var(--mono);margin-right:12px;flex:none}
+  .page h2{font-size:clamp(24px,3.4vw,34px);display:flex;align-items:center;
+    margin-bottom:20px;letter-spacing:-.4px}
+  .page h3{font-size:18px;margin:26px 0 8px;color:#2a2f3d}
+  .page p{margin:14px 0;color:#333846}
+  .page ul{margin:14px 0;padding-left:22px;color:#333846}
+  .page li{margin:6px 0}
+  strong{color:var(--ink)}
+  em.term{font-style:normal;background:var(--shear-soft);color:var(--shear);
+    padding:1px 6px;border-radius:6px;font-weight:600}
+
+  .callout{background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:12px;padding:16px 20px;margin:22px 0;
+    box-shadow:0 4px 16px rgba(25,28,36,.04)}
+  .callout.shear{border-left-color:var(--shear)}
+  .callout.teal{border-left-color:var(--teal)}
+  .callout p{margin:6px 0}
+
+  .eq{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:18px 22px;margin:20px 0;text-align:center;
+    font-family:var(--mono);font-size:20px;letter-spacing:.5px;
+    box-shadow:0 4px 16px rgba(25,28,36,.04)}
+  .eq .lbl{display:block;font-size:12px;color:var(--muted);margin-top:10px;
+    font-family:-apple-system,sans-serif;letter-spacing:.02em}
+
+  .sim{background:var(--panel);border-radius:var(--radius);padding:18px;
+    margin:24px 0;box-shadow:0 18px 40px rgba(14,20,34,.22);
+    color:#dfe6f5}
+  .sim-head{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;
+    justify-content:space-between;margin-bottom:12px}
+  .sim-head .t{font-size:13px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:#7f8dab}
+  .sim-head .hint{font-size:12.5px;color:#6c7a97}
+  canvas{display:block;width:100%;border-radius:10px;background:#0b101c}
+
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:14px 20px;margin-top:16px}
+  .ctrl label{display:flex;justify-content:space-between;align-items:baseline;
+    font-size:12.5px;color:#9aa8c4;margin-bottom:6px;letter-spacing:.02em}
+  .ctrl label b{color:#7cc4ff;font-family:var(--mono);font-weight:600}
+  input[type=range]{width:100%;accent-color:#4d8dff;height:20px;cursor:pointer;}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  button.tg{background:#1a2438;border:1px solid var(--panel-line);color:#a9b7d3;
+    padding:7px 14px;border-radius:9px;font-size:12.5px;cursor:pointer;
+    transition:.15s;font-family:inherit}
+  button.tg:hover{border-color:#3c5480;color:#dfe6f5}
+  button.tg.on{background:#22406f;border-color:#3f6fbe;color:#cfe2ff}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+  .chips span{background:#fff;border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:14px;color:#3a4152}
+  .chips span.tag{background:var(--accent-soft);border-color:#cddcff;color:var(--accent);font-weight:600}
+  .chips span.tagG{background:#e6faf6;border-color:#b8ece4;color:var(--teal);font-weight:600}
+
+  .tbl-wrap{overflow-x:auto;margin:22px 0;border-radius:14px;
+    border:1px solid var(--line);background:#fff}
+  table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px}
+  th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:#faf9f6;font-weight:700;font-size:13px;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--muted)}
+  tbody tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:600;color:#2a2f3d}
+  .liq-col{color:#2f6df6}
+  .gas-col{color:#0f9b8e}
+
+  .chain{display:flex;flex-direction:column;align-items:center;gap:0;margin:26px 0}
+  .chain .node{background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:11px 22px;font-weight:600;font-size:14.5px;text-align:center;
+    box-shadow:0 3px 12px rgba(25,28,36,.05);min-width:200px;color:#2a2f3d}
+  .chain .node.hot{background:var(--shear-soft);border-color:#ffd2b8;color:var(--shear)}
+  .chain .node.cool{background:var(--accent-soft);border-color:#cddcff;color:var(--accent)}
+  .chain .node.gas{background:#e6faf6;border-color:#b8ece4;color:var(--teal)}
+  .chain .arr{color:#b9b3a5;font-size:18px;line-height:1;padding:6px 0}
+  .chain .split{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+  .chain .branch{display:flex;flex-direction:column;align-items:center}
+
+  .deflist{display:grid;gap:14px;margin:22px 0}
+  .def{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;box-shadow:0 4px 16px rgba(25,28,36,.04)}
+  .def .dt{font-weight:700;color:var(--accent);font-size:14px;
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .def.gas .dt{color:var(--teal)}
+  .def .dd{color:#333846}
+  .def .dd code{font-family:var(--mono);background:#f2f0ea;padding:2px 7px;border-radius:6px}
+
+  .book-nav{position:fixed;bottom:max(14px, env(safe-area-inset-bottom));
+    left:50%;transform:translateX(-50%);z-index:7000;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,254,251,.95);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid #d8d0bd;border-radius:999px;padding:5px 8px;
+    box-shadow:0 8px 30px -8px rgba(60,50,20,.25);
+    font-family:inherit;user-select:none;max-width:calc(100vw - 20px)}
+  .nav-btn{display:inline-flex;align-items:center;justify-content:center;
+    background:#fff;border:1px solid #e0daca;color:#3a3f4d;
+    width:32px;height:32px;border-radius:50%;cursor:pointer;
+    transition:.15s;padding:0}
+  .nav-btn:hover:not(:disabled){background:#fffef8;border-color:#b9ae93}
+  .nav-btn:disabled{opacity:.32;cursor:not-allowed}
+  .nav-btn svg{width:14px;height:14px}
+  .nav-center{display:flex;flex-direction:column;align-items:center;gap:3px;
+    min-width:0;padding:0 6px}
+  .nav-title{font-size:11.5px;color:#6b6350;letter-spacing:.02em;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+  .dots{display:flex;gap:5px;align-items:center;justify-content:center}
+  .dot{width:7px;height:7px;border-radius:50%;background:#c9c0ab;border:none;
+    cursor:pointer;transition:.18s;padding:0}
+  .dot:hover{background:#9a8f74;transform:scale(1.25)}
+  .dot.active{background:var(--accent);width:18px;border-radius:4px}
+  .page-num{font-family:var(--mono);font-size:10px;color:#8a8168;letter-spacing:.06em}
+
+  .edit-fab{position:fixed;top:max(14px, env(safe-area-inset-top));right:14px;
+    z-index:7500;width:38px;height:38px;border-radius:50%;
+    background:rgba(255,254,251,.96);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid #d8d0bd;color:#3a3f4d;
+    display:inline-flex;align-items:center;justify-content:center;
+    cursor:pointer;box-shadow:0 6px 18px -6px rgba(60,50,20,.28);
+    transition:.15s;font-family:inherit;padding:0}
+  .edit-fab:hover{background:#fffef8;border-color:#b9ae93;transform:translateY(-1px)}
+  .edit-fab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .edit-fab svg{width:16px;height:16px}
+
+  .edit-actions{position:fixed;
+    top:max(60px, calc(env(safe-area-inset-top) + 60px));right:14px;
+    z-index:7400;display:flex;flex-direction:column;gap:5px;align-items:flex-end;
+    font-family:inherit}
+  .edit-actions[hidden]{display:none}
+  .edit-actions input.title-edit{background:rgba(255,254,251,.97);
+    border:1px solid #d8d0bd;border-radius:10px;
+    padding:6px 10px;font-size:12px;font-family:inherit;color:#3a3f4d;
+    width:160px;font-weight:600;box-shadow:0 6px 18px -6px rgba(60,50,20,.22)}
+  .edit-actions input.title-edit:focus{outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,246,.15)}
+  .edit-actions button{background:rgba(255,254,251,.97);border:1px solid #d8d0bd;color:#3a3f4d;
+    padding:6px 11px;border-radius:9px;cursor:pointer;
+    font-weight:600;font-size:11.5px;display:inline-flex;align-items:center;gap:5px;
+    transition:.15s;font-family:inherit;box-shadow:0 6px 18px -6px rgba(60,50,20,.22)}
+  .edit-actions button:hover{background:#fffef8;border-color:#b9ae93}
+  .edit-actions button.danger{color:#c92a2a;border-color:#f0bcbc}
+  .edit-actions button.danger:hover{background:#fff5f5;border-color:#e8a0a0}
+  .edit-actions button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .edit-actions button.primary:hover{background:#245ad4}
+  .edit-actions button svg{width:12px;height:12px}
+
+  body.edit-mode .page{outline:2px dashed rgba(47,109,246,.35);outline-offset:-10px}
+  body.edit-mode .page:focus-within{outline-color:rgba(47,109,246,.85)}
+  body.edit-mode .page [contenteditable="false"]{user-select:none}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(20,18,12,.55);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal-backdrop[hidden]{display:none}
+  .modal{background:#fffefb;border-radius:18px;padding:26px 28px;
+    width:min(440px,100%);max-height:90vh;overflow-y:auto;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.5);font-family:inherit}
+  .modal.wide{width:min(760px,100%)}
+  .modal h3{font-size:21px;margin-bottom:6px;letter-spacing:-.3px}
+  .modal .sub{color:#6b6350;font-size:13.5px;margin:0 0 6px}
+  .modal label{display:block;font-size:11.5px;font-weight:800;color:#3a3f4d;
+    margin:14px 0 6px;letter-spacing:.08em;text-transform:uppercase}
+  .modal input[type=text],.modal input[type=password],.modal textarea{
+    width:100%;background:#fbf9f4;border:1px solid #d8d0bd;border-radius:11px;
+    padding:11px 14px;font-family:inherit;font-size:14px;color:#191c24;resize:vertical}
+  .modal textarea{font-family:var(--mono);font-size:12.5px;line-height:1.55;min-height:220px;
+    white-space:pre;overflow:auto;tab-size:2}
+  .modal input:focus,.modal textarea:focus{outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,246,.15)}
+  .modal .hint{color:#8a8168;font-size:12px;margin-top:8px;line-height:1.55}
+  .modal .hint code{font-family:var(--mono);background:#f0ece0;padding:1px 6px;
+    border-radius:5px;font-size:11.5px}
+  .modal .login-error{color:#c92a2a;background:#fff5f5;border:1px solid #f0bcbc;
+    padding:9px 12px;border-radius:9px;font-size:13px;margin-top:14px}
+  .modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px;
+    padding-top:18px;border-top:1px solid #eee9de}
+  .modal-actions button{padding:10px 18px;border-radius:11px;font-size:13.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;border:1px solid #d8d0bd;
+    background:#fff;color:#3a3f4d;transition:.15s}
+  .modal-actions button:hover{background:#faf7ef}
+  .modal-actions button.primary{background:var(--accent);color:#fff;border-color:var(--accent);
+    box-shadow:0 8px 22px -8px rgba(47,109,246,.6)}
+  .modal-actions button.primary:hover{background:#245ad4}
+
+  @media (max-width:760px){
+    body{line-height:1.7}
+    .page{padding:22px 20px 110px;font-size:16px}
+    .page.cover{padding:34px 24px 110px}
+    .page h2{font-size:clamp(22px,5.6vw,28px);margin-bottom:16px}
+    .page h3{font-size:16.5px;margin:20px 0 6px}
+    .chip{min-width:26px;height:26px;font-size:12.5px;margin-right:9px}
+    .sim{padding:12px;margin:18px 0}
+    .sim canvas{height:300px !important}
+    #cvContainer{height:320px !important}
+    #cvFree{height:380px !important}
+    #cvGravity{height:340px !important}
+    #cvFill{height:320px !important}
+    #cvMolecules{height:310px !important}
+    #cvBoundary{height:330px !important}
+    #cvGravRole{height:330px !important}
+    .controls{grid-template-columns:1fr;gap:10px}
+    .eq{font-size:17px;padding:14px 16px}
+    .callout{padding:14px 16px;margin:18px 0}
+    table{font-size:13px;min-width:440px}
+    th,td{padding:9px 12px}
+    .chain .node{min-width:0;width:100%;font-size:13.5px;padding:10px 14px}
+    .chain .split{flex-direction:column;gap:14px;align-items:center}
+    .chain .branch{width:100%}
+    .nav-btn{width:30px;height:30px}
+    .nav-title{max-width:120px;font-size:11px}
+    .edit-fab{width:34px;height:34px;top:10px;right:10px}
+    .edit-fab svg{width:14px;height:14px}
+    .edit-actions{top:52px;right:10px}
+    .edit-actions input.title-edit{width:130px;font-size:11.5px}
+    .edit-actions button{padding:5px 9px;font-size:11px}
+    .modal{padding:22px 20px}
+    .modal h3{font-size:19px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .page{transition-duration:.35s}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="book" id="book">
+
+    <!-- PAGE 0 · COVER -->
+    <div class="page cover" data-title="Cover">
+      <div class="kicker">Interactive Fluid Mechanics</div>
+      <h1>Liquid<br><em>vs Gas</em></h1>
+      <p>Both are fluids. Both flow under shear stress. But they behave very differently inside a container — and that difference comes down to volume, free surface, and how far apart the molecules are.</p>
+      <div class="pill"><b>Liquid</b> → fixed volume, free surface &nbsp;·&nbsp; <b>Gas</b> → fills all space</div>
+      <button class="start" id="startBtn">
+        Start reading
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <!-- PAGE 1 · BOTH ARE FLUIDS -->
+    <div class="page" data-title="1 · Both Are Fluids">
+      <h2><span class="chip">1</span>Both Are Fluids</h2>
+      <p>Both <strong>liquids</strong> and <strong>gases</strong> are fluids — because both can undergo <em class="term">continuous deformation</em> and <em class="term">flow</em> under shear stress.</p>
+
+      <div class="callout">
+        <p>But they behave <strong>differently</strong> when placed in a container. That difference is what this chapter is about.</p>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Property</th><th class="liq-col">Liquid</th><th class="gas-col">Gas</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Shape</td><td>Takes the shape of the container</td><td>Takes the shape of and fills the container</td></tr>
+            <tr><td>Volume</td><td>Has a nearly fixed volume</td><td>Has no fixed volume</td></tr>
+            <tr><td>Container</td><td>Occupies only part of the container if enough liquid is present</td><td>Expands to occupy the entire available space</td></tr>
+            <tr><td>Free surface</td><td>Can form a free surface</td><td>Cannot form a free surface</td></tr>
+            <tr><td>Compressibility</td><td>Relatively difficult to compress</td><td>Relatively easy to compress</td></tr>
+            <tr><td>Example</td><td>Water, oil</td><td>Air, steam</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · Same Container, Same Amount</span>
+          <span class="hint">Same number of molecules — watch how they behave differently</span>
+        </div>
+        <canvas id="cvContainer" style="height:380px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="cLiquid">💧 Liquid</button>
+          <button class="tg" id="cGas">💨 Gas</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 2 · LIQUID -->
+    <div class="page" data-title="2 · Liquid">
+      <h2><span class="chip">2</span>Liquid</h2>
+      <p>A liquid has a <strong>definite volume</strong> but does <strong>not</strong> have a definite shape.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · Water in a Glass</span>
+          <span class="hint">Adjust the amount, tilt the glass — the surface stays horizontal</span>
+        </div>
+        <canvas id="cvFree" style="height:440px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>Water amount <b><span id="waterVal">45</span>%</b></label>
+            <input type="range" id="waterSlider" min="8" max="92" step="1" value="45">
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="tg" id="tiltBtn">↻ Tilt glass</button>
+          <button class="tg on" id="gravBtn">↓ Gravity ON</button>
+          <button class="tg" id="resetWaterBtn">↺ Reset</button>
+        </div>
+      </div>
+
+      <p>Water placed in a glass: the water takes the shape of the <strong>lower part</strong> of the container, but it does not necessarily fill the entire container.</p>
+
+      <h3>Why?</h3>
+      <ul>
+        <li>Liquid molecules are relatively <strong>close together</strong>, so the liquid tends to maintain approximately the same volume.</li>
+        <li>However, the molecules <strong>can move relative to one another</strong>. Therefore the liquid flows and takes the shape of its container.</li>
+      </ul>
+    </div>
+
+    <!-- PAGE 3 · FREE SURFACE -->
+    <div class="page" data-title="3 · Free Surface">
+      <h2><span class="chip">3</span>What is a Free Surface?</h2>
+      <p>A <strong>free surface</strong> is the boundary between a liquid and the gas above it, when the liquid does not completely fill the container.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · Free Surface &amp; Gravity</span>
+          <span class="hint">Toggle gravity — watch what happens to the surface</span>
+        </div>
+        <canvas id="cvGravity" style="height:360px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="gravToggle">↓ Gravity ON</button>
+          <button class="tg" id="shakeBtn">〜 Shake</button>
+        </div>
+      </div>
+
+      <div class="callout teal">
+        <p>In the presence of gravity, the free surface of a liquid at rest is generally <strong>horizontal</strong>.</p>
+      </div>
+
+      <p>A glass containing water has a distinct upper boundary — that boundary is the free surface.</p>
+    </div>
+
+    <!-- PAGE 4 · GAS -->
+    <div class="page" data-title="4 · Gas">
+      <h2><span class="chip">4</span>Gas</h2>
+      <p>A gas does <strong>not</strong> have a definite shape or a definite volume.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · Gas Fills the Container</span>
+          <span class="hint">Resize the container — the gas expands to fill it</span>
+        </div>
+        <canvas id="cvFill" style="height:420px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label>Container size <b><span id="sizeVal">100</span>%</b></label>
+            <input type="range" id="sizeSlider" min="40" max="100" step="1" value="100">
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="tg" id="fillPause">⏸ Pause</button>
+        </div>
+      </div>
+
+      <p>If we put air into a container, the gas spreads throughout the available space. If the container is larger, the gas expands to occupy the additional space.</p>
+    </div>
+
+    <!-- PAGE 5 · WHY GAS FILLS -->
+    <div class="page" data-title="5 · Why Gas Fills Everything">
+      <h2><span class="chip">5</span>Why Does a Gas Fill the Entire Container?</h2>
+      <p>Gas molecules are <strong>much farther apart</strong> than liquid molecules and can move freely throughout the available space.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · Molecules</span>
+          <span class="hint">Compare liquid (close, slow) vs gas (far apart, fast)</span>
+        </div>
+        <canvas id="cvMolecules" style="height:360px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="molLiquid">💧 Liquid molecules</button>
+          <button class="tg" id="molGas">💨 Gas molecules</button>
+        </div>
+      </div>
+
+      <p>When gas is placed in a container, its molecules spread out until they occupy the available volume.</p>
+
+      <div class="eq" style="color:var(--teal)">
+        Gas → expands to fill the entire available space
+      </div>
+
+      <div class="callout">
+        <p><strong>Everyday example:</strong> if you spray perfume in one corner of a room, the smell eventually spreads throughout the room.</p>
+      </div>
+    </div>
+
+    <!-- PAGE 6 · NO FREE SURFACE -->
+    <div class="page" data-title="6 · Why Gas Has No Free Surface">
+      <h2><span class="chip">6</span>Why Can't a Gas Form a Free Surface?</h2>
+      <p>This is an important distinction.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · Liquid vs Gas Boundary</span>
+          <span class="hint">Left: clear boundary · Right: no boundary</span>
+        </div>
+        <canvas id="cvBoundary" style="height:360px"></canvas>
+      </div>
+
+      <p>Consider water: there is a clear boundary between the water and the air — the free surface.</p>
+      <p>Now consider air inside a container: there is <strong>no separate horizontal boundary</strong> between "gas" and "empty space" inside the container. The gas simply expands and occupies the available volume.</p>
+
+      <div class="chain">
+        <div class="node cool">Liquid</div>
+        <div class="arr">↓</div>
+        <div class="node cool">can have a free surface</div>
+      </div>
+      <div class="chain">
+        <div class="node gas">Gas</div>
+        <div class="arr">↓</div>
+        <div class="node gas">cannot have a free surface</div>
+      </div>
+    </div>
+
+    <!-- PAGE 7 · GRAVITY -->
+    <div class="page" data-title="7 · Role of Gravity">
+      <h2><span class="chip">7</span>The Role of Gravity</h2>
+      <p>The phrase <em>"in the presence of gravity"</em> is important.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t">Simulation · Gravity and the Free Surface</span>
+          <span class="hint">Toggle gravity — compare flat vs floating surface</span>
+        </div>
+        <canvas id="cvGravRole" style="height:360px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="grToggle">↓ Gravity ON</button>
+        </div>
+      </div>
+
+      <p>A liquid at rest under gravity forms a free surface that is approximately <strong>horizontal</strong>.</p>
+
+      <div class="callout teal">
+        <p>Gravity pulls the liquid downward, and the liquid settles into a configuration with a horizontal free surface.</p>
+      </div>
+
+      <p>This is why water in a glass has a flat top surface.</p>
+    </div>
+
+    <!-- PAGE 8 · FUNDAMENTAL DIFFERENCE -->
+    <div class="page" data-title="8 · Fundamental Difference">
+      <h2><span class="chip">8</span>The Fundamental Difference</h2>
+      <p>The easiest way to remember the difference is:</p>
+
+      <div class="deflist">
+        <div class="def">
+          <div class="dt">Liquid</div>
+          <div class="dd">Definite volume + no definite shape.<br>
+          It takes the shape of the container but does not necessarily fill it.</div>
+        </div>
+        <div class="def gas">
+          <div class="dt">Gas</div>
+          <div class="dd">No definite volume + no definite shape.<br>
+          It expands and fills the entire available space.</div>
+        </div>
+      </div>
+
+      <div class="chain">
+        <div class="node cool">LIQUID</div>
+        <div class="arr">↓</div>
+        <div class="node">Fixed volume · Free surface · Hard to compress</div>
+        <div class="arr">&nbsp;</div>
+        <div class="node gas">GAS</div>
+        <div class="arr">↓</div>
+        <div class="node">No fixed volume · No free surface · Easy to compress</div>
+      </div>
+    </div>
+
+    <!-- PAGE 9 · EXAM VERSION -->
+    <div class="page" data-title="9 · Exam-Friendly Version">
+      <h2><span class="chip">9</span>⭐ Exam-Friendly Version</h2>
+
+      <div class="deflist">
+        <div class="def">
+          <div class="dt">Liquid</div>
+          <div class="dd">
+            <ul style="margin:6px 0">
+              <li>A liquid has a <strong>definite volume</strong> but <strong>no definite shape</strong>.</li>
+              <li>It takes the shape of the container in which it is placed.</li>
+              <li>Under gravity, a liquid at rest can form a <strong>free surface</strong>.</li>
+              <li>Example: water in a glass.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="def gas">
+          <div class="dt">Gas</div>
+          <div class="dd">
+            <ul style="margin:6px 0">
+              <li>A gas has <strong>neither a definite volume nor a definite shape</strong>.</li>
+              <li>It expands until it reaches the container walls.</li>
+              <li>It fills the entire available space.</li>
+              <li>It does <strong>not</strong> form a free surface.</li>
+              <li>Example: air in a room.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout shear" style="text-align:center">
+        <p style="font-family:Georgia,serif;font-size:20px;margin:6px 0">
+          <strong>One-line memory trick</strong>
+        </p>
+        <p style="font-family:Georgia,serif;font-size:22px;margin:10px 0;color:var(--shear)">
+          Liquid: <strong>fixed volume, free surface</strong>
+        </p>
+      </div>
+
+      <p style="margin-top:40px;color:var(--muted);font-size:13.5px;text-align:center">— End of book —</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- NAV BAR -->
+<div class="book-nav">
+  <button class="nav-btn" id="prevBtn" title="Previous">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="nav-center">
+    <div class="nav-title" id="navTitle">Cover</div>
+    <div class="dots" id="dots"></div>
+    <div class="page-num" id="pageNum">1 / 10</div>
+  </div>
+  <button class="nav-btn" id="nextBtn" title="Next">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>
+</div>
+
+<!-- EDIT FAB -->
+<button class="edit-fab" id="editToggle" title="Toggle edit mode (E)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+</button>
+
+<!-- EDIT ACTIONS -->
+<div class="edit-actions" id="editActions" hidden>
+  <input type="text" class="title-edit" id="titleInput" placeholder="Page title…">
+  <button id="addPageBtn" title="Add a new page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    Add
+  </button>
+  <button id="delPageBtn" class="danger" title="Delete this page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+    Delete
+  </button>
+  <button id="saveHtmlBtn" class="primary" title="Download as .html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    Save
+  </button>
+  <button id="resetBtn" class="danger" title="Reset original">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 019-9 9 9 0 016.36 2.64L21 8M21 3v5h-5M21 12a9 9 0 01-9 9 9 9 0 01-6.36-2.64L3 16M3 21v-5h5"/></svg>
+    Reset
+  </button>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-backdrop" id="loginModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3>Log in to edit</h3>
+    <p class="sub">Enter your credentials to unlock the editor.</p>
+    <label for="loginUser">Username</label>
+    <input type="text" id="loginUser" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <label for="loginPass">Password</label>
+    <input type="password" id="loginPass" autocomplete="current-password">
+    <div class="login-error" id="loginError" hidden>Invalid username or password.</div>
+    <div class="modal-actions">
+      <button id="loginCancel">Cancel</button>
+      <button class="primary" id="loginSubmit">Log in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PAGE MODAL -->
+<div class="modal-backdrop" id="addModal" hidden>
+  <div class="modal wide" role="dialog" aria-modal="true">
+    <h3>Add a new page</h3>
+    <p class="sub">Paste any HTML — headings, paragraphs, callouts, even your own canvas.</p>
+    <label for="newPageTitle">Page title</label>
+    <input type="text" id="newPageTitle" placeholder="e.g. 10 · Surface Tension">
+    <label for="newPageHtml">Page HTML</label>
+    <textarea id="newPageHtml" spellcheck="false"></textarea>
+    <p class="hint">Reuse the book's classes — <code>callout</code>, <code>eq</code>, <code>chips</code>, <code>tbl-wrap</code>, <code>deflist</code> — and wrap interactive bits in <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code>.</p>
+    <div class="modal-actions">
+      <button id="addModalCancel">Cancel</button>
+      <button class="primary" id="addModalInsert">Add page</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   AUTH
+   ============================================================ */
+const EDIT_USER = 'fluid';
+const EDIT_PASS = 'che233';
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentIdx = 0;
+let animating = false;
+let pages = [];
+let N = 0;
+let editMode = false;
+let dotEls = [];
+let restoredIdx = 0;
+const FLIP_MS = 950;
+
+const STORAGE_KEY = 'liquid-gas-book-v2';
+
+(function restoreFromStorage(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data.pages || !data.pages.length) return;
+    const bookEl = document.getElementById('book');
+    bookEl.innerHTML = '';
+    data.pages.forEach(pd => {
+      const p = document.createElement('div');
+      p.className = (pd.cls || 'page').replace(/\s*flipped\s*/g, ' ').trim();
+      p.dataset.title = pd.title || '';
+      p.innerHTML = pd.html;
+      bookEl.appendChild(p);
+    });
+    restoredIdx = Math.max(0, Math.min(data.idx || 0, data.pages.length - 1));
+  } catch(e){ console.warn('Restore failed', e); }
+})();
+
+currentIdx = restoredIdx;
+
+pages = [...document.querySelectorAll('.page')];
+N = pages.length;
+
+const dotsEl     = document.getElementById('dots');
+const navTitleEl = document.getElementById('navTitle');
+const pageNumEl  = document.getElementById('pageNum');
+const prevBtn    = document.getElementById('prevBtn');
+const nextBtn    = document.getElementById('nextBtn');
+
+function rebuildDots(){
+  dotsEl.innerHTML = '';
+  pages.forEach((p, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.title = p.dataset.title || ('Page ' + (i + 1));
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+  dotEls = [...dotsEl.children];
+}
+
+function updateZ(){
+  pages.forEach((p, i) => {
+    if (i < currentIdx)         p.style.zIndex = i + 1;
+    else if (i === currentIdx)  p.style.zIndex = N + 100;
+    else                        p.style.zIndex = N - (i - currentIdx) + 10;
+  });
+}
+
+function updateUI(){
+  dotEls.forEach((d, i) => d.classList.toggle('active', i === currentIdx));
+  navTitleEl.textContent = pages[currentIdx].dataset.title || '';
+  pageNumEl.textContent = (currentIdx + 1) + ' / ' + N;
+  prevBtn.disabled = currentIdx === 0 || animating;
+  nextBtn.disabled = currentIdx === N - 1 || animating;
+}
+
+function refreshPages(){
+  pages = [...document.querySelectorAll('.page')];
+  N = pages.length;
+  if (currentIdx >= N) currentIdx = N - 1;
+  rebuildDots(); updateZ(); updateUI();
+}
+
+function goNext(){
+  if (animating || currentIdx >= N - 1) return;
+  animating = true; updateUI();
+  const oldPage = pages[currentIdx];
+  oldPage.style.zIndex = 6000;
+  oldPage.classList.add('flipped');
+  currentIdx++;
+  updateZ();
+  oldPage.style.zIndex = 6000;
+  setTimeout(() => {
+    animating = false; updateZ(); updateUI(); resizeAll();
+  }, FLIP_MS + 20);
+}
+
+function goPrev(){
+  if (animating || currentIdx <= 0) return;
+  animating = true; updateUI();
+  const newIdx = currentIdx - 1;
+  const newPage = pages[newIdx];
+  newPage.style.zIndex = 6000;
+  newPage.classList.remove('flipped');
+  currentIdx = newIdx;
+  setTimeout(() => {
+    animating = false; updateZ(); updateUI(); resizeAll();
+  }, FLIP_MS + 20);
+}
+
+function goTo(idx){
+  if (animating || idx === currentIdx || idx < 0 || idx >= N) return;
+  animating = true;
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < idx));
+  currentIdx = idx;
+  updateZ(); updateUI();
+  setTimeout(() => { animating = false; updateUI(); resizeAll(); }, 60);
+}
+
+prevBtn.addEventListener('click', goPrev);
+nextBtn.addEventListener('click', goNext);
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, button, textarea, select, [contenteditable]')) {
+    if (e.key !== 'Escape') return;
+  }
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); goNext(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'PageUp')                    { e.preventDefault(); goPrev(); }
+  if (e.key === 'Home')  goTo(0);
+  if (e.key === 'End')   goTo(N - 1);
+  if (e.key === 'e' || e.key === 'E') { requestEditToggle(); }
+});
+
+const startBtn = document.getElementById('startBtn');
+if (startBtn) startBtn.addEventListener('click', goNext);
+
+/* ============================================================
+   CANVAS INFRA
+   ============================================================ */
+const canvases = [];
+let DT = 0;
+let GT = 0;
+
+function reg(id, draw){
+  const c = document.getElementById(id);
+  if (!c) return null;
+  const pageEl = c.closest('.page');
+  const pageIdx = pages.indexOf(pageEl);
+  const o = { c, ctx: c.getContext('2d'), draw, w: 0, h: 0, pageIdx };
+  canvases.push(o);
+  return o;
+}
+
+function resizeAll(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvases.forEach(o => {
+    const cw = o.c.clientWidth;
+    const ch = o.c.clientHeight;
+    if (cw === 0 || ch === 0) return;
+    o.w = cw; o.h = ch;
+    o.c.width  = Math.round(cw * dpr);
+    o.c.height = Math.round(ch * dpr);
+    o.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  });
+}
+
+function rr(ctx, x, y, w, h, r){
+  r = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+const FONT_STACK = '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+
+function txt(ctx, s, x, y, color, size, align, weight){
+  ctx.fillStyle = color || '#8fa0c0';
+  ctx.font = (weight || 500) + ' ' + (size || 12) + 'px ' + FONT_STACK;
+  ctx.textAlign = align || 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(s, x, y);
+}
+
+function txtFit(ctx, s, x, y, color, size, align, weight, maxW){
+  let fs = size || 12;
+  const apply = () => {
+    ctx.font = (weight || 500) + ' ' + fs + 'px ' + FONT_STACK;
+  };
+  apply();
+  const lim = maxW || 99999;
+  while (ctx.measureText(s).width > lim && fs > 8.5){
+    fs -= 0.5;
+    apply();
+  }
+  ctx.fillStyle = color || '#8fa0c0';
+  ctx.textAlign = align || 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(s, x, y);
+}
+
+function simArea(h, topPad, botPad){
+  const top = (topPad == null) ? 30 : topPad;
+  const bot = h - ((botPad == null) ? 88 : botPad);
+  const height = Math.max(40, bot - top);
+  return { top, bot, height, mid: top + height / 2 };
+}
+
+/* ============================================================
+   GEOMETRY HELPERS
+   ============================================================ */
+function polygonArea(points){
+  if (!points || points.length < 3) return 0;
+  let area = 0;
+  for (let i = 0; i < points.length; i++){
+    const j = (i + 1) % points.length;
+    area += points[i].x * points[j].y;
+    area -= points[j].x * points[i].y;
+  }
+  return Math.abs(area) / 2;
+}
+
+function clipPolygonBelow(points, yLine){
+  const result = [];
+  const n = points.length;
+  for (let i = 0; i < n; i++){
+    const curr = points[i];
+    const next = points[(i + 1) % n];
+    const currBelow = curr.y > yLine;
+    const nextBelow = next.y > yLine;
+    if (currBelow) result.push(curr);
+    if (currBelow !== nextBelow){
+      const t = (yLine - curr.y) / (next.y - curr.y);
+      result.push({ x: curr.x + t * (next.x - curr.x), y: yLine });
+    }
+  }
+  return result;
+}
+
+function findWaterLevel(corners, targetArea){
+  let minY = Infinity, maxY = -Infinity;
+  for (const c of corners){
+    if (c.y < minY) minY = c.y;
+    if (c.y > maxY) maxY = c.y;
+  }
+  let lo = minY, hi = maxY;
+  for (let i = 0; i < 34; i++){
+    const mid = (lo + hi) / 2;
+    const area = polygonArea(clipPolygonBelow(corners, mid));
+    if (area > targetArea) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+/* ============================================================
+   EDIT SYSTEM
+   ============================================================ */
+const editToggle  = document.getElementById('editToggle');
+const editActions = document.getElementById('editActions');
+const titleInput  = document.getElementById('titleInput');
+const addPageBtn  = document.getElementById('addPageBtn');
+const delPageBtn  = document.getElementById('delPageBtn');
+const saveHtmlBtn = document.getElementById('saveHtmlBtn');
+const resetBtn    = document.getElementById('resetBtn');
+
+const loginModal   = document.getElementById('loginModal');
+const loginUser    = document.getElementById('loginUser');
+const loginPass    = document.getElementById('loginPass');
+const loginError   = document.getElementById('loginError');
+const loginSubmit  = document.getElementById('loginSubmit');
+const loginCancel  = document.getElementById('loginCancel');
+
+const addModal       = document.getElementById('addModal');
+const newPageTitle   = document.getElementById('newPageTitle');
+const newPageHtml    = document.getElementById('newPageHtml');
+const addModalCancel = document.getElementById('addModalCancel');
+const addModalInsert = document.getElementById('addModalInsert');
+
+function requestEditToggle(){
+  if (editMode) { setEditMode(false); return; }
+  openLogin();
+}
+function openLogin(){
+  loginUser.value = ''; loginPass.value = ''; loginError.hidden = true;
+  loginModal.hidden = false;
+  setTimeout(() => loginUser.focus(), 40);
+}
+function closeLogin(){ loginModal.hidden = true; }
+function submitLogin(){
+  const u = loginUser.value.trim();
+  const p = loginPass.value;
+  if (u === EDIT_USER && p === EDIT_PASS){ closeLogin(); setEditMode(true); }
+  else { loginError.hidden = false; loginPass.value = ''; loginPass.focus(); }
+}
+loginSubmit.addEventListener('click', submitLogin);
+loginCancel.addEventListener('click', closeLogin);
+loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeLogin(); });
+[loginUser, loginPass].forEach(el => {
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter'){ e.preventDefault(); submitLogin(); }
+    if (e.key === 'Escape'){ closeLogin(); }
+  });
+});
+
+function setEditMode(on){
+  editMode = on;
+  document.body.classList.toggle('edit-mode', on);
+  pages.forEach(p => {
+    if (on) { p.setAttribute('contenteditable', 'true'); p.spellcheck = false; }
+    else { p.removeAttribute('contenteditable'); }
+  });
+  document.querySelectorAll('.sim, .sim *, canvas, button, input, select, textarea, .eq').forEach(el => {
+    if (on) el.setAttribute('contenteditable', 'false');
+    else el.removeAttribute('contenteditable');
+  });
+  editToggle.classList.toggle('active', on);
+  editActions.hidden = !on;
+  if (on) { syncTitleInput(); if (pages[currentIdx]) pages[currentIdx].scrollTop = 0; }
+  else { saveToStorage(); }
+}
+
+function syncTitleInput(){
+  if (!pages[currentIdx]) return;
+  titleInput.value = pages[currentIdx].dataset.title || '';
+}
+titleInput.addEventListener('input', () => {
+  if (!pages[currentIdx]) return;
+  pages[currentIdx].dataset.title = titleInput.value;
+  navTitleEl.textContent = titleInput.value;
+  if (dotEls[currentIdx]) dotEls[currentIdx].title = titleInput.value;
+  scheduleSave();
+});
+
+let saveTimer = null;
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveToStorage, 1200); }
+document.getElementById('book').addEventListener('input', () => { if (editMode) scheduleSave(); });
+
+function saveToStorage(){
+  try {
+    const data = {
+      pages: pages.map(p => ({
+        cls: p.className.replace(/\s*flipped\s*/g, ' ').trim(),
+        title: p.dataset.title || '',
+        html: p.innerHTML
+      })),
+      idx: currentIdx
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) { console.warn('Storage save failed', e); }
+}
+
+const DEFAULT_NEW_PAGE =
+`<h2><span class="chip">·</span>New chapter</h2>
+<p>Write your content here.</p>
+<div class="callout"><p><strong>Tip:</strong> reuse the book's classes.</p></div>`;
+
+function openAddModal(){
+  newPageTitle.value = '';
+  newPageHtml.value = DEFAULT_NEW_PAGE;
+  addModal.hidden = false;
+  setTimeout(() => newPageTitle.focus(), 30);
+}
+function closeAddModal(){ addModal.hidden = true; }
+function insertNewPage(){
+  const title = newPageTitle.value.trim() || 'New page';
+  const html  = newPageHtml.value;
+  const newPage = document.createElement('div');
+  newPage.className = 'page';
+  newPage.dataset.title = title;
+  newPage.innerHTML = html;
+  const bookEl = document.getElementById('book');
+  const anchor = pages[currentIdx];
+  if (anchor && anchor.nextSibling) bookEl.insertBefore(newPage, anchor.nextSibling);
+  else bookEl.appendChild(newPage);
+  const newIdx = currentIdx + 1;
+  closeAddModal();
+  if (!editMode) setEditMode(true);
+  refreshPages();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < newIdx));
+  currentIdx = newIdx;
+  updateZ(); updateUI(); syncTitleInput(); saveToStorage();
+  setTimeout(() => { if (pages[currentIdx]) pages[currentIdx].scrollTop = 0; resizeAll(); }, 60);
+}
+
+function deleteCurrentPage(){
+  if (currentIdx === 0) { alert('The cover page cannot be deleted.'); return; }
+  if (!confirm('Delete this page? This cannot be undone.')) return;
+  pages[currentIdx].remove();
+  currentIdx = Math.max(0, currentIdx - 1);
+  refreshPages();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
+  updateZ(); updateUI(); syncTitleInput(); saveToStorage();
+}
+
+function saveAsHTML(){
+  const clone = document.documentElement.cloneNode(true);
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('[spellcheck]').forEach(el => el.removeAttribute('spellcheck'));
+  clone.classList.remove('edit-mode');
+  const clonedPages = clone.querySelectorAll('.page');
+  clonedPages.forEach(p => {
+    p.classList.remove('flipped');
+    p.style.zIndex = ''; p.style.transform = ''; p.style.transition = '';
+  });
+  ['#editToggle','#editActions','#addModal','#loginModal'].forEach(sel => {
+    const el = clone.querySelector(sel);
+    if (el) el.remove();
+  });
+  let html = clone.outerHTML.replace(
+    /const STORAGE_KEY = '[^']+';/,
+    "const STORAGE_KEY = 'liquid-gas-export-" + Date.now() + "';"
+  );
+  const doc = '<!DOCTYPE html>\n' + html;
+  const blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'liquid-vs-gas.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  saveToStorage();
+}
+
+function resetToOriginal(){
+  if (!confirm('Clear all edits and reload the original file?')) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+  location.reload();
+}
+
+editToggle.addEventListener('click', requestEditToggle);
+addPageBtn.addEventListener('click', openAddModal);
+delPageBtn.addEventListener('click', deleteCurrentPage);
+saveHtmlBtn.addEventListener('click', saveAsHTML);
+resetBtn.addEventListener('click', resetToOriginal);
+addModalCancel.addEventListener('click', closeAddModal);
+addModalInsert.addEventListener('click', insertNewPage);
+addModal.addEventListener('click', (e) => { if (e.target === addModal) closeAddModal(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !addModal.hidden) { closeAddModal(); e.stopPropagation(); }
+});
+
+/* ============================================================
+   HELPER: glass container outline
+   ============================================================ */
+function drawGlassOutline(ctx, x, y, cw, ch, opts){
+  opts = opts || {};
+  const cornerR = opts.cornerR || 14;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x, y + ch - cornerR);
+  ctx.quadraticCurveTo(x, y + ch, x + cornerR, y + ch);
+  ctx.lineTo(x + cw - cornerR, y + ch);
+  ctx.quadraticCurveTo(x + cw, y + ch, x + cw, y + ch - cornerR);
+  ctx.lineTo(x + cw, y);
+  if (opts.close) ctx.closePath();
+  return { cornerR };
+}
+
+/* ============================================================
+   SIM 1 · cvContainer
+   ============================================================ */
+const containerSim = { mode: 'liquid', t: 0, molecules: [] };
+
+(function initContainerMolecules(){
+  const N = 55;
+  for (let i = 0; i < N; i++){
+    containerSim.molecules.push({
+      x: 0.05 + Math.random() * 0.9,
+      y: 0.05 + Math.random() * 0.9,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: (Math.random() - 0.5) * 0.6,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+})();
+
+reg('cvContainer', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const A  = simArea(h, 28, 90);
+  const cw = Math.min(w * 0.46, 200);
+  const ch = Math.min(A.height * 0.96, 300);
+  const cx = w / 2;
+  const cy = A.mid;
+  const x  = cx - cw / 2;
+  const y  = cy - ch / 2;
+
+  containerSim.t += DT;
+
+  ctx.save();
+  drawGlassOutline(ctx, x, y, cw, ch);
+  ctx.fillStyle = 'rgba(120,180,255,.05)';
+  ctx.fill();
+  ctx.restore();
+
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(140,190,255,.4)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x, y); ctx.lineTo(x + cw, y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.save();
+  drawGlassOutline(ctx, x, y, cw, ch, { close: true });
+  ctx.clip();
+
+  if (containerSim.mode === 'liquid'){
+    const liquidTopY = y + ch * 0.58;
+
+    const wg = ctx.createLinearGradient(0, liquidTopY, 0, y + ch);
+    wg.addColorStop(0, 'rgba(90,160,255,.72)');
+    wg.addColorStop(1, 'rgba(30,75,180,.92)');
+    ctx.fillStyle = wg;
+    ctx.fillRect(x, liquidTopY, cw, ch - (liquidTopY - y));
+
+    ctx.strokeStyle = '#a8e0ff';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (let px = 0; px <= cw; px += 4){
+      const wave = Math.sin((px * 0.08) + containerSim.t * 2.2) * 1.6;
+      const py = liquidTopY + wave;
+      if (px === 0) ctx.moveTo(x + px, py);
+      else ctx.lineTo(x + px, py);
+    }
+    ctx.stroke();
+
+    for (const m of containerSim.molecules){
+      m.vx += (Math.random() - 0.5) * 0.04;
+      m.vy += (Math.random() - 0.5) * 0.04;
+      m.vx *= 0.94;
+      m.vy *= 0.94;
+      m.x += m.vx * DT;
+      m.y += m.vy * DT;
+
+      let lx = x + 8 + m.x * (cw - 16);
+      let ly = liquidTopY + 10 + m.y * (y + ch - liquidTopY - 18);
+
+      if (lx < x + 8)         { lx = x + 8;         m.vx = Math.abs(m.vx); }
+      if (lx > x + cw - 8)    { lx = x + cw - 8;    m.vx = -Math.abs(m.vx); }
+      if (ly < liquidTopY + 6){ ly = liquidTopY + 6;m.vy = Math.abs(m.vy); }
+      if (ly > y + ch - 6)    { ly = y + ch - 6;    m.vy = -Math.abs(m.vy); }
+
+      ctx.fillStyle = 'rgba(140,200,255,.25)';
+      ctx.beginPath(); ctx.arc(lx, ly, 5.5, 0, 7); ctx.fill();
+
+      ctx.fillStyle = 'rgba(200,232,255,.95)';
+      ctx.beginPath(); ctx.arc(lx, ly, 3.2, 0, 7); ctx.fill();
+    }
+
+    for (let i = 0; i < 12; i++){
+      const vx = x + 20 + ((i * 47 + containerSim.t * 25) % Math.max(1, cw - 40));
+      const vy = y + 25 + ((i * 31 + containerSim.t * 12) % Math.max(1, liquidTopY - y - 45));
+      ctx.fillStyle = 'rgba(180,220,255,.22)';
+      ctx.beginPath(); ctx.arc(vx, vy, 1.8, 0, 7); ctx.fill();
+    }
+  } else {
+    const gg = ctx.createLinearGradient(0, y, 0, y + ch);
+    gg.addColorStop(0, 'rgba(15,155,142,.14)');
+    gg.addColorStop(1, 'rgba(15,155,142,.26)');
+    ctx.fillStyle = gg;
+    ctx.fillRect(x, y, cw, ch);
+
+    for (const m of containerSim.molecules){
+      m.vx += (Math.random() - 0.5) * 0.16;
+      m.vy += (Math.random() - 0.5) * 0.16;
+      m.vx *= 0.99;
+      m.vy *= 0.99;
+      const sp = Math.hypot(m.vx, m.vy);
+      if (sp < 0.35){
+        const ang = Math.random() * Math.PI * 2;
+        m.vx += Math.cos(ang) * 0.1;
+        m.vy += Math.sin(ang) * 0.1;
+      }
+      m.x += m.vx * DT;
+      m.y += m.vy * DT;
+
+      if (m.x < 0.04){ m.x = 0.04; m.vx = Math.abs(m.vx); }
+      if (m.x > 0.96){ m.x = 0.96; m.vx = -Math.abs(m.vx); }
+      if (m.y < 0.04){ m.y = 0.04; m.vy = Math.abs(m.vy); }
+      if (m.y > 0.96){ m.y = 0.96; m.vy = -Math.abs(m.vy); }
+
+      const px = x + 6 + m.x * (cw - 12);
+      const py = y + 6 + m.y * (ch - 12);
+
+      ctx.fillStyle = 'rgba(120,240,220,.22)';
+      ctx.beginPath(); ctx.arc(px, py, 5, 0, 7); ctx.fill();
+
+      ctx.fillStyle = 'rgba(140,250,230,.9)';
+      ctx.beginPath(); ctx.arc(px, py, 2.6, 0, 7); ctx.fill();
+    }
+  }
+
+  ctx.restore();
+
+  drawGlassOutline(ctx, x, y, cw, ch);
+  ctx.strokeStyle = '#4d8dff';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  const maxW = w - 24;
+  if (containerSim.mode === 'liquid'){
+    txtFit(ctx, 'LIQUID', cx, h - 64, '#7cc4ff', 14, 'center', 800, maxW);
+    txtFit(ctx, 'same 55 molecules — they occupy only the bottom part',
+           cx, h - 40, '#9aa8c4', 12, 'center', 500, maxW);
+    txtFit(ctx, '✔ forms a free surface',
+           cx, h - 18, '#8fd4ff', 12, 'center', 700, maxW);
+  } else {
+    txtFit(ctx, 'GAS', cx, h - 64, '#3fd4c0', 14, 'center', 800, maxW);
+    txtFit(ctx, 'same 55 molecules — they fill the entire container',
+           cx, h - 40, '#9aa8c4', 12, 'center', 500, maxW);
+    txtFit(ctx, '✘ no free surface',
+           cx, h - 18, '#3fd4c0', 12, 'center', 700, maxW);
+  }
+});
+
+const cLiquidBtn = document.getElementById('cLiquid');
+const cGasBtn = document.getElementById('cGas');
+if (cLiquidBtn) cLiquidBtn.addEventListener('click', () => {
+  containerSim.mode = 'liquid';
+  cLiquidBtn.classList.add('on'); cGasBtn.classList.remove('on');
+});
+if (cGasBtn) cGasBtn.addEventListener('click', () => {
+  containerSim.mode = 'gas';
+  cGasBtn.classList.add('on'); cLiquidBtn.classList.remove('on');
+});
+
+/* ============================================================
+   SIM 2 · cvFree — Water in a Glass  (FIXED)
+   ============================================================ */
+const waterSim = {
+  level: 0.45,
+  targetTilt: 0,
+  tilt: 0,
+  gravity: true,
+  surfaceWave: 0
+};
+
+reg('cvFree', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  waterSim.tilt += (waterSim.targetTilt - waterSim.tilt) * Math.min(DT * 5, 1);
+
+  const A  = simArea(h, 46, 66);
+  const cw = Math.min(w * 0.34, 150);
+  const ch = Math.min(A.height * 0.76, 250);
+  const cx = w / 2;
+  const cy = A.mid;
+  const angle = waterSim.tilt;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+
+  const tr = (lx, ly) => ({
+    x: cx + lx * cos - ly * sin,
+    y: cy + lx * sin + ly * cos
+  });
+
+  const corners = [
+    tr(-cw/2, -ch/2),
+    tr( cw/2, -ch/2),
+    tr( cw/2,  ch/2),
+    tr(-cw/2,  ch/2)
+  ];
+
+  const containerPath = () => {
+    ctx.beginPath();
+    ctx.moveTo(corners[0].x, corners[0].y);
+    ctx.lineTo(corners[1].x, corners[1].y);
+    ctx.lineTo(corners[2].x, corners[2].y);
+    ctx.lineTo(corners[3].x, corners[3].y);
+    ctx.closePath();
+  };
+
+  // Glass interior shadow
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.35)';
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 8;
+  containerPath();
+  ctx.fillStyle = 'rgba(120,180,255,.06)';
+  ctx.fill();
+  ctx.restore();
+
+  if (waterSim.gravity){
+    /* ---------- GRAVITY ON : horizontal free surface ---------- */
+    const targetArea = waterSim.level * cw * ch;
+    const waterY = findWaterLevel(corners, targetArea);
+
+    ctx.save();
+    containerPath();
+    ctx.clip();
+
+    const wg = ctx.createLinearGradient(0, waterY - 20, 0, cy + ch);
+    wg.addColorStop(0, 'rgba(90,160,255,.78)');
+    wg.addColorStop(1, 'rgba(25,60,160,.95)');
+    ctx.fillStyle = wg;
+    ctx.fillRect(0, waterY, w, h - waterY);
+
+    const wob = waterSim.surfaceWave;
+    ctx.strokeStyle = '#a8e0ff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    const xL = Math.max(0, corners[0].x - 20);
+    const xR = Math.min(w, corners[1].x + 20);
+    for (let px = xL; px <= xR; px += 4){
+      const wave = Math.sin(px * 0.06 + waterSim.tilt * 6) * wob;
+      const py = waterY + wave;
+      if (px === xL) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    txtFit(ctx, 'free surface', cx, Math.max(A.top + 12, waterY - 20),
+           '#8fd4ff', 12, 'center', 700, w - 24);
+  } else {
+    /* ---------- GRAVITY OFF : floating blue sphere (FIX) ---------- */
+    const area = waterSim.level * cw * ch;
+    const maxR = Math.min(cw, ch) * 0.42;
+    let r = Math.sqrt(area / Math.PI);
+    r = Math.min(r, maxR);
+
+    ctx.save();
+    containerPath();
+    ctx.clip();
+
+    const bx = cx + Math.sin(GT * 0.7) * 3;
+    const by = cy + Math.cos(GT * 0.55) * 3;
+    const wob = 1 + Math.sin(GT * 2.1) * 0.03;
+
+    // Soft outer halo (surface tension look)
+    ctx.fillStyle = 'rgba(90,160,255,.14)';
+    ctx.beginPath();
+    ctx.arc(bx, by, r * 1.15 * wob, 0, 7);
+    ctx.fill();
+
+    // Main sphere body
+    const bg = ctx.createRadialGradient(
+      bx - r * 0.35, by - r * 0.40, r * 0.10,
+      bx, by, r
+    );
+    bg.addColorStop(0, 'rgba(150,205,255,.95)');
+    bg.addColorStop(0.55, 'rgba(80,145,245,.92)');
+    bg.addColorStop(1, 'rgba(25,60,160,.95)');
+    ctx.fillStyle = bg;
+    ctx.beginPath();
+    ctx.arc(bx, by, r * wob, 0, 7);
+    ctx.fill();
+
+    // Rim
+    ctx.strokeStyle = 'rgba(190,230,255,.85)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(bx, by, r * wob, 0, 7);
+    ctx.stroke();
+
+    // Specular highlight
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    ctx.beginPath();
+    ctx.ellipse(bx - r * 0.34, by - r * 0.38, r * 0.22, r * 0.13, -0.6, 0, 7);
+    ctx.fill();
+
+    // Molecules inside the sphere
+    const nm = 20;
+    for (let i = 0; i < nm; i++){
+      const a = i * 2.399 + GT * 0.4;
+      const rr2 = Math.sqrt((i + 0.5) / nm) * r * 0.75 * wob;
+      ctx.fillStyle = 'rgba(210,238,255,.9)';
+      ctx.beginPath();
+      ctx.arc(bx + Math.cos(a) * rr2, by + Math.sin(a) * rr2, 2.4, 0, 7);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  /* ---------- Container outline (rotated) ---------- */
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(angle);
+  drawGlassOutline(ctx, -cw/2, -ch/2, cw, ch, { close: false });
+  ctx.strokeStyle = '#4d8dff';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(140,190,255,.55)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(-cw/2, -ch/2);
+  ctx.lineTo( cw/2, -ch/2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  /* ---------- Labels (all clamped inside canvas) ---------- */
+  const maxW = w - 24;
+  const topY = cy - ch / 2;
+
+  if (waterSim.gravity){
+    txtFit(ctx, 'Air', cx, Math.max(14, topY - 22), '#8fa0c0', 12, 'center', 700, maxW);
+
+    const gx = Math.max(18, cx - cw / 2 - 44);
+    const gy1 = cy - 25, gy2 = cy + 25;
+    ctx.strokeStyle = '#ff8a3d';
+    ctx.fillStyle = '#ff8a3d';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(gx, gy1); ctx.lineTo(gx, gy2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(gx, gy2 + 9);
+    ctx.lineTo(gx - 7, gy2 - 1);
+    ctx.lineTo(gx + 7, gy2 - 1);
+    ctx.closePath(); ctx.fill();
+    txt(ctx, 'g', gx, gy2 + 22, '#ff8a3d', 14, 'center', 800);
+  } else {
+    txtFit(ctx, 'Air', cx, A.top + 14, '#8fa0c0', 12, 'center', 700, maxW);
+    txtFit(ctx, 'zero gravity  (g = 0)', cx, A.top + 36,
+           '#ff8a3d', 11.5, 'center', 800, maxW);
+  }
+
+  const tiltDeg = Math.round(waterSim.tilt * 180 / Math.PI);
+  let line1, line2, col1, col2;
+
+  if (!waterSim.gravity){
+    line1 = 'no gravity → the liquid floats as a sphere';
+    line2 = 'it has NO free surface (it does not spread out)';
+    col1 = '#ff9d5c'; col2 = '#9aa8c4';
+  } else if (Math.abs(tiltDeg) > 1){
+    line1 = 'glass tilted ' + Math.abs(tiltDeg) + '°';
+    line2 = 'the free surface stays horizontal';
+    col1 = '#8fd4ff'; col2 = '#9aa8c4';
+  } else {
+    line1 = 'water settles — flat horizontal surface';
+    line2 = 'free surface = boundary with the air above';
+    col1 = '#8fd4ff'; col2 = '#9aa8c4';
+  }
+
+  txtFit(ctx, line1, cx, h - 44, col1, 12.5, 'center', 700, maxW);
+  txtFit(ctx, line2, cx, h - 20, col2, 11.5, 'center', 500, maxW);
+});
+
+const waterSlider = document.getElementById('waterSlider');
+const waterVal = document.getElementById('waterVal');
+if (waterSlider) waterSlider.addEventListener('input', () => {
+  waterSim.level = +waterSlider.value / 100;
+  waterVal.textContent = waterSlider.value;
+});
+
+const tiltBtn = document.getElementById('tiltBtn');
+if (tiltBtn) tiltBtn.addEventListener('click', () => {
+  waterSim.targetTilt = waterSim.targetTilt === 0 ? -0.28 : 0;
+  tiltBtn.classList.toggle('on', waterSim.targetTilt !== 0);
+  tiltBtn.textContent = waterSim.targetTilt !== 0 ? '↺ Straighten' : '↻ Tilt glass';
+  waterSim.surfaceWave = 2.5;
+});
+
+const gravBtn = document.getElementById('gravBtn');
+if (gravBtn) gravBtn.addEventListener('click', () => {
+  waterSim.gravity = !waterSim.gravity;
+  gravBtn.classList.toggle('on', waterSim.gravity);
+  gravBtn.textContent = waterSim.gravity ? '↓ Gravity ON' : '↑ Gravity OFF';
+  waterSim.surfaceWave = 2.5;
+});
+
+const resetWaterBtn = document.getElementById('resetWaterBtn');
+if (resetWaterBtn) resetWaterBtn.addEventListener('click', () => {
+  waterSim.level = 0.45;
+  waterSim.targetTilt = 0;
+  waterSim.tilt = 0;
+  waterSim.gravity = true;
+  waterSim.surfaceWave = 0;
+  if (waterSlider){ waterSlider.value = 45; waterVal.textContent = '45'; }
+  if (tiltBtn){ tiltBtn.classList.remove('on'); tiltBtn.textContent = '↻ Tilt glass'; }
+  if (gravBtn){ gravBtn.classList.add('on'); gravBtn.textContent = '↓ Gravity ON'; }
+});
+
+/* ============================================================
+   SIM 3 · cvGravity
+   ============================================================ */
+const gravSim = { on: true, t: 0, shake: 0 };
+
+reg('cvGravity', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  gravSim.t += DT;
+  if (gravSim.shake > 0) gravSim.shake = Math.max(0, gravSim.shake - DT * 1.2);
+
+  const A  = simArea(h, 30, 76);
+  const cw = Math.min(w * 0.5, 220);
+  const ch = Math.min(A.height * 0.94, 240);
+  const cx = w / 2;
+  const cy = A.mid;
+  const x  = cx - cw / 2;
+  const y  = cy - ch / 2;
+
+  drawGlassOutline(ctx, x, y, cw, ch, { close: true });
+  ctx.fillStyle = 'rgba(120,180,255,.05)';
+  ctx.fill();
+
+  const fillH = ch * 0.6;
+  const waterY = y + ch - fillH;
+
+  ctx.save();
+  drawGlassOutline(ctx, x, y, cw, ch, { close: true });
+  ctx.clip();
+
+  const wg = ctx.createLinearGradient(0, waterY - 20, 0, y + ch);
+  wg.addColorStop(0, 'rgba(90,160,255,.75)');
+  wg.addColorStop(1, 'rgba(25,60,160,.95)');
+  ctx.fillStyle = wg;
+  ctx.fillRect(x, waterY, cw, ch);
+
+  const baseAmp = gravSim.on ? (gravSim.shake * 6) : 4;
+  ctx.strokeStyle = '#a8e0ff';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let px = 0; px <= cw; px += 3){
+    const wob = Math.sin((px * 0.08) + gravSim.t * 3.2) * baseAmp * 0.6
+              + Math.sin((px * 0.14) + gravSim.t * 5) * baseAmp * 0.4;
+    const py = waterY + wob;
+    if (px === 0) ctx.moveTo(x + px, py);
+    else ctx.lineTo(x + px, py);
+  }
+  ctx.stroke();
+  ctx.restore();
+
+  drawGlassOutline(ctx, x, y, cw, ch);
+  ctx.strokeStyle = '#4d8dff';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(140,190,255,.4)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x, y); ctx.lineTo(x + cw, y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  txt(ctx, 'Air', cx, y + 20, '#8fa0c0', 12, 'center', 700);
+
+  const maxW = w - 24;
+
+  if (gravSim.on){
+    const gx = Math.max(16, x - 26);
+    ctx.strokeStyle = '#ff8a3d';
+    ctx.fillStyle = '#ff8a3d';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(gx, y + ch * 0.3); ctx.lineTo(gx, y + ch * 0.7); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(gx, y + ch * 0.7 + 10);
+    ctx.lineTo(gx - 8, y + ch * 0.7 - 2);
+    ctx.lineTo(gx + 8, y + ch * 0.7 - 2);
+    ctx.closePath(); ctx.fill();
+    txt(ctx, 'g', gx, y + ch * 0.5 + 14, '#ff8a3d', 15, 'center', 800);
+
+    txtFit(ctx, 'horizontal free surface', cx, h - 48, '#8fd4ff', 13, 'center', 800, maxW);
+    txtFit(ctx, 'gravity on → the liquid settles and the surface is flat',
+           cx, h - 22, '#9aa8c4', 12, 'center', 500, maxW);
+  } else {
+    txtFit(ctx, 'surface is NOT horizontal', cx, h - 48, '#ff8a3d', 13, 'center', 800, maxW);
+    txtFit(ctx, 'gravity off → no preferred direction, the liquid floats freely',
+           cx, h - 22, '#9aa8c4', 12, 'center', 500, maxW);
+  }
+});
+
+const gravToggle = document.getElementById('gravToggle');
+if (gravToggle) gravToggle.addEventListener('click', () => {
+  gravSim.on = !gravSim.on;
+  gravToggle.classList.toggle('on', gravSim.on);
+  gravToggle.textContent = gravSim.on ? '↓ Gravity ON' : '↑ Gravity OFF';
+});
+
+const shakeBtn = document.getElementById('shakeBtn');
+if (shakeBtn) shakeBtn.addEventListener('click', () => { gravSim.shake = 1.0; });
+
+/* ============================================================
+   SIM 4 · cvFill
+   ============================================================ */
+const fillSim = { size: 1.0, targetSize: 1.0, playing: true, particles: [] };
+
+(function initFillParticles(){
+  const N = 90;
+  for (let i = 0; i < N; i++){
+    const ang = Math.random() * Math.PI * 2;
+    const sp = 0.35 + Math.random() * 0.45;
+    fillSim.particles.push({
+      x: 0.05 + Math.random() * 0.9,
+      y: 0.05 + Math.random() * 0.9,
+      vx: Math.cos(ang) * sp,
+      vy: Math.sin(ang) * sp
+    });
+  }
+})();
+
+reg('cvFill', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  fillSim.size += (fillSim.targetSize - fillSim.size) * Math.min(DT * 4, 1);
+
+  const A  = simArea(h, 36, 78);
+  const maxW = Math.min(w * 0.74, 380);
+  const maxH = Math.min(A.height * 0.94, 250);
+  const cw = maxW * fillSim.size;
+  const ch = maxH * fillSim.size;
+  const cx = w / 2;
+  const cy = A.mid;
+  const x  = cx - cw / 2;
+  const y  = cy - ch / 2;
+
+  ctx.fillStyle = 'rgba(15,155,142,.06)';
+  rr(ctx, x, y, cw, ch, 10);
+  ctx.fill();
+
+  ctx.save();
+  rr(ctx, x, y, cw, ch, 10);
+  ctx.clip();
+
+  const dt = fillSim.playing ? DT : 0;
+  const innerPad = Math.max(6, Math.min(10, cw * 0.06));
+
+  for (const p of fillSim.particles){
+    if (fillSim.playing){
+      p.x += p.vx * dt * 0.9;
+      p.y += p.vy * dt * 0.9;
+
+      if (p.x < 0.02){ p.x = 0.02; p.vx = Math.abs(p.vx); }
+      if (p.x > 0.98){ p.x = 0.98; p.vx = -Math.abs(p.vx); }
+      if (p.y < 0.02){ p.y = 0.02; p.vy = Math.abs(p.vy); }
+      if (p.y > 0.98){ p.y = 0.98; p.vy = -Math.abs(p.vy); }
+
+      p.vx += (Math.random() - 0.5) * 0.05;
+      p.vy += (Math.random() - 0.5) * 0.05;
+
+      const sp = Math.hypot(p.vx, p.vy);
+      if (sp > 1.1){ p.vx = (p.vx / sp) * 1.1; p.vy = (p.vy / sp) * 1.1; }
+      if (sp < 0.3){
+        const ang = Math.random() * Math.PI * 2;
+        p.vx += Math.cos(ang) * 0.05;
+        p.vy += Math.sin(ang) * 0.05;
+      }
+    }
+
+    const px = x + innerPad + p.x * (cw - innerPad * 2);
+    const py = y + innerPad + p.y * (ch - innerPad * 2);
+
+    ctx.fillStyle = 'rgba(120,240,220,.20)';
+    ctx.beginPath(); ctx.arc(px, py, 5.5, 0, 7); ctx.fill();
+
+    ctx.fillStyle = 'rgba(160,255,235,.95)';
+    ctx.beginPath(); ctx.arc(px, py, 2.4, 0, 7); ctx.fill();
+  }
+
+  ctx.restore();
+
+  rr(ctx, x, y, cw, ch, 10);
+  ctx.strokeStyle = '#0f9b8e';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  const maxLabelW = w - 24;
+  txtFit(ctx, 'GAS', cx, h - 62, '#3fd4c0', 14, 'center', 800, maxLabelW);
+  txtFit(ctx, 'container ' + Math.round(fillSim.size * 100) + '% size · ' +
+                fillSim.particles.length + ' molecules',
+         cx, h - 38, '#9aa8c4', 12, 'center', 600, maxLabelW);
+  txtFit(ctx, 'the gas spreads out to fill every available space',
+         cx, h - 16, '#3fd4c0', 12, 'center', 700, maxLabelW);
+});
+
+const sizeSlider = document.getElementById('sizeSlider');
+const sizeVal = document.getElementById('sizeVal');
+if (sizeSlider) sizeSlider.addEventListener('input', () => {
+  fillSim.targetSize = +sizeSlider.value / 100;
+  sizeVal.textContent = sizeSlider.value;
+});
+
+const fillPause = document.getElementById('fillPause');
+if (fillPause) fillPause.addEventListener('click', (e) => {
+  fillSim.playing = !fillSim.playing;
+  e.target.classList.toggle('on', !fillSim.playing);
+  e.target.textContent = fillSim.playing ? '⏸ Pause' : '▶ Play';
+});
+
+/* ============================================================
+   SIM 5 · cvMolecules
+   ============================================================ */
+const molSim = { mode: 'liquid', t: 0, liquidMols: [], gasMols: [] };
+
+(function initMolecules(){
+  const rows = 6, cols = 12;
+  for (let i = 0; i < rows * cols; i++){
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    molSim.liquidMols.push({
+      baseX: 0.08 + (c + 0.5) / cols * 0.84,
+      baseY: 0.58 + (r + 0.5) / rows * 0.36,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: (Math.random() - 0.5) * 0.15,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+  for (let i = 0; i < 26; i++){
+    const ang = Math.random() * Math.PI * 2;
+    const sp = 0.5 + Math.random() * 0.5;
+    molSim.gasMols.push({
+      x: 0.05 + Math.random() * 0.9,
+      y: 0.05 + Math.random() * 0.9,
+      vx: Math.cos(ang) * sp,
+      vy: Math.sin(ang) * sp
+    });
+  }
+})();
+
+reg('cvMolecules', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  molSim.t += DT;
+
+  const A  = simArea(h, 34, 78);
+  const cw = Math.min(w * 0.7, 320);
+  const ch = Math.min(A.height * 0.94, 240);
+  const cx = w / 2;
+  const cy = A.mid;
+  const x  = cx - cw / 2;
+  const y  = cy - ch / 2;
+
+  rr(ctx, x, y, cw, ch, 10);
+  ctx.fillStyle = 'rgba(120,180,255,.04)';
+  ctx.fill();
+  ctx.strokeStyle = '#4d8dff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.save();
+  rr(ctx, x, y, cw, ch, 10);
+  ctx.clip();
+
+  if (molSim.mode === 'liquid'){
+    const surfaceY = y + ch * 0.55;
+
+    const wg = ctx.createLinearGradient(0, surfaceY, 0, y + ch);
+    wg.addColorStop(0, 'rgba(90,160,255,.35)');
+    wg.addColorStop(1, 'rgba(25,60,160,.55)');
+    ctx.fillStyle = wg;
+    ctx.fillRect(x, surfaceY, cw, ch - (surfaceY - y));
+
+    ctx.strokeStyle = '#a8e0ff';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (let px = 0; px <= cw; px += 4){
+      const wob = Math.sin(px * 0.1 + molSim.t * 2) * 1.5;
+      const py = surfaceY + wob;
+      if (px === 0) ctx.moveTo(x + px, py);
+      else ctx.lineTo(x + px, py);
+    }
+    ctx.stroke();
+
+    for (const m of molSim.liquidMols){
+      m.vx += (Math.random() - 0.5) * 0.05;
+      m.vy += (Math.random() - 0.5) * 0.05;
+      m.vx *= 0.9;
+      m.vy *= 0.9;
+
+      const oscX = Math.sin(molSim.t * 2 + m.phase) * 1.2;
+      const oscY = Math.cos(molSim.t * 1.5 + m.phase) * 1.2;
+
+      const px = x + m.baseX * cw + oscX + m.vx * 8;
+      const py = y + m.baseY * ch + oscY + m.vy * 8;
+
+      ctx.fillStyle = 'rgba(140,200,255,.20)';
+      ctx.beginPath(); ctx.arc(px, py, 5.5, 0, 7); ctx.fill();
+
+      ctx.fillStyle = 'rgba(200,232,255,.95)';
+      ctx.beginPath(); ctx.arc(px, py, 3.2, 0, 7); ctx.fill();
+    }
+
+    for (let i = 0; i < 8; i++){
+      const vx = x + 20 + ((i * 53 + molSim.t * 20) % Math.max(1, cw - 40));
+      const vy = y + 20 + ((i * 37 + molSim.t * 10) % Math.max(1, surfaceY - y - 40));
+      ctx.fillStyle = 'rgba(180,220,255,.20)';
+      ctx.beginPath(); ctx.arc(vx, vy, 1.8, 0, 7); ctx.fill();
+    }
+  } else {
+    const gg = ctx.createLinearGradient(0, y, 0, y + ch);
+    gg.addColorStop(0, 'rgba(15,155,142,.12)');
+    gg.addColorStop(1, 'rgba(15,155,142,.22)');
+    ctx.fillStyle = gg;
+    ctx.fillRect(x, y, cw, ch);
+
+    for (const m of molSim.gasMols){
+      m.x += m.vx * DT * 1.4;
+      m.y += m.vy * DT * 1.4;
+
+      if (m.x < 0.02){ m.x = 0.02; m.vx = Math.abs(m.vx); }
+      if (m.x > 0.98){ m.x = 0.98; m.vx = -Math.abs(m.vx); }
+      if (m.y < 0.02){ m.y = 0.02; m.vy = Math.abs(m.vy); }
+      if (m.y > 0.98){ m.y = 0.98; m.vy = -Math.abs(m.vy); }
+
+      m.vx += (Math.random() - 0.5) * 0.08;
+      m.vy += (Math.random() - 0.5) * 0.08;
+      const sp = Math.hypot(m.vx, m.vy);
+      if (sp > 1.3){ m.vx = (m.vx / sp) * 1.3; m.vy = (m.vy / sp) * 1.3; }
+
+      const px = x + 8 + m.x * (cw - 16);
+      const py = y + 8 + m.y * (ch - 16);
+
+      ctx.fillStyle = 'rgba(120,240,220,.15)';
+      ctx.beginPath(); ctx.arc(px - m.vx * 8, py - m.vy * 8, 2, 0, 7); ctx.fill();
+
+      ctx.fillStyle = 'rgba(120,240,220,.18)';
+      ctx.beginPath(); ctx.arc(px, py, 5, 0, 7); ctx.fill();
+
+      ctx.fillStyle = 'rgba(140,250,230,.9)';
+      ctx.beginPath(); ctx.arc(px, py, 2.6, 0, 7); ctx.fill();
+    }
+  }
+
+  ctx.restore();
+
+  const maxW = w - 24;
+  if (molSim.mode === 'liquid'){
+    txtFit(ctx, 'LIQUID MOLECULES', cx, y - 16, '#7cc4ff', 13, 'center', 800, maxW);
+    txtFit(ctx, 'close together · slow vibration', cx, h - 48, '#9aa8c4', 12, 'center', 600, maxW);
+    txtFit(ctx, 'they still slide past each other → the liquid flows',
+           cx, h - 22, '#9aa8c4', 12, 'center', 500, maxW);
+  } else {
+    txtFit(ctx, 'GAS MOLECULES', cx, y - 16, '#3fd4c0', 13, 'center', 800, maxW);
+    txtFit(ctx, 'far apart · fast random motion', cx, h - 48, '#9aa8c4', 12, 'center', 600, maxW);
+    txtFit(ctx, 'they spread out to fill all the space',
+           cx, h - 22, '#9aa8c4', 12, 'center', 500, maxW);
+  }
+});
+
+const molLiquidBtn = document.getElementById('molLiquid');
+const molGasBtn = document.getElementById('molGas');
+if (molLiquidBtn) molLiquidBtn.addEventListener('click', () => {
+  molSim.mode = 'liquid';
+  molLiquidBtn.classList.add('on'); molGasBtn.classList.remove('on');
+});
+if (molGasBtn) molGasBtn.addEventListener('click', () => {
+  molSim.mode = 'gas';
+  molGasBtn.classList.add('on'); molLiquidBtn.classList.remove('on');
+});
+
+/* ============================================================
+   SIM 6 · cvBoundary
+   ============================================================ */
+reg('cvBoundary', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  const A   = simArea(h, 30, 82);
+  const pad = Math.max(16, w * 0.035);
+  const halfW = (w - pad * 3) / 2;
+  const cw = Math.min(halfW * 0.9, 160);
+  const ch = Math.min(A.height * 0.94, 220);
+  const cy = A.mid;
+
+  /* LEFT */
+  const xL = pad + (halfW - cw) / 2;
+  const yL = cy - ch / 2;
+
+  rr(ctx, xL, yL, cw, ch, 10);
+  ctx.fillStyle = 'rgba(120,180,255,.05)';
+  ctx.fill();
+  ctx.strokeStyle = '#4d8dff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  const waterY = yL + ch * 0.42;
+
+  ctx.save();
+  rr(ctx, xL, yL, cw, ch, 10);
+  ctx.clip();
+
+  const wg = ctx.createLinearGradient(0, waterY, 0, yL + ch);
+  wg.addColorStop(0, 'rgba(90,160,255,.75)');
+  wg.addColorStop(1, 'rgba(25,60,160,.92)');
+  ctx.fillStyle = wg;
+  ctx.fillRect(xL, waterY, cw, ch - (waterY - yL));
+
+  ctx.strokeStyle = '#a8e0ff';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(xL, waterY);
+  ctx.lineTo(xL + cw, waterY);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.strokeStyle = '#8fd4ff';
+  ctx.fillStyle = '#8fd4ff';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(xL + cw * 0.5, waterY - 30);
+  ctx.lineTo(xL + cw * 0.5, waterY - 10);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(xL + cw * 0.5, waterY - 6);
+  ctx.lineTo(xL + cw * 0.5 - 4.5, waterY - 14);
+  ctx.lineTo(xL + cw * 0.5 + 4.5, waterY - 14);
+  ctx.closePath(); ctx.fill();
+
+  txtFit(ctx, 'free surface', xL + cw * 0.5, waterY - 40,
+         '#8fd4ff', 11.5, 'center', 700, cw - 8);
+  txt(ctx, 'Air', xL + cw / 2, yL + 16, '#8fa0c0', 11.5, 'center', 700);
+  txt(ctx, 'Water', xL + cw / 2, yL + ch * 0.74, 'rgba(205,228,255,.95)', 12.5, 'center', 800);
+
+  /* RIGHT */
+  const xR = pad * 2 + halfW + (halfW - cw) / 2;
+  const yR = cy - ch / 2;
+
+  rr(ctx, xR, yR, cw, ch, 10);
+  const gg = ctx.createLinearGradient(0, yR, 0, yR + ch);
+  gg.addColorStop(0, 'rgba(15,155,142,.14)');
+  gg.addColorStop(1, 'rgba(15,155,142,.28)');
+  ctx.fillStyle = gg;
+  ctx.fill();
+  ctx.strokeStyle = '#0f9b8e';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.save();
+  rr(ctx, xR, yR, cw, ch, 10);
+  ctx.clip();
+  for (let i = 0; i < 40; i++){
+    const gx = xR + 12 + ((i * 41) % Math.max(1, cw - 24));
+    const gy = yR + 12 + ((i * 67) % Math.max(1, ch - 24));
+    ctx.fillStyle = 'rgba(120,240,220,.7)';
+    ctx.beginPath(); ctx.arc(gx, gy, 2.2, 0, 7); ctx.fill();
+  }
+  ctx.restore();
+
+  const my = yR + ch * 0.5;
+  const mx = xR + cw / 2;
+  ctx.strokeStyle = 'rgba(255,138,61,.55)';
+  ctx.lineWidth = 1.8;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.moveTo(xR + 8, my);
+  ctx.lineTo(xR + cw - 8, my);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = '#ff8a3d';
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(mx - 7, my - 7); ctx.lineTo(mx + 7, my + 7);
+  ctx.moveTo(mx + 7, my - 7); ctx.lineTo(mx - 7, my + 7);
+  ctx.stroke();
+
+  txtFit(ctx, 'no boundary here', mx, my - 22, '#ff8a3d', 11.5, 'center', 700, cw - 8);
+
+  txtFit(ctx, 'LIQUID', xL + cw / 2, h - 58, '#4d8dff', 13.5, 'center', 800, halfW - 4);
+  txtFit(ctx, 'has a free surface', xL + cw / 2, h - 30, '#9aa8c4', 11.5, 'center', 500, halfW - 4);
+
+  txtFit(ctx, 'GAS', xR + cw / 2, h - 58, '#0f9b8e', 13.5, 'center', 800, halfW - 4);
+  txtFit(ctx, 'no free surface', xR + cw / 2, h - 30, '#9aa8c4', 11.5, 'center', 500, halfW - 4);
+
+  txt(ctx, 'vs', w / 2, cy, '#b9b3a5', 15, 'center', 800);
+});
+
+/* ============================================================
+   SIM 7 · cvGravRole
+   ============================================================ */
+const gravRoleSim = { on: true, t: 0, tiltProgress: 0 };
+
+reg('cvGravRole', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+
+  gravRoleSim.t += DT;
+  const targetTilt = gravRoleSim.on ? 0 : 1;
+  gravRoleSim.tiltProgress += (targetTilt - gravRoleSim.tiltProgress) * Math.min(DT * 3, 1);
+
+  const A  = simArea(h, 30, 78);
+  const cw = Math.min(w * 0.5, 220);
+  const ch = Math.min(A.height * 0.94, 220);
+  const cx = w / 2;
+  const cy = A.mid;
+  const x  = cx - cw / 2;
+  const y  = cy - ch / 2;
+
+  drawGlassOutline(ctx, x, y, cw, ch, { close: true });
+  ctx.fillStyle = 'rgba(120,180,255,.05)';
+  ctx.fill();
+
+  ctx.save();
+  drawGlassOutline(ctx, x, y, cw, ch, { close: true });
+  ctx.clip();
+
+  const fillH = ch * 0.6;
+  const flatY = y + ch - fillH;
+  const maxW = w - 24;
+
+  if (gravRoleSim.on){
+    const wg = ctx.createLinearGradient(0, flatY, 0, y + ch);
+    wg.addColorStop(0, 'rgba(90,160,255,.75)');
+    wg.addColorStop(1, 'rgba(25,60,160,.92)');
+    ctx.fillStyle = wg;
+    ctx.fillRect(x, flatY, cw, ch - (flatY - y));
+
+    ctx.strokeStyle = '#a8e0ff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x, flatY); ctx.lineTo(x + cw, flatY);
+    ctx.stroke();
+  } else {
+    const amp = 14 + Math.sin(gravRoleSim.t * 1.5) * 4;
+    const freq = 0.06;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y + ch);
+    ctx.lineTo(x, flatY);
+    for (let px = 0; px <= cw; px += 4){
+      const wob = Math.sin(px * freq + gravRoleSim.t * 2) * amp;
+      ctx.lineTo(x + px, flatY + wob * gravRoleSim.tiltProgress);
+    }
+    ctx.lineTo(x + cw, y + ch);
+    ctx.closePath();
+
+    const wg = ctx.createLinearGradient(0, flatY - amp, 0, y + ch);
+    wg.addColorStop(0, 'rgba(255,138,61,.55)');
+    wg.addColorStop(1, 'rgba(180,80,20,.75)');
+    ctx.fillStyle = wg;
+    ctx.fill();
+
+    ctx.strokeStyle = '#ffb380';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let px = 0; px <= cw; px += 4){
+      const wob = Math.sin(px * freq + gravRoleSim.t * 2) * amp;
+      const py = flatY + wob * gravRoleSim.tiltProgress;
+      if (px === 0) ctx.moveTo(x + px, py);
+      else ctx.lineTo(x + px, py);
+    }
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+  drawGlassOutline(ctx, x, y, cw, ch);
+  ctx.strokeStyle = '#4d8dff';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  txt(ctx, 'Air', cx, y + 20, '#8fa0c0', 11.5, 'center', 700);
+
+  if (gravRoleSim.on){
+    const gx = Math.max(16, x - 26);
+    ctx.strokeStyle = '#ff8a3d';
+    ctx.fillStyle = '#ff8a3d';
+    ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.moveTo(gx, y + 30); ctx.lineTo(gx, y + ch - 30); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(gx, y + ch - 20);
+    ctx.lineTo(gx - 8, y + ch - 32);
+    ctx.lineTo(gx + 8, y + ch - 32);
+    ctx.closePath(); ctx.fill();
+    txt(ctx, 'g', gx, y + ch / 2 + 16, '#ff8a3d', 16, 'center', 800);
+
+    txtFit(ctx, 'gravity pulls the liquid downward', cx, h - 48,
+           '#ff8a3d', 12.5, 'center', 700, maxW);
+    txtFit(ctx, '→ flat, horizontal free surface', cx, h - 22,
+           '#8fd4ff', 12.5, 'center', 700, maxW);
+  } else {
+    txt(ctx, 'g = 0', cx, y + 20, '#ff8a3d', 16, 'center', 800);
+
+    txtFit(ctx, 'no gravity — the liquid floats freely', cx, h - 48,
+           '#ff8a3d', 12.5, 'center', 700, maxW);
+    txtFit(ctx, '→ nothing forces the surface to be horizontal', cx, h - 22,
+           '#ff9d5c', 12.5, 'center', 700, maxW);
+  }
+});
+
+const grToggle = document.getElementById('grToggle');
+if (grToggle) grToggle.addEventListener('click', () => {
+  gravRoleSim.on = !gravRoleSim.on;
+  grToggle.classList.toggle('on', gravRoleSim.on);
+  grToggle.textContent = gravRoleSim.on ? '↓ Gravity ON' : '↑ Gravity OFF';
+});
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+let lastT = performance.now();
+
+function loop(now){
+  DT = Math.min((now - lastT) / 1000, 0.05);
+  lastT = now;
+  GT += DT;
+
+  if (waterSim.surfaceWave > 0.05) waterSim.surfaceWave *= 0.96;
+  else waterSim.surfaceWave = 0;
+
+  canvases.forEach(o => {
+    if (o.w === 0) return;
+    if (o.pageIdx === -1 || !o.c.isConnected){
+      const pageEl = o.c.closest('.page');
+      o.pageIdx = pages.indexOf(pageEl);
+    }
+    if (o.pageIdx === -1) return;
+    if (Math.abs(o.pageIdx - currentIdx) <= 1) o.draw(o);
+  });
+
+  requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   RESIZE
+   ============================================================ */
+let resizeRaf = null;
+function requestResize(){
+  if (resizeRaf) cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resizeAll(); });
+}
+window.addEventListener('resize', requestResize);
+window.addEventListener('orientationchange', () => setTimeout(resizeAll, 250));
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot(){
+  rebuildDots();
+  updateZ();
+  updateUI();
+  resizeAll();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
+  setTimeout(resizeAll, 120);
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(() => requestResize());
+  }
+}
+
+window.addEventListener('load', boot);
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>

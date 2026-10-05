@@ -1,0 +1,3544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Adhesion, Cohesion &amp; Viscosity — Interactive Book</title>
+<style>
+  :root{
+    --paper:#fffefb;
+    --ink:#191c24;
+    --muted:#5d6472;
+    --line:#e5e0d6;
+    --accent:#2f6df6;
+    --accent-soft:#e8efff;
+    --shear:#e8590c;
+    --shear-soft:#ffeee4;
+    --teal:#0f9b8e;
+    --teal-soft:#e2f6f4;
+    --panel:#0e1422;
+    --panel-line:#243049;
+    --radius:16px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 50% -20%, #f4f0e6 0%, transparent 70%),
+      linear-gradient(180deg,#ded7c8,#e9e4d9 60%,#ddd6c7);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.25;margin:0}
+
+  .stage{position:fixed;inset:0;overflow:hidden;}
+  .book{position:absolute;inset:0;perspective:2600px;perspective-origin:50% 50%;}
+
+  .page{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,#fffefb 0%,#fdfbf6 100%);
+    padding:44px max(24px, calc(50vw - 420px)) 120px;
+    font-size:16.5px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    transform-origin:left center;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    transition:transform .95s cubic-bezier(.44,.05,.22,1);
+    will-change:transform;
+    scrollbar-width:thin;
+    scrollbar-color:#cfc7b4 transparent;
+  }
+  .page::-webkit-scrollbar{width:8px}
+  .page::-webkit-scrollbar-thumb{background:#d5cdbb;border-radius:6px}
+  .page::-webkit-scrollbar-track{background:transparent}
+  .page.flipped{transform:rotateY(-180deg);}
+
+  .page.cover{
+    background:
+      radial-gradient(700px 400px at 30% 20%, #eef3ff 0%, transparent 65%),
+      radial-gradient(600px 500px at 80% 90%, #ffeede 0%, transparent 60%),
+      linear-gradient(180deg,#fffefb 0%,#fbf8f1 100%);
+    display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+    padding:60px max(24px, calc(50vw - 420px)) 120px;
+  }
+  .cover .kicker{
+    font-size:12px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--accent);font-weight:800;margin-bottom:20px;
+  }
+  .cover h1{font-size:clamp(36px,6.4vw,66px);letter-spacing:-1px;line-height:1.06}
+  .cover h1 em{font-style:italic;color:var(--shear)}
+  .cover p{max-width:560px;color:var(--muted);font-size:17.5px;margin:22px 0 0}
+  .cover .pill{
+    display:inline-block;margin-top:32px;padding:11px 22px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);font-family:var(--mono);font-size:15px;
+    box-shadow:0 8px 24px rgba(25,28,36,.07);
+  }
+  .cover .pill b{color:var(--shear)}
+  .cover .start{
+    margin-top:38px;display:inline-flex;align-items:center;gap:10px;
+    background:var(--accent);color:#fff;border:none;border-radius:12px;
+    padding:13px 24px;font-size:15px;font-weight:600;cursor:pointer;
+    box-shadow:0 10px 26px -8px rgba(47,109,246,.55);
+    transition:.18s;font-family:inherit;
+  }
+  .cover .start:hover{background:#245ad4;transform:translateY(-1px)}
+  .cover .start svg{width:16px;height:16px}
+
+  .chip{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:30px;height:30px;padding:0 9px;border-radius:9px;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:700;
+    font-family:var(--mono);margin-right:12px;flex:none;
+  }
+  .page h2{
+    font-size:clamp(24px,3.4vw,34px);display:flex;align-items:center;
+    margin-bottom:20px;letter-spacing:-.4px;
+  }
+  .page h3{font-size:18px;margin:26px 0 8px;color:#2a2f3d}
+  .page p{margin:14px 0;color:#333846}
+  .page ul{margin:14px 0;padding-left:22px;color:#333846}
+  .page li{margin:6px 0}
+  strong{color:var(--ink)}
+  em.term{font-style:normal;background:var(--shear-soft);color:var(--shear);
+    padding:1px 6px;border-radius:6px;font-weight:600;}
+
+  .callout{
+    background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:12px;padding:16px 20px;margin:22px 0;
+    box-shadow:0 4px 16px rgba(25,28,36,.04);
+  }
+  .callout.shear{border-left-color:var(--shear)}
+  .callout.teal{border-left-color:var(--teal)}
+  .callout p{margin:6px 0}
+
+  .eq{
+    background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:18px 22px;margin:20px 0;text-align:center;
+    font-family:var(--mono);font-size:20px;letter-spacing:.5px;
+    box-shadow:0 4px 16px rgba(25,28,36,.04);
+  }
+  .eq .frac{display:inline-flex;flex-direction:column;vertical-align:middle;
+    text-align:center;font-size:.82em;line-height:1.15;margin:0 4px}
+  .eq .frac .num{border-bottom:1.5px solid currentColor;padding:0 6px 2px}
+  .eq .frac .den{padding:2px 6px 0}
+  .eq .lbl{display:block;font-size:12px;color:var(--muted);margin-top:10px;
+    font-family:-apple-system,sans-serif;letter-spacing:.02em}
+
+  .sim{
+    background:var(--panel);border-radius:var(--radius);padding:18px;
+    margin:24px 0;box-shadow:0 18px 40px rgba(14,20,34,.22);
+    color:#dfe6f5;
+  }
+  .sim-head{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;
+    justify-content:space-between;margin-bottom:12px;
+  }
+  .sim-head .t{font-size:13px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:#7f8dab}
+  .sim-head .hint{font-size:12.5px;color:#6c7a97}
+  canvas{display:block;width:100%;border-radius:10px;background:#0b101c}
+
+  .controls{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:14px 20px;margin-top:16px;
+  }
+  .ctrl label{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:12.5px;color:#9aa8c4;margin-bottom:6px;letter-spacing:.02em;
+  }
+  .ctrl label b{color:#7cc4ff;font-family:var(--mono);font-weight:600}
+  input[type=range]{width:100%;accent-color:#4d8dff;height:20px;cursor:pointer;}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  button.tg{
+    background:#1a2438;border:1px solid var(--panel-line);color:#a9b7d3;
+    padding:7px 14px;border-radius:9px;font-size:12.5px;cursor:pointer;
+    transition:.15s;font-family:inherit;
+  }
+  button.tg:hover{border-color:#3c5480;color:#dfe6f5}
+  button.tg.on{background:#22406f;border-color:#3f6fbe;color:#cfe2ff}
+  .readout{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .ro{
+    flex:1 1 130px;background:#141d2f;border:1px solid var(--panel-line);
+    border-radius:10px;padding:10px 14px;
+  }
+  .ro .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7183a3}
+  .ro .v{font-family:var(--mono);font-size:19px;color:#8fd4ff;
+    font-variant-numeric:tabular-nums;margin-top:2px}
+  .ro .v small{font-size:12px;color:#7f8dab}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin:14px 0 0;font-size:13px;color:#8fa0c0}
+  .legend i{display:inline-block;width:13px;height:13px;border-radius:4px;
+    margin-right:7px;vertical-align:-1px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+  .chips span{
+    background:#fff;border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:14px;color:#3a4152;
+  }
+  .chips span.tag{background:var(--accent-soft);border-color:#cddcff;color:var(--accent);font-weight:600}
+
+  .tbl-wrap{overflow-x:auto;margin:22px 0;border-radius:14px;
+    border:1px solid var(--line);background:#fff}
+  table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px}
+  th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:#faf9f6;font-weight:700;font-size:13px;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--muted)}
+  tbody tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:600;color:#2a2f3d}
+
+  .chain{display:flex;flex-direction:column;align-items:center;gap:0;margin:26px 0}
+  .chain .node{
+    background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:11px 22px;font-weight:600;font-size:14.5px;text-align:center;
+    box-shadow:0 3px 12px rgba(25,28,36,.05);min-width:200px;color:#2a2f3d;
+  }
+  .chain .node.hot{background:var(--shear-soft);border-color:#ffd2b8;color:var(--shear)}
+  .chain .node.cool{background:var(--accent-soft);border-color:#cddcff;color:var(--accent)}
+  .chain .node.mint{background:var(--teal-soft);border-color:#bfe9e5;color:var(--teal)}
+  .chain .arr{color:#b9b3a5;font-size:18px;line-height:1;padding:6px 0}
+  .chain .split{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+  .chain .branch{display:flex;flex-direction:column;align-items:center}
+
+  .deflist{display:grid;gap:14px;margin:22px 0}
+  .def{
+    background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;box-shadow:0 4px 16px rgba(25,28,36,.04);
+  }
+  .def .dt{font-weight:700;color:var(--accent);font-size:14px;
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .def .dd{color:#333846}
+  .def .dd code{font-family:var(--mono);background:#f2f0ea;padding:2px 7px;border-radius:6px}
+
+  .sim-explain{
+    background:#f4fbfa;
+    border:1px solid #c9ece8;
+    border-left:4px solid var(--teal);
+    border-radius:12px;
+    padding:18px 22px;
+    margin:-8px 0 26px;
+    box-shadow:0 4px 16px rgba(15,155,142,.06);
+  }
+  .sim-explain h3{
+    margin:0 0 8px 0;
+    font-size:16px;
+    color:var(--teal);
+    letter-spacing:-.2px;
+  }
+  .sim-explain p{
+    margin:8px 0;
+    font-size:15px;
+    color:#2b3a3a;
+    line-height:1.7;
+  }
+  .sim-explain strong{color:#0b6c62}
+  .sim-explain ul{margin:8px 0 8px 20px;color:#2b3a3a;font-size:15px}
+  .sim-explain li{margin:4px 0}
+  .sim-explain code{
+    font-family:var(--mono);background:#e2f4f1;padding:1px 6px;
+    border-radius:5px;font-size:13.5px;color:#0b6c62;
+  }
+  .sim-explain .tag-note{
+    display:inline-block;background:var(--teal);color:#fff;
+    font-size:10.5px;font-weight:800;letter-spacing:.12em;
+    text-transform:uppercase;padding:3px 9px;border-radius:6px;
+    margin-bottom:8px;
+  }
+
+  .book-nav{
+    position:fixed;
+    bottom:max(14px, env(safe-area-inset-bottom));
+    left:50%;
+    transform:translateX(-50%);
+    z-index:7000;
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,254,251,.95);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid #d8d0bd;
+    border-radius:999px;
+    padding:5px 8px;
+    box-shadow:0 8px 30px -8px rgba(60,50,20,.25);
+    font-family:inherit;
+    user-select:none;
+    max-width:calc(100vw - 20px);
+  }
+  .nav-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:#fff;border:1px solid #e0daca;color:#3a3f4d;
+    width:32px;height:32px;border-radius:50%;cursor:pointer;
+    transition:.15s;padding:0;
+  }
+  .nav-btn:hover:not(:disabled){background:#fffef8;border-color:#b9ae93}
+  .nav-btn:disabled{opacity:.32;cursor:not-allowed}
+  .nav-btn svg{width:14px;height:14px}
+
+  .nav-center{display:flex;flex-direction:column;align-items:center;gap:3px;
+    min-width:0;padding:0 6px}
+  .nav-title{
+    font-size:11.5px;color:#6b6350;letter-spacing:.02em;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;
+  }
+  .dots{display:flex;gap:5px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .dot{
+    width:7px;height:7px;border-radius:50%;background:#c9c0ab;border:none;
+    cursor:pointer;transition:.18s;padding:0;
+  }
+  .dot:hover{background:#9a8f74;transform:scale(1.25)}
+  .dot.active{background:var(--accent);width:18px;border-radius:4px}
+  .page-num{font-family:var(--mono);font-size:10px;color:#8a8168;letter-spacing:.06em}
+
+  .edit-fab{
+    position:fixed;
+    top:max(14px, env(safe-area-inset-top));
+    right:14px;
+    z-index:7500;
+    width:38px;height:38px;
+    border-radius:50%;
+    background:rgba(255,254,251,.96);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid #d8d0bd;
+    color:#3a3f4d;
+    display:inline-flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.28);
+    transition:.15s;
+    font-family:inherit;
+    padding:0;
+  }
+  .edit-fab:hover{background:#fffef8;border-color:#b9ae93;transform:translateY(-1px)}
+  .edit-fab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .edit-fab svg{width:16px;height:16px}
+
+  .edit-actions{
+    position:fixed;
+    top:max(60px, calc(env(safe-area-inset-top) + 60px));
+    right:14px;
+    z-index:7400;
+    display:flex;flex-direction:column;gap:5px;align-items:flex-end;
+    font-family:inherit;
+  }
+  .edit-actions[hidden]{display:none}
+  .edit-actions input.title-edit{
+    background:rgba(255,254,251,.97);
+    border:1px solid #d8d0bd;border-radius:10px;
+    padding:6px 10px;font-size:12px;font-family:inherit;color:#3a3f4d;
+    width:160px;font-weight:600;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.22);
+  }
+  .edit-actions input.title-edit:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,246,.15);
+  }
+  .edit-actions button{
+    background:rgba(255,254,251,.97);border:1px solid #d8d0bd;color:#3a3f4d;
+    padding:6px 11px;border-radius:9px;cursor:pointer;
+    font-weight:600;font-size:11.5px;display:inline-flex;align-items:center;gap:5px;
+    transition:.15s;font-family:inherit;
+    box-shadow:0 6px 18px -6px rgba(60,50,20,.22);
+  }
+  .edit-actions button:hover{background:#fffef8;border-color:#b9ae93}
+  .edit-actions button.danger{color:#c92a2a;border-color:#f0bcbc}
+  .edit-actions button.danger:hover{background:#fff5f5;border-color:#e8a0a0}
+  .edit-actions button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .edit-actions button.primary:hover{background:#245ad4}
+  .edit-actions button svg{width:12px;height:12px}
+
+  body.edit-mode .page{outline:2px dashed rgba(47,109,246,.35);outline-offset:-10px}
+  body.edit-mode .page:focus-within{outline-color:rgba(47,109,246,.85)}
+  body.edit-mode .page [contenteditable="false"]{user-select:none}
+
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(20,18,12,.55);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    z-index:9000;display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .modal-backdrop[hidden]{display:none}
+  .modal{
+    background:#fffefb;border-radius:18px;padding:26px 28px;
+    width:min(440px,100%);max-height:90vh;overflow-y:auto;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.5);
+    font-family:inherit;
+  }
+  .modal.wide{width:min(760px,100%)}
+  .modal h3{font-size:21px;margin-bottom:6px;letter-spacing:-.3px}
+  .modal .sub{color:#6b6350;font-size:13.5px;margin:0 0 6px}
+  .modal label{
+    display:block;font-size:11.5px;font-weight:800;color:#3a3f4d;
+    margin:14px 0 6px;letter-spacing:.08em;text-transform:uppercase;
+  }
+  .modal input[type=text],.modal input[type=password],.modal textarea{
+    width:100%;background:#fbf9f4;border:1px solid #d8d0bd;border-radius:11px;
+    padding:11px 14px;font-family:inherit;font-size:14px;color:#191c24;
+    resize:vertical;
+  }
+  .modal textarea{
+    font-family:var(--mono);font-size:12.5px;line-height:1.55;min-height:220px;
+    white-space:pre;overflow:auto;tab-size:2;
+  }
+  .modal input:focus,.modal textarea:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(47,109,246,.15);
+  }
+  .modal .hint{color:#8a8168;font-size:12px;margin-top:8px;line-height:1.55;}
+  .modal .hint code{
+    font-family:var(--mono);background:#f0ece0;padding:1px 6px;
+    border-radius:5px;font-size:11.5px;
+  }
+  .modal .login-error{
+    color:#c92a2a;background:#fff5f5;border:1px solid #f0bcbc;
+    padding:9px 12px;border-radius:9px;font-size:13px;margin-top:14px;
+  }
+  .modal-actions{
+    display:flex;justify-content:flex-end;gap:9px;margin-top:22px;
+    padding-top:18px;border-top:1px solid #eee9de;
+  }
+  .modal-actions button{
+    padding:10px 18px;border-radius:11px;font-size:13.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;border:1px solid #d8d0bd;
+    background:#fff;color:#3a3f4d;transition:.15s;
+  }
+  .modal-actions button:hover{background:#faf7ef}
+  .modal-actions button.primary{
+    background:var(--accent);color:#fff;border-color:var(--accent);
+    box-shadow:0 8px 22px -8px rgba(47,109,246,.6);
+  }
+  .modal-actions button.primary:hover{background:#245ad4}
+
+  @media (max-width:760px){
+    body{line-height:1.7}
+    .page{padding:56px 20px 110px;font-size:16px}
+    .page.cover{padding:60px 24px 110px}
+
+    .page h2{font-size:clamp(22px,5.6vw,28px);margin-bottom:16px}
+    .page h3{font-size:16.5px;margin:20px 0 6px}
+    .chip{min-width:26px;height:26px;font-size:12.5px;margin-right:9px}
+
+    .sim{padding:12px;margin:18px 0}
+    .sim canvas{height:240px !important}
+    #cvNewton{height:440px !important}
+    #cvVisc{height:320px !important}
+    #cvBL{height:320px !important}
+    #cvPeople{height:360px !important}
+    #cvNoSlip{height:300px !important}
+    #cvPipe{height:340px !important}
+
+    .controls{grid-template-columns:1fr;gap:10px}
+    .readout .ro .v{font-size:16px}
+    .eq{font-size:17px;padding:14px 16px}
+    .eq .lbl{font-size:11px}
+    .callout{padding:14px 16px;margin:18px 0}
+    .sim-explain{padding:14px 16px;margin:-4px 0 20px}
+    .sim-explain p, .sim-explain ul{font-size:14.5px}
+
+    table{font-size:13px;min-width:440px}
+    th,td{padding:9px 12px}
+
+    .chain .node{min-width:0;width:100%;font-size:13.5px;padding:10px 14px}
+    .chain .split{flex-direction:column;gap:14px;align-items:center}
+    .chain .branch{width:100%}
+
+    .nav-btn{width:30px;height:30px}
+    .nav-title{max-width:120px;font-size:11px}
+    .dot{width:6px;height:6px}
+    .dot.active{width:14px}
+
+    .edit-fab{width:34px;height:34px;top:10px;right:10px}
+    .edit-fab svg{width:14px;height:14px}
+    .edit-actions{top:52px;right:10px}
+    .edit-actions input.title-edit{width:130px;font-size:11.5px}
+    .edit-actions button{padding:5px 9px;font-size:11px}
+
+    .modal{padding:22px 20px}
+    .modal h3{font-size:19px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .page{transition-duration:.35s}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="book" id="book">
+
+    <!-- ============== PAGE 0 · COVER ============== -->
+    <div class="page cover" data-title-en="Cover">
+      <div class="kicker" data-i18n="coverKicker">Interactive Fluid Mechanics</div>
+      <h1 data-i18n-html="coverH1">Adhesion,<br>Cohesion &amp;<br><em>Viscosity</em></h1>
+      <p data-i18n="coverP">Why a fluid sticks to a wall, why its own molecules pull on each other, and how that turns into the no-slip condition, a velocity profile and a boundary layer.</p>
+      <div class="pill" data-i18n-html="coverPill"><b>τ</b> = μ · du/dy &nbsp;→&nbsp; no-slip → profile → <b>boundary layer</b></div>
+      <button class="start" id="startBtn">
+        <span data-i18n="start">Start reading</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <!-- ============== PAGE 1 · ADHESION ============== -->
+    <div class="page" data-title-en="1 · What is Adhesion?">
+      <h2><span class="chip">1</span><span data-i18n="p1title">What is Adhesion?</span></h2>
+
+      <div class="callout shear">
+        <p style="font-size:18px;margin:4px 0" data-i18n-html="p1callout"><strong>Adhesion is the attraction between <span style="color:var(--shear)">different</span> substances.</strong></p>
+      </div>
+
+      <p data-i18n="p1examples">For example:</p>
+      <div class="chips">
+        <span data-i18n="p1c1">water ↔ glass</span>
+        <span data-i18n="p1c2">water ↔ metal</span>
+        <span data-i18n="p1c3">oil ↔ solid surface</span>
+      </div>
+
+      <p data-i18n-html="p1remember">Easy way to remember it: <strong>Adhesion = <em class="term">different</em></strong>.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim1T">Simulation · Water on Glass</span>
+          <span class="hint" data-i18n="sim1H">Dashed orange links = fluid–solid interaction</span>
+        </div>
+        <canvas id="cvAdhesion" style="height:330px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblAdh">Adhesion strength</span> <b><span id="adhVal">70</span>%</b></label>
+            <input type="range" id="adhSlider" min="0" max="100" value="70">
+          </div>
+        </div>
+        <div class="legend">
+          <span><i style="background:#5fa8f5"></i><span data-i18n="legWater">Water molecule</span></span>
+          <span><i style="background:#2f6df6"></i><span data-i18n="legGlass">Glass surface atom</span></span>
+          <span><i style="background:#ff8a3d"></i><span data-i18n="legAdhBond">Adhesion bond</span></span>
+        </div>
+      </div>
+
+      <p data-i18n="p1after">Water molecules near the glass are pulled toward it. That pull is the <strong>fluid–solid interaction</strong> we call adhesion. Slide the strength to zero and the links fade away.</p>
+    </div>
+
+    <!-- ============== PAGE 2 · COHESION ============== -->
+    <div class="page" data-title-en="2 · What is Cohesion?">
+      <h2><span class="chip">2</span><span data-i18n="p2title">What is Cohesion?</span></h2>
+
+      <div class="callout">
+        <p style="font-size:18px;margin:4px 0" data-i18n-html="p2callout"><strong>Cohesion is the attraction between molecules of the <span style="color:var(--accent)">same</span> substance.</strong></p>
+      </div>
+
+      <p data-i18n="p2examples">For example:</p>
+      <div class="chips">
+        <span data-i18n="p2c1">water ↔ water</span>
+        <span data-i18n="p2c2">oil ↔ oil</span>
+        <span data-i18n="p2c3">air ↔ air</span>
+      </div>
+
+      <p data-i18n-html="p2remember">Easy way to remember it: <strong>Cohesion = <em class="term">same</em></strong>.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim2T">Simulation · Water Molecules</span>
+          <span class="hint" data-i18n="sim2H">Blue links = fluid–fluid interaction</span>
+        </div>
+        <canvas id="cvCohesion" style="height:330px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblCoh">Cohesion strength</span> <b><span id="cohVal">80</span>%</b></label>
+            <input type="range" id="cohSlider" min="0" max="100" value="80">
+          </div>
+        </div>
+        <div class="legend">
+          <span><i style="background:#5fa8f5"></i><span data-i18n="legWater">Water molecule</span></span>
+          <span><i style="background:#4d8dff"></i><span data-i18n="legCohBond">Cohesion bond</span></span>
+        </div>
+      </div>
+
+      <div class="eq">
+        <span data-i18n="eq1">Adhesion = different &nbsp;&nbsp;·&nbsp;&nbsp; Cohesion = same</span>
+        <span class="lbl" data-i18n="eq1lbl">Two words, two different interactions</span>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 3 · ADHESION vs COHESION ============== -->
+    <div class="page" data-title-en="3 · Adhesion vs Cohesion">
+      <h2><span class="chip">3</span><span data-i18n="p3title">Adhesion vs Cohesion</span></h2>
+
+      <p data-i18n="p3a">Consider water flowing along a solid wall. Two different interactions are happening at the same time.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim3T">Simulation · Both Interactions at Once</span>
+          <span class="hint" data-i18n="sim3H">Toggle each bond type on and off</span>
+        </div>
+        <canvas id="cvBoth" style="height:330px"></canvas>
+        <div class="btnrow">
+          <button class="tg on" id="tgAdh" data-i18n="btnAdhBonds">Adhesion bonds</button>
+          <button class="tg on" id="tgCoh" data-i18n="btnCohBonds">Cohesion bonds</button>
+        </div>
+        <div class="legend">
+          <span><i style="background:#ff8a3d"></i><span data-i18n="legAdhWater">Adhesion — water ↔ wall (different)</span></span>
+          <span><i style="background:#4d8dff"></i><span data-i18n="legCohWater">Cohesion — water ↔ water (same)</span></span>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th data-i18n="thConcept">Concept</th><th data-i18n="thInteraction">Interaction</th><th data-i18n="thBetween">Between</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-i18n="trAdh">Adhesion</td><td data-i18n="trAdhI">Fluid–solid</td><td data-i18n="trAdhB">Different substances</td></tr>
+            <tr><td data-i18n="trCoh">Cohesion</td><td data-i18n="trCohI">Fluid–fluid</td><td data-i18n="trCohB">Same substance</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 4 · WHY THEY MATTER ============== -->
+    <div class="page" data-title-en="4 · Why They Matter">
+      <h2><span class="chip">4</span><span data-i18n="p4title">Why Are They Important?</span></h2>
+
+      <p data-i18n="p4a">These two interactions help us understand what happens when a fluid touches a solid wall, and what happens between neighbouring regions <em>inside</em> the fluid.</p>
+
+      <div class="chain">
+        <div class="node hot" data-i18n="ch1a">At the wall — fluid–solid interaction</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n-html="ch1b">Related to <strong>adhesion</strong></div>
+        <div class="arr">↓</div>
+        <div class="node cool" data-i18n="ch1c">Macroscopic result: the NO-SLIP condition</div>
+      </div>
+
+      <div class="chain">
+        <div class="node cool" data-i18n="ch2a">Inside the fluid — fluid–fluid interaction</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n-html="ch2b">Related to <strong>cohesion</strong></div>
+        <div class="arr">↓</div>
+        <div class="node mint" data-i18n="ch2c">Macroscopic result: VISCOUS behaviour</div>
+      </div>
+
+      <div class="callout shear">
+        <h3 style="margin-top:0" data-i18n="p4carefulH">Be careful with the wording</h3>
+        <p data-i18n="p4careful1">It is <strong>not</strong> correct to say:</p>
+        <ul>
+          <li data-i18n="p4careful2">“Adhesion <em>is</em> viscosity.”</li>
+          <li data-i18n="p4careful3">“Cohesion <em>is</em> viscosity.”</li>
+        </ul>
+        <p data-i18n="p4careful4">They are <strong>related concepts</strong>, but they are not the same thing. Molecular interactions <em>contribute to</em> viscous behaviour; viscosity is the macroscopic property we use to <em>quantify</em> it.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 5 · VISCOSITY ============== -->
+    <div class="page" data-title-en="5 · What is Viscosity?">
+      <h2><span class="chip">5</span><span data-i18n="p5title">What is Viscosity?</span></h2>
+
+      <div class="callout">
+        <p style="font-size:18px;margin:4px 0" data-i18n-html="p5callout"><strong>Viscosity describes a fluid's resistance to <span style="color:var(--accent)">relative motion between neighbouring fluid regions</span>.</strong></p>
+      </div>
+
+      <p data-i18n="p5a">Water flows easily. Honey flows slowly. Honey has a higher viscosity than water.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim5T">Simulation · Same Push, Different Fluid</span>
+          <span class="hint" data-i18n="sim5H">Identical shear stress τ applied to both channels</span>
+        </div>
+        <canvas id="cvVisc" style="height:340px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblMuB">Viscosity of fluid B</span> <b><span id="muBVal">250</span>× water</b></label>
+            <input type="range" id="muBSlider" min="1" max="400" value="250">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k" data-i18n="roWaterRate">Water · du/dy</div><div class="v" id="vWater">100 <small>%</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roBRate">Fluid B · du/dy</div><div class="v" id="vB">—</div></div>
+          <div class="ro"><div class="k" data-i18n="roRatio">Viscosity ratio</div><div class="v" id="vRatio">250 <small>×</small></div></div>
+        </div>
+      </div>
+
+      <div class="eq">
+        <span data-i18n="eq5">Higher viscosity → greater resistance to relative motion</span>
+        <span class="lbl" data-i18n="eq5lbl">For the same applied shear stress, a more viscous fluid shears more slowly</span>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 6 · DOES COHESION CAUSE VISCOSITY ============== -->
+    <div class="page" data-title-en="6 · Does Cohesion Cause Viscosity?">
+      <h2><span class="chip">6</span><span data-i18n="p6title">Does Cohesion Cause Viscosity?</span></h2>
+
+      <p data-i18n="p6a">This is where we need to be precise. The simple answer is:</p>
+
+      <div class="callout teal">
+        <p style="font-size:17px;margin:4px 0" data-i18n-html="p6callout"><strong>Fluid–fluid molecular interactions <em>contribute to</em> viscous behaviour.</strong></p>
+      </div>
+
+      <p data-i18n-html="p6b">Cohesive interactions are part of the molecular interactions inside a fluid, and those interactions allow <strong>momentum transfer</strong> between neighbouring regions.</p>
+
+      <div class="chain">
+        <div class="node cool" data-i18n="p6ch1">Fluid–fluid molecular interactions</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n="p6ch2">Momentum transfer</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n="p6ch3">Resistance to relative motion</div>
+        <div class="arr">↓</div>
+        <div class="node mint" data-i18n="p6ch4">Viscous behaviour</div>
+      </div>
+
+      <div class="callout shear" style="text-align:center">
+        <p style="font-family:Georgia,serif;font-size:20px;margin:6px 0" data-i18n="p6not"><strong>Cohesion ≠ viscosity</strong></p>
+        <p style="margin:6px 0;color:var(--muted)" data-i18n="p6notSub">Viscosity is the macroscopic property used to quantify the resistance.</p>
+      </div>
+
+      <p data-i18n="p6c">For a Newtonian fluid, that quantification is written as:</p>
+
+      <div class="eq">
+        τ = μ <span class="frac"><span class="num">du</span><span class="den">dy</span></span>
+        <span class="lbl" data-i18n="eq6lbl">τ = shear stress · μ = dynamic viscosity · du/dy = velocity gradient</span>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 7 · THE VISCOSITY EQUATION ============== -->
+    <div class="page" data-title-en="7 · The Viscosity Equation">
+      <h2><span class="chip">7</span><span data-i18n="p7title">The Newtonian Viscosity Equation</span></h2>
+
+      <div class="eq">
+        τ = μ <span class="frac"><span class="num">du</span><span class="den">dy</span></span>
+        <span class="lbl" data-i18n="eq7lbl">Shear stress = viscosity × velocity gradient</span>
+      </div>
+
+      <p data-i18n="p7a">This one equation is the heart of viscous flow. To really understand it, we need a situation where we can <em>see</em> every term. That situation is <strong>Couette flow</strong>.</p>
+
+      <h3 data-i18n="p7h1">Couette flow — the simplest viscous flow</h3>
+      <p data-i18n="p7b">Picture a thin layer of fluid sandwiched between two flat plates:</p>
+      <ul>
+        <li data-i18n-html="p7li1">The <strong>bottom plate</strong> is fixed. The fluid touching it must obey the no-slip condition, so <code>u = 0</code> there.</li>
+        <li data-i18n-html="p7li2">The <strong>top plate</strong> slides sideways at speed <code>U</code>. The fluid touching it must move at <code>u = U</code>.</li>
+        <li data-i18n="p7li3">Between the two plates, every fluid layer is dragged along by the layer above it and held back by the layer below it.</li>
+      </ul>
+
+      <p data-i18n="p7c">Because the fluid is Newtonian and the geometry is simple, the velocity profile turns out to be a <strong>straight line</strong>:</p>
+
+      <div class="eq">
+        u(y) = U · <span class="frac"><span class="num">y</span><span class="den">h</span></span>
+        <span class="lbl" data-i18n="eq7cLbl">Linear velocity profile between the plates</span>
+      </div>
+
+      <p data-i18n="p7d">Since the profile is a straight line, its slope is the same at every height:</p>
+
+      <div class="eq">
+        <span class="frac"><span class="num">du</span><span class="den">dy</span></span> = <span class="frac"><span class="num">U</span><span class="den">h</span></span> = constant
+        <span class="lbl" data-i18n="eq7dLbl">Shear rate is uniform across the gap</span>
+      </div>
+
+      <p data-i18n="p7e">And because the shear rate is constant, the shear stress is constant too:</p>
+
+      <div class="eq">
+        τ = μ <span class="frac"><span class="num">U</span><span class="den">h</span></span> = constant
+        <span class="lbl" data-i18n="eq7eLbl">Every layer feels exactly the same shear stress</span>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim7T">Simulation · Couette Flow — Full Picture</span>
+          <span class="hint" data-i18n="sim7H">Move the sliders and watch every quantity update in real time</span>
+        </div>
+        <canvas id="cvNewton" style="height:440px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblU">Top plate speed U</span> <b><span id="nUVal">0.50</span> m/s</b></label>
+            <input type="range" id="nUSlider" min="0" max="200" step="1" value="50">
+          </div>
+          <div class="ctrl">
+            <label><span data-i18n="lblH">Gap height h</span> <b><span id="nHVal">2.0</span> mm</b></label>
+            <input type="range" id="nHSlider" min="5" max="60" step="1" value="20">
+          </div>
+          <div class="ctrl">
+            <label><span data-i18n="lblMu">Viscosity μ</span> <b><span id="nMuVal">0.100</span> Pa·s</b></label>
+            <input type="range" id="nMuSlider" min="1" max="200" step="1" value="100">
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="tg on" id="nTgProfile" data-i18n="btnProfile">Velocity profile</button>
+          <button class="tg on" id="nTgParticles" data-i18n="btnParticles">Particles</button>
+          <button class="tg on" id="nTgElement" data-i18n="btnElement">Deforming element</button>
+          <button class="tg on" id="nTgStress" data-i18n="btnStress">Shear stress</button>
+          <button class="tg" id="nPause" data-i18n="btnPause2">⏸ Pause</button>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k" data-i18n="roShearRate">Shear rate du/dy</div><div class="v" id="nRate">250 <small>s⁻¹</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roTau">Shear stress τ</div><div class="v" id="nTau">25.0 <small>Pa</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roMid">Velocity at mid-gap</div><div class="v" id="nMid">0.25 <small>m/s</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roTime">Time to cross gap</div><div class="v" id="nTime">—</div></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:#7cc4ff"></i><span data-i18n="legVelProf">Velocity profile u(y)</span></span>
+          <span><i style="background:#ff8a3d"></i><span data-i18n="legTau">Shear stress τ</span></span>
+          <span><i style="background:#5fa8f5"></i><span data-i18n="legParticles">Fluid particles</span></span>
+        </div>
+      </div>
+
+      <h3 data-i18n="p7h2">How to read the simulation</h3>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th data-i18n="thSee">What you see</th><th data-i18n="thMeans">What it means</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-i18n="tb1a">Blue curve on the left</td><td data-i18n-html="tb1b">The velocity profile <code>u(y)</code>. It is a straight line because the shear rate is constant.</td></tr>
+            <tr><td data-i18n="tb2a">Blue arrows of different lengths</td><td data-i18n="tb2b">Fluid layers at different heights move at different speeds. Length ∝ local velocity.</td></tr>
+            <tr><td data-i18n="tb3a">Little blue dots drifting right</td><td data-i18n="tb3b">Individual fluid particles. Top ones move fastest; bottom ones are almost stuck.</td></tr>
+            <tr><td data-i18n="tb4a">Orange rectangle that leans over</td><td data-i18n-html="tb4b">A small blob of fluid <em>continuously shearing</em>. This is what "deformation" looks like.</td></tr>
+            <tr><td data-i18n="tb5a">Pairs of opposing orange arrows</td><td data-i18n="tb5b">Shear stress τ acting between neighbouring layers — a drag couple.</td></tr>
+            <tr><td data-i18n="tb6a">Top plate with moving hatch</td><td data-i18n="tb6b">The moving boundary. It drags the fluid right at speed U.</td></tr>
+            <tr><td data-i18n="tb7a">Bottom dark plate</td><td data-i18n="tb7b">The fixed boundary. The fluid next to it is stationary (no-slip).</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 data-i18n="p7h3">Try these three experiments</h3>
+      <ul>
+        <li data-i18n-html="p7t1"><strong>Set U = 0.</strong> The top plate stops. Notice the profile collapses, the shear rate becomes zero, and the shear stress vanishes. <em>No relative motion → no viscous stress.</em></li>
+        <li data-i18n-html="p7t2"><strong>Halve h.</strong> The shear rate doubles. Same plate speed, but the fluid is squeezed into a thinner gap, so layers must slide past each other faster. τ doubles too.</li>
+        <li data-i18n-html="p7t3"><strong>Increase μ.</strong> The profile shape does not change — because it is set by geometry and plate speed, not by viscosity. But τ rises: the fluid resists the same deformation more strongly.</li>
+      </ul>
+
+      <div class="callout teal">
+        <p style="margin:0" data-i18n-html="p7key"><strong>Key insight:</strong> the <em>profile shape</em> is set by the geometry and the boundary conditions. The <em>shear stress</em> is set by the viscosity and the shear rate. In Couette flow both are uniform across the gap.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 8 · FLOW NEAR A WALL ============== -->
+    <div class="page" data-title-en="8 · Flow Near a Wall">
+      <h2><span class="chip">8</span><span data-i18n="p8title">What Happens Near a Wall?</span></h2>
+
+      <p data-i18n-html="p8a">Now consider fluid flowing over a <strong>stationary wall</strong>. The fluid directly touching the wall behaves very differently from the fluid farther away.</p>
+
+      <div class="chain">
+        <div class="node" data-i18n="p8ch1">Fluid contacts a solid wall</div>
+        <div class="arr">↓</div>
+        <div class="node hot" data-i18n="p8ch2">No-slip condition</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n-html="p8ch3">u<sub>fluid at wall</sub> = u<sub>wall</sub></div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n="p8ch4">Velocity changes away from the wall</div>
+        <div class="arr">↓</div>
+        <div class="node cool" data-i18n="p8ch5">du/dy exists</div>
+        <div class="arr">↓</div>
+        <div class="node mint" data-i18n="p8ch6">Viscous effects → boundary layer</div>
+      </div>
+
+      <div class="callout">
+        <p data-i18n-html="p8callout">The wall's influence does <strong>not</strong> stop the whole fluid. It simply decreases with distance from the wall. That decreasing influence is exactly what lets a <strong>velocity profile</strong> exist.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 9 · NO-SLIP ============== -->
+    <div class="page" data-title-en="9 · The No-Slip Condition">
+      <h2><span class="chip">9</span><span data-i18n="p9title">The No-Slip Condition</span></h2>
+
+      <div class="eq">
+        u<sub>fluid at wall</sub> = u<sub>wall</sub>
+        <span class="lbl" data-i18n="eq9lbl">The velocity of the fluid at the wall equals the velocity of the wall</span>
+      </div>
+
+      <p data-i18n-html="p9a">This is one of the most important boundary conditions in viscous flow. Notice it does <strong>not</strong> say u = 0 — it says the fluid matches the wall.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim9T">Simulation · The Wall Can Move</span>
+          <span class="hint" data-i18n="sim9H">Slide from 0 up to U∞ and watch the profile flatten out</span>
+        </div>
+        <canvas id="cvNoSlip" style="height:340px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblWallVel">Wall velocity u<sub>wall</sub></span> <b><span id="wVal">0.00</span> m/s</b></label>
+            <input type="range" id="wSlider" min="0" max="100" step="1" value="0">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k" data-i18n="roUWall">u at the wall</div><div class="v" id="wAtWall">0.00 <small>m/s</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roUinf">Free-stream U∞</div><div class="v" id="wFree">1.00 <small>m/s</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roGradWall">du/dy at wall</div><div class="v" id="wGrad">50 <small>s⁻¹</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roProf">Profile</div><div class="v" id="wShape">linear</div></div>
+        </div>
+      </div>
+
+      <div class="callout shear">
+        <p data-i18n-html="p9b1"><strong>Stationary wall:</strong> u<sub>wall</sub> = 0 → the fluid <em>at the wall</em> has zero velocity. It does <strong>not</strong> mean the whole fluid is stationary.</p>
+        <p data-i18n-html="p9b2"><strong>Moving wall:</strong> u<sub>wall</sub> = U → the fluid at the wall moves at U too.</p>
+        <p data-i18n-html="p9b3"><strong>Special case:</strong> when u<sub>wall</sub> = U∞, the entire fluid moves at the same speed → the profile is flat → du/dy = 0 → <strong>no shear stress</strong>.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 10 · NO-SLIP INSIDE A PIPE ============== -->
+    <div class="page" data-title-en="10 · No-Slip in a Pipe">
+      <h2><span class="chip">10</span><span data-i18n="p10title">No-Slip Inside a Pipe</span></h2>
+
+      <p data-i18n-html="p10a">Exactly the same rule applies inside a pipe. The thin layer of fluid touching the pipe wall <strong>sticks to the wall</strong>, so its velocity must equal the wall velocity — which is zero for a fixed pipe.</p>
+
+      <div class="eq">
+        u<sub>fluid at wall</sub> = u<sub>wall</sub> = 0
+        <span class="lbl" data-i18n="eq10lbl">No-slip at both walls of the pipe</span>
+      </div>
+
+      <p data-i18n="p10b">Because the fluid is held still at the walls but must carry a finite flow rate, the velocity has to be <strong>largest in the middle</strong> and zero at the edges. For slow (laminar) flow this gives the familiar <strong>parabolic profile</strong>:</p>
+
+      <div class="eq">
+        u(r) = u<sub>max</sub> · ( 1 − (r/R)² )
+        <span class="lbl" data-i18n="eq10bLbl">r = distance from the centre-line · R = pipe radius</span>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim10T">Simulation · Flow Through a Pipe</span>
+          <span class="hint" data-i18n="sim10H">Notice the velocity is exactly zero at both walls</span>
+        </div>
+        <canvas id="cvPipe" style="height:340px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblUmax">Centre-line velocity u<sub>max</sub></span> <b><span id="pipeUVal">1.00</span> m/s</b></label>
+            <input type="range" id="pipeUSlider" min="20" max="200" step="1" value="100">
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="tg" id="pipeTgTurb" data-i18n="btnTurb">Show turbulent profile</button>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k" data-i18n="roUWallPipe">u at the wall</div><div class="v">0.00 <small>m/s</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roUmax">u at the centre</div><div class="v" id="pipeUmax">1.00 <small>m/s</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roGradPipe">du/dy at the wall</div><div class="v" id="pipeGrad">—</div></div>
+        </div>
+      </div>
+
+      <h3 data-i18n="p10h1">Why the no-slip matters in a pipe</h3>
+      <div class="chain">
+        <div class="node hot" data-i18n="p10ch1">No-slip at the pipe wall (u = 0)</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n="p10ch2">Velocity must rise toward the centre</div>
+        <div class="arr">↓</div>
+        <div class="node cool" data-i18n="p10ch3">Velocity profile u(r)</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n-html="p10ch4">du/dr ≠ 0 → wall shear stress τ<sub>w</sub></div>
+        <div class="arr">↓</div>
+        <div class="node mint" data-i18n="p10ch5">Pressure drop needed to keep the flow going</div>
+      </div>
+
+      <div class="callout shear">
+        <p data-i18n-html="p10imp"><strong>Important:</strong> if there were no no-slip, the fluid would slide along the wall like a frictionless plug and there would be no velocity gradient at the wall, no wall shear stress and no need for a pressure gradient to drive the flow. Every real pipe-flow calculation — friction factor, head loss, pumping power — starts from the no-slip condition.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 11 · VELOCITY PROFILE ============== -->
+    <div class="page" data-title-en="11 · Velocity Profile">
+      <h2><span class="chip">11</span><span data-i18n="p11title">Velocity Profile &amp; Velocity Gradient</span></h2>
+
+      <p data-i18n-html="p11a">A <strong>velocity profile</strong> shows how fluid velocity changes with position. For flow over a stationary wall we write:</p>
+
+      <div class="eq">
+        u = u(y)
+        <span class="lbl" data-i18n="eq11lbl">Velocity depends on distance from the wall</span>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim11T">Simulation · Profile and Gradient</span>
+          <span class="hint" data-i18n="sim11H">Toggle the gradient triangle to see du/dy</span>
+        </div>
+        <canvas id="cvProfile" style="height:360px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblUinf">Free-stream U∞</span> <b><span id="pUVal">1.00</span> m/s</b></label>
+            <input type="range" id="pUSlider" min="20" max="200" step="1" value="100">
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="tg on" id="pTgGrad" data-i18n="btnGrad">Show Δu / Δy</button>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k" data-i18n="roUWallP">u at wall</div><div class="v" id="pWall">0.00 <small>m/s</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roUTop">u at top</div><div class="v" id="pTop">1.00 <small>m/s</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roNearWallGrad">Near-wall du/dy</div><div class="v" id="pGrad">—</div></div>
+        </div>
+      </div>
+
+      <p data-i18n="p11b">Near the wall u ≈ 0. Far away u ≈ U∞. In between, the velocity changes — so du/dy ≠ 0. That difference in velocity between neighbouring regions is what produces viscous effects.</p>
+
+      <div class="chain">
+        <div class="node" data-i18n="p11ch1">Different velocities between neighbouring regions</div>
+        <div class="arr">↓</div>
+        <div class="node cool" data-i18n="p11ch2">Velocity gradient du/dy</div>
+        <div class="arr">↓</div>
+        <div class="node mint" data-i18n="p11ch3">Viscous shear stress τ = μ (du/dy)</div>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 12 · WALL SHEAR STRESS ============== -->
+    <div class="page" data-title-en="12 · Wall Shear Stress &amp; Drag">
+      <h2><span class="chip">12</span><span data-i18n="p12title">Wall Shear Stress &amp; Skin-Friction Drag</span></h2>
+
+      <p data-i18n="p12a">At the wall, the viscous shear stress is called the <strong>wall shear stress</strong>:</p>
+
+      <div class="eq">
+        τ<sub>w</sub> = μ ( du/dy )<sub>wall</sub>
+        <span class="lbl" data-i18n="eq12lbl">Evaluated exactly at the wall</span>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim12T">Simulation · Near-Wall Region</span>
+          <span class="hint" data-i18n="sim12H">Dashed line = tangent to the profile at the wall</span>
+        </div>
+        <canvas id="cvWallStress" style="height:360px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblUinf2">Free-stream U∞</span> <b><span id="wsUVal">2.0</span> m/s</b></label>
+            <input type="range" id="wsUSlider" min="5" max="50" step="1" value="20">
+          </div>
+          <div class="ctrl">
+            <label><span data-i18n="lblMu2">Viscosity μ</span> <b><span id="wsMuVal">0.100</span> Pa·s</b></label>
+            <input type="range" id="wsMuSlider" min="1" max="100" step="1" value="10">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k" data-i18n="roGradWs">(du/dy) at wall</div><div class="v" id="wsGrad">—</div></div>
+          <div class="ro"><div class="k" data-i18n="roTauW">Wall shear τ<sub>w</sub></div><div class="v" id="wsTau">—</div></div>
+        </div>
+      </div>
+
+      <h3 data-i18n="p12h1">Skin-friction drag</h3>
+      <p data-i18n-html="p12b">When fluid flows over a solid surface, viscous effects create a <strong>tangential force</strong> between the fluid and the surface. The fluid and the wall exert equal and opposite tangential forces on each other — the wall feels a resisting force called <strong>skin-friction drag</strong>.</p>
+
+      <div class="callout shear">
+        <p data-i18n-html="p12c">Increase either μ or (du/dy)<sub>wall</sub> and the wall shear stress rises — and so does the skin-friction drag.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 13 · BOUNDARY LAYER ============== -->
+    <div class="page" data-title-en="13 · The Boundary Layer">
+      <h2><span class="chip">13</span><span data-i18n="p13title">The Boundary Layer</span></h2>
+
+      <div class="callout">
+        <p style="font-size:17px;margin:4px 0" data-i18n-html="p13callout"><strong>The boundary layer is the region of fluid close to a solid surface where viscous effects are important and the velocity changes from the wall velocity toward the free-stream velocity.</strong></p>
+      </div>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim13T">Simulation · Growth Along a Flat Plate</span>
+          <span class="hint" data-i18n="sim13H">The layer starts thin at the leading edge and thickens downstream</span>
+        </div>
+        <canvas id="cvBL" style="height:380px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblUinf3">Free-stream U∞</span> <b><span id="blUVal">1.00</span> m/s</b></label>
+            <input type="range" id="blUSlider" min="20" max="200" step="1" value="100">
+          </div>
+          <div class="ctrl">
+            <label><span data-i18n="lblNu">Kinematic viscosity ν</span> <b><span id="blNuVal">0.100</span></b></label>
+            <input type="range" id="blNuSlider" min="1" max="100" step="1" value="10">
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="tg on" id="blTgProfiles" data-i18n="btnVelProf">Velocity profiles</button>
+          <button class="tg on" id="blTgParticles" data-i18n="btnParticles">Particles</button>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k" data-i18n="roDelta">δ at trailing edge</div><div class="v" id="blDelta">—</div></div>
+        </div>
+      </div>
+
+      <p data-i18n="p13b">At the wall u = 0. Outside the boundary layer u ≈ U∞. Somewhere in between the velocity must change between those two values — that region <em>is</em> the boundary layer.</p>
+
+      <div class="callout teal">
+        <p data-i18n="p13c">Higher U∞ → thinner boundary layer. Higher viscosity → thicker boundary layer.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 14 · WHY BL FORMS ============== -->
+    <div class="page" data-title-en="14 · Why the Boundary Layer Forms">
+      <h2><span class="chip">14</span><span data-i18n="p14title">Why Does a Boundary Layer Form?</span></h2>
+
+      <div class="chain">
+        <div class="node" data-i18n="p14ch1">Fluid contacts a solid wall</div>
+        <div class="arr">↓</div>
+        <div class="node hot" data-i18n="p14ch2">No-slip</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n-html="p14ch3">u<sub>fluid at wall</sub> = u<sub>wall</sub></div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n="p14ch4">Velocity changes away from the wall</div>
+        <div class="arr">↓</div>
+        <div class="node cool" data-i18n="p14ch5">du/dy exists</div>
+        <div class="arr">↓</div>
+        <div class="node mint" data-i18n="p14ch6">Viscous effects</div>
+        <div class="arr">↓</div>
+        <div class="node mint" data-i18n="p14ch7">Boundary layer</div>
+      </div>
+
+      <p data-i18n="p14a">For a stationary wall, u = 0 at the surface, but u → U∞ far from the wall. Therefore there must be a region where the velocity transitions between those two values. That region is the boundary layer.</p>
+    </div>
+
+    <!-- ============== PAGE 15 · PEOPLE ANALOGY ============== -->
+    <div class="page" data-title-en="15 · People-Holding-Hands Analogy">
+      <h2><span class="chip">15</span><span data-i18n="p15title">The People-Holding-Hands Analogy</span></h2>
+
+      <p data-i18n-html="p15a">Imagine a <strong>vertical column of people</strong> standing on a moving walkway (the wall). The person at the bottom is gripping the walkway; each person above is holding hands with the one below.</p>
+
+      <p data-i18n-html="p15b">Because the walkway drags the bottom person, and each person drags the one above, the column <strong>leans over</strong> — exactly the way a velocity profile leans over.</p>
+
+      <div class="sim">
+        <div class="sim-head">
+          <span class="t" data-i18n="sim15T">Simulation · Holding Hands (vertical stack)</span>
+          <span class="hint" data-i18n="sim15H">Wall at the bottom; people stacked upward like fluid layers</span>
+        </div>
+        <canvas id="cvPeople" style="height:360px"></canvas>
+        <div class="controls">
+          <div class="ctrl">
+            <label><span data-i18n="lblWallSpeed">Wall (pole) speed</span> <b><span id="ppVal">0.00</span> m/s</b></label>
+            <input type="range" id="ppSlider" min="0" max="100" step="1" value="0">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="ro"><div class="k" data-i18n="roP1">Person 1 (at the wall)</div><div class="v" id="pp1">0.00 <small>m/s</small></div></div>
+          <div class="ro"><div class="k" data-i18n="roPTop">Top person</div><div class="v" id="pp5">1.00 <small>m/s</small></div></div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th data-i18n="thAnalogy">Analogy</th><th data-i18n="thFluidMech">Fluid mechanics</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-i18n="ta1a">Walkway / wall at the bottom</td><td data-i18n="ta1b">Solid wall</td></tr>
+            <tr><td data-i18n="ta2a">Person 1 (bottom)</td><td data-i18n="ta2b">Fluid immediately next to the wall</td></tr>
+            <tr><td data-i18n="ta3a">Persons 2, 3, 4… (above)</td><td data-i18n="ta3b">Neighbouring fluid regions, farther from the wall</td></tr>
+            <tr><td data-i18n="ta4a">Wall–person grip</td><td data-i18n="ta4b">Fluid–solid interaction (adhesion)</td></tr>
+            <tr><td data-i18n="ta5a">Person–person grip</td><td data-i18n="ta5b">Fluid–fluid molecular interaction (cohesion)</td></tr>
+            <tr><td data-i18n="ta6a">Person 1 held by the wall</td><td data-i18n="ta6b">No-slip at the wall</td></tr>
+            <tr><td data-i18n="ta7a">Pull between neighbours</td><td data-i18n="ta7b">Momentum transfer</td></tr>
+            <tr><td data-i18n="ta8a">The column leaning over</td><td data-i18n="ta8b">Velocity profile u(y)</td></tr>
+            <tr><td data-i18n="ta9a">Resistance to the lean</td><td data-i18n="ta9b">Viscous behaviour</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout shear">
+        <h3 style="margin-top:0" data-i18n="p15limH">Important limitation</h3>
+        <p data-i18n-html="p15lim1">Do <strong>not</strong> imagine: “if the first molecule stops, every molecule must stop.” That is not what happens.</p>
+        <p data-i18n-html="p15lim2">The wall's influence <strong>decreases with distance</strong> from the wall. Fluid molecules are not literally holding hands — but neighbouring fluid regions really do interact and transfer momentum.</p>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 16 · EVERYTHING CONNECTED ============== -->
+    <div class="page" data-title-en="16 · Everything Connected">
+      <h2><span class="chip">16</span><span data-i18n="p16title">How It All Connects</span></h2>
+
+      <h3 data-i18n="p16h1">At the wall</h3>
+      <p data-i18n-html="p16a">There is a fluid–solid molecular interaction. This is associated with the idea of <strong>adhesion</strong>.</p>
+      <div class="chain">
+        <div class="node hot" data-i18n="p16c1">Adhesion (fluid–solid)</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n="p16c2">Macroscopic result</div>
+        <div class="arr">↓</div>
+        <div class="node cool" data-i18n-html="p16c3">u<sub>fluid at wall</sub> = u<sub>wall</sub> &nbsp;(no-slip)</div>
+      </div>
+
+      <h3 data-i18n="p16h2">Inside the fluid</h3>
+      <p data-i18n="p16b">There are fluid–fluid molecular interactions. These allow momentum transfer between neighbouring regions and contribute to viscous behaviour.</p>
+      <div class="chain">
+        <div class="node cool" data-i18n="p16d1">Cohesion (fluid–fluid)</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n="p16d2">Momentum transfer</div>
+        <div class="arr">↓</div>
+        <div class="node mint" data-i18n="p16d3">Viscous resistance</div>
+      </div>
+
+      <h3 data-i18n="p16h3">Putting it together</h3>
+      <div class="chain">
+        <div class="node hot" data-i18n="p16e1">No-slip at the wall</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n="p16e2">Velocity changes with distance</div>
+        <div class="arr">↓</div>
+        <div class="node cool" data-i18n="p16e3">Velocity profile u(y) &nbsp;→&nbsp; du/dy</div>
+        <div class="arr">↓</div>
+        <div class="node mint" data-i18n="p16e4">τ = μ (du/dy)</div>
+        <div class="arr">↓</div>
+        <div class="node" data-i18n="p16e5">Wall shear stress &amp; skin-friction drag</div>
+        <div class="arr">↓</div>
+        <div class="node hot" data-i18n="p16e6">Boundary layer</div>
+      </div>
+    </div>
+
+    <!-- ============== PAGE 17 · DEFINITIONS ============== -->
+    <div class="page" data-title-en="17 · Exam-Friendly Definitions">
+      <h2><span class="chip">17</span><span data-i18n="p17title">Exam-Friendly Definitions</span></h2>
+
+      <div class="deflist">
+        <div class="def">
+          <div class="dt" data-i18n="defAdhT">Adhesion</div>
+          <div class="dd" data-i18n-html="defAdhD">Adhesion is the attraction or interaction between <strong>different</strong> substances — for example, between a fluid and a solid wall.</div>
+        </div>
+        <div class="def">
+          <div class="dt" data-i18n="defCohT">Cohesion</div>
+          <div class="dd" data-i18n-html="defCohD">Cohesion is the attraction or interaction between molecules of the <strong>same</strong> substance — for example, between neighbouring water molecules.</div>
+        </div>
+        <div class="def">
+          <div class="dt" data-i18n="defViscT">Viscosity</div>
+          <div class="dd" data-i18n-html="defViscD">Viscosity is a fluid's resistance to relative motion between neighbouring fluid regions. For a Newtonian fluid, <code>τ = μ (du/dy)</code>.</div>
+        </div>
+        <div class="def">
+          <div class="dt" data-i18n="defNoSlipT">No-Slip Condition</div>
+          <div class="dd" data-i18n-html="defNoSlipD">The velocity of the fluid at a solid boundary equals the velocity of that boundary: <code>u<sub>fluid at wall</sub> = u<sub>wall</sub></code>. Inside a fixed pipe this means <code>u = 0</code> at the pipe wall.</div>
+        </div>
+        <div class="def">
+          <div class="dt" data-i18n="defVelProfT">Velocity Profile</div>
+          <div class="dd" data-i18n-html="defVelProfD">The velocity profile is the variation of fluid velocity with distance from the wall: <code>u = u(y)</code>. In a laminar pipe it is parabolic: <code>u = u<sub>max</sub>(1 − (r/R)²)</code>.</div>
+        </div>
+        <div class="def">
+          <div class="dt" data-i18n="defVelGradT">Velocity Gradient</div>
+          <div class="dd" data-i18n-html="defVelGradD"><code>du/dy</code> — the rate at which velocity changes with distance normal to the wall.</div>
+        </div>
+        <div class="def">
+          <div class="dt" data-i18n="defWallShearT">Wall Shear Stress</div>
+          <div class="dd" data-i18n-html="defWallShearD"><code>τ<sub>w</sub> = μ (du/dy)<sub>wall</sub></code> — the viscous shear stress evaluated at the wall. It is associated with skin-friction drag.</div>
+        </div>
+        <div class="def">
+          <div class="dt" data-i18n="defBLT">Boundary Layer</div>
+          <div class="dd" data-i18n="defBLD">The region of fluid close to a solid surface where viscous effects are important and the velocity changes from the wall velocity to the free-stream velocity.</div>
+        </div>
+      </div>
+
+      <div class="callout shear" style="text-align:center">
+        <p style="font-family:Georgia,serif;font-size:18px;margin:6px 0" data-i18n-html="p17final1"><strong>Adhesion = different &nbsp;·&nbsp; Cohesion = same</strong></p>
+        <p style="font-family:Georgia,serif;font-size:18px;margin:6px 0" data-i18n-html="p17final2">Wall → no-slip → profile → du/dy → τ = μ (du/dy) → <strong>boundary layer</strong></p>
+      </div>
+
+      <p style="margin-top:40px;color:var(--muted);font-size:13.5px;text-align:center" data-i18n="endNote">— End of book —</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============== NAV BAR ============== -->
+<div class="book-nav">
+  <button class="nav-btn" id="prevBtn" data-i18n-title="prevTip" title="Previous">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+  </button>
+
+  <div class="nav-center">
+    <div class="nav-title" id="navTitle">Cover</div>
+    <div class="dots" id="dots"></div>
+    <div class="page-num" id="pageNum">1 / 18</div>
+  </div>
+
+  <button class="nav-btn" id="nextBtn" data-i18n-title="nextTip" title="Next">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>
+</div>
+
+<!-- ============== EDIT FAB ============== -->
+<button class="edit-fab" id="editToggle" title="Toggle edit mode (E)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+</button>
+
+<!-- ============== EDIT ACTIONS ============== -->
+<div class="edit-actions" id="editActions" hidden>
+  <input type="text" class="title-edit" id="titleInput" placeholder="Page title…" data-i18n-ph="titlePh" title="Page title">
+  <button id="addPageBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    <span data-i18n="actAdd">Add</span>
+  </button>
+  <button id="delPageBtn" class="danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+    <span data-i18n="actDel">Delete</span>
+  </button>
+  <button id="saveHtmlBtn" class="primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    <span data-i18n="actSave">Save</span>
+  </button>
+  <button id="resetBtn" class="danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 019-9 9 9 0 016.36 2.64L21 8M21 3v5h-5M21 12a9 9 0 01-9 9 9 9 0 01-6.36-2.64L3 16M3 21v-5h5"/></svg>
+    <span data-i18n="actReset">Reset</span>
+  </button>
+</div>
+
+<!-- ============== LOGIN MODAL ============== -->
+<div class="modal-backdrop" id="loginModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <h3 id="loginTitle" data-i18n="loginTitle">Log in to edit</h3>
+    <p class="sub" data-i18n="loginSub">Enter your credentials to unlock the editor.</p>
+    <label for="loginUser" data-i18n="loginUserLbl">Username</label>
+    <input type="text" id="loginUser" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <label for="loginPass" data-i18n="loginPassLbl">Password</label>
+    <input type="password" id="loginPass" autocomplete="current-password">
+    <div class="login-error" id="loginError" hidden data-i18n="loginErr">Invalid username or password.</div>
+    <div class="modal-actions">
+      <button id="loginCancel" data-i18n="cancel">Cancel</button>
+      <button class="primary" id="loginSubmit" data-i18n="loginBtn">Log in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ADD PAGE MODAL ============== -->
+<div class="modal-backdrop" id="addModal" hidden>
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <h3 id="addTitle" data-i18n="addTitle">Add a new page</h3>
+    <p class="sub" data-i18n-html="addSub">Paste any HTML — headings, paragraphs, callouts, even your own <code style="font-family:var(--mono);background:#f0ece0;padding:1px 6px;border-radius:5px;font-size:12px">&lt;canvas&gt;</code> or a new simulation block.</p>
+    <label for="newPageTitle" data-i18n="addTitleLbl">Page title (shown in the navigation)</label>
+    <input type="text" id="newPageTitle" placeholder="e.g. 18 · Reynolds Number" data-i18n-ph="addTitlePh">
+    <label for="newPageHtml" data-i18n="addHtmlLbl">Page HTML</label>
+    <textarea id="newPageHtml" spellcheck="false"></textarea>
+    <p class="hint" data-i18n-html="addHint">
+      Tip: reuse the book's classes — <code>callout</code>, <code>callout shear</code>, <code>eq</code>, <code>chips</code>, <code>tbl-wrap</code>, <code>chain</code>, <code>deflist</code> — and wrap interactive bits in a <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code>.
+    </p>
+    <div class="modal-actions">
+      <button id="addModalCancel" data-i18n="cancel">Cancel</button>
+      <button class="primary" id="addModalInsert" data-i18n="addInsert">Add page</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   AUTH
+   ============================================================ */
+const EDIT_USER = 'fluid';
+const EDIT_PASS = 'che233';
+
+/* ============================================================
+   LANGUAGE — English only
+   ============================================================ */
+const LANG = 'en';
+
+/* ============================================================
+   I18N DICTIONARY (English)
+   ============================================================ */
+const I18N = {
+  en: {
+    start: 'Start reading',
+    prevTip: 'Previous', nextTip: 'Next',
+    editFabTip: 'Toggle edit mode (E)', editFabTipExit: 'Exit edit mode (E)',
+    titlePh: 'Page title…',
+    actAdd: 'Add', actDel: 'Delete', actSave: 'Save', actReset: 'Reset',
+    loginTitle: 'Log in to edit',
+    loginSub: 'Enter your credentials to unlock the editor.',
+    loginUserLbl: 'Username', loginPassLbl: 'Password',
+    loginErr: 'Invalid username or password.',
+    cancel: 'Cancel', loginBtn: 'Log in',
+    addTitle: 'Add a new page',
+    addSub: 'Paste any HTML — headings, paragraphs, callouts, even your own <code style="font-family:var(--mono);background:#f0ece0;padding:1px 6px;border-radius:5px;font-size:12px">&lt;canvas&gt;</code> or a new simulation block.',
+    addTitleLbl: 'Page title (shown in the navigation)',
+    addTitlePh: 'e.g. 18 · Reynolds Number',
+    addHtmlLbl: 'Page HTML',
+    addHint: 'Tip: reuse the book\'s classes — <code>callout</code>, <code>callout shear</code>, <code>eq</code>, <code>chips</code>, <code>tbl-wrap</code>, <code>chain</code>, <code>deflist</code> — and wrap interactive bits in a <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code>.',
+    addInsert: 'Add page',
+    confirmDelete: 'Delete this page? You can undo by clicking Reset, but that wipes every edit.',
+    alertCover: 'The cover page cannot be deleted.',
+    confirmReset: 'Clear all edits and reload the original file? This cannot be undone.',
+
+    coverKicker: 'Interactive Fluid Mechanics',
+    coverH1: 'Adhesion,<br>Cohesion &amp;<br><em>Viscosity</em>',
+    coverP: 'Why a fluid sticks to a wall, why its own molecules pull on each other, and how that turns into the no-slip condition, a velocity profile and a boundary layer.',
+    coverPill: '<b>τ</b> = μ · du/dy &nbsp;→&nbsp; no-slip → profile → <b>boundary layer</b>',
+
+    p1title: 'What is Adhesion?',
+    p1callout: '<strong>Adhesion is the attraction between <span style="color:var(--shear)">different</span> substances.</strong>',
+    p1examples: 'For example:',
+    p1c1: 'water ↔ glass', p1c2: 'water ↔ metal', p1c3: 'oil ↔ solid surface',
+    p1remember: 'Easy way to remember it: <strong>Adhesion = <em class="term">different</em></strong>.',
+    sim1T: 'Simulation · Water on Glass',
+    sim1H: 'Dashed orange links = fluid–solid interaction',
+    lblAdh: 'Adhesion strength',
+    legWater: 'Water molecule', legGlass: 'Glass surface atom', legAdhBond: 'Adhesion bond',
+    p1after: 'Water molecules near the glass are pulled toward it. That pull is the <strong>fluid–solid interaction</strong> we call adhesion. Slide the strength to zero and the links fade away.',
+
+    p2title: 'What is Cohesion?',
+    p2callout: '<strong>Cohesion is the attraction between molecules of the <span style="color:var(--accent)">same</span> substance.</strong>',
+    p2examples: 'For example:',
+    p2c1: 'water ↔ water', p2c2: 'oil ↔ oil', p2c3: 'air ↔ air',
+    p2remember: 'Easy way to remember it: <strong>Cohesion = <em class="term">same</em></strong>.',
+    sim2T: 'Simulation · Water Molecules',
+    sim2H: 'Blue links = fluid–fluid interaction',
+    lblCoh: 'Cohesion strength',
+    legCohBond: 'Cohesion bond',
+    eq1: 'Adhesion = different &nbsp;&nbsp;·&nbsp;&nbsp; Cohesion = same',
+    eq1lbl: 'Two words, two different interactions',
+
+    p3title: 'Adhesion vs Cohesion',
+    p3a: 'Consider water flowing along a solid wall. Two different interactions are happening at the same time.',
+    sim3T: 'Simulation · Both Interactions at Once',
+    sim3H: 'Toggle each bond type on and off',
+    btnAdhBonds: 'Adhesion bonds', btnCohBonds: 'Cohesion bonds',
+    legAdhWater: 'Adhesion — water ↔ wall (different)',
+    legCohWater: 'Cohesion — water ↔ water (same)',
+    thConcept: 'Concept', thInteraction: 'Interaction', thBetween: 'Between',
+    trAdh: 'Adhesion', trAdhI: 'Fluid–solid', trAdhB: 'Different substances',
+    trCoh: 'Cohesion', trCohI: 'Fluid–fluid', trCohB: 'Same substance',
+
+    p4title: 'Why Are They Important?',
+    p4a: 'These two interactions help us understand what happens when a fluid touches a solid wall, and what happens between neighbouring regions <em>inside</em> the fluid.',
+    ch1a: 'At the wall — fluid–solid interaction',
+    ch1b: 'Related to <strong>adhesion</strong>',
+    ch1c: 'Macroscopic result: the NO-SLIP condition',
+    ch2a: 'Inside the fluid — fluid–fluid interaction',
+    ch2b: 'Related to <strong>cohesion</strong>',
+    ch2c: 'Macroscopic result: VISCOUS behaviour',
+    p4carefulH: 'Be careful with the wording',
+    p4careful1: 'It is <strong>not</strong> correct to say:',
+    p4careful2: '“Adhesion <em>is</em> viscosity.”',
+    p4careful3: '“Cohesion <em>is</em> viscosity.”',
+    p4careful4: 'They are <strong>related concepts</strong>, but they are not the same thing. Molecular interactions <em>contribute to</em> viscous behaviour; viscosity is the macroscopic property we use to <em>quantify</em> it.',
+
+    p5title: 'What is Viscosity?',
+    p5callout: '<strong>Viscosity describes a fluid\'s resistance to <span style="color:var(--accent)">relative motion between neighbouring fluid regions</span>.</strong>',
+    p5a: 'Water flows easily. Honey flows slowly. Honey has a higher viscosity than water.',
+    sim5T: 'Simulation · Same Push, Different Fluid',
+    sim5H: 'Identical shear stress τ applied to both channels',
+    lblMuB: 'Viscosity of fluid B',
+    roWaterRate: 'Water · du/dy', roBRate: 'Fluid B · du/dy', roRatio: 'Viscosity ratio',
+    eq5: 'Higher viscosity → greater resistance to relative motion',
+    eq5lbl: 'For the same applied shear stress, a more viscous fluid shears more slowly',
+
+    p6title: 'Does Cohesion Cause Viscosity?',
+    p6a: 'This is where we need to be precise. The simple answer is:',
+    p6callout: '<strong>Fluid–fluid molecular interactions <em>contribute to</em> viscous behaviour.</strong>',
+    p6b: 'Cohesive interactions are part of the molecular interactions inside a fluid, and those interactions allow <strong>momentum transfer</strong> between neighbouring regions.',
+    p6ch1: 'Fluid–fluid molecular interactions',
+    p6ch2: 'Momentum transfer',
+    p6ch3: 'Resistance to relative motion',
+    p6ch4: 'Viscous behaviour',
+    p6not: '<strong>Cohesion ≠ viscosity</strong>',
+    p6notSub: 'Viscosity is the macroscopic property used to quantify the resistance.',
+    p6c: 'For a Newtonian fluid, that quantification is written as:',
+    eq6lbl: 'τ = shear stress · μ = dynamic viscosity · du/dy = velocity gradient',
+
+    p7title: 'The Newtonian Viscosity Equation',
+    eq7lbl: 'Shear stress = viscosity × velocity gradient',
+    p7a: 'This one equation is the heart of viscous flow. To really understand it, we need a situation where we can <em>see</em> every term. That situation is <strong>Couette flow</strong>.',
+    p7h1: 'Couette flow — the simplest viscous flow',
+    p7b: 'Picture a thin layer of fluid sandwiched between two flat plates:',
+    p7li1: 'The <strong>bottom plate</strong> is fixed. The fluid touching it must obey the no-slip condition, so <code>u = 0</code> there.',
+    p7li2: 'The <strong>top plate</strong> slides sideways at speed <code>U</code>. The fluid touching it must move at <code>u = U</code>.',
+    p7li3: 'Between the two plates, every fluid layer is dragged along by the layer above it and held back by the layer below it.',
+    p7c: 'Because the fluid is Newtonian and the geometry is simple, the velocity profile turns out to be a <strong>straight line</strong>:',
+    eq7cLbl: 'Linear velocity profile between the plates',
+    p7d: 'Since the profile is a straight line, its slope is the same at every height:',
+    eq7dLbl: 'Shear rate is uniform across the gap',
+    p7e: 'And because the shear rate is constant, the shear stress is constant too:',
+    eq7eLbl: 'Every layer feels exactly the same shear stress',
+    sim7T: 'Simulation · Couette Flow — Full Picture',
+    sim7H: 'Move the sliders and watch every quantity update in real time',
+    lblU: 'Top plate speed U', lblH: 'Gap height h', lblMu: 'Viscosity μ',
+    btnProfile: 'Velocity profile', btnParticles: 'Particles', btnElement: 'Deforming element',
+    btnStress: 'Shear stress', btnPause2: '⏸ Pause',
+    roShearRate: 'Shear rate du/dy', roTau: 'Shear stress τ',
+    roMid: 'Velocity at mid-gap', roTime: 'Time to cross gap',
+    legVelProf: 'Velocity profile u(y)', legTau: 'Shear stress τ', legParticles: 'Fluid particles',
+    p7h2: 'How to read the simulation',
+    thSee: 'What you see', thMeans: 'What it means',
+    tb1a: 'Blue curve on the left', tb1b: 'The velocity profile <code>u(y)</code>. It is a straight line because the shear rate is constant.',
+    tb2a: 'Blue arrows of different lengths', tb2b: 'Fluid layers at different heights move at different speeds. Length ∝ local velocity.',
+    tb3a: 'Little blue dots drifting right', tb3b: 'Individual fluid particles. Top ones move fastest; bottom ones are almost stuck.',
+    tb4a: 'Orange rectangle that leans over', tb4b: 'A small blob of fluid <em>continuously shearing</em>. This is what "deformation" looks like.',
+    tb5a: 'Pairs of opposing orange arrows', tb5b: 'Shear stress τ acting between neighbouring layers — a drag couple.',
+    tb6a: 'Top plate with moving hatch', tb6b: 'The moving boundary. It drags the fluid right at speed U.',
+    tb7a: 'Bottom dark plate', tb7b: 'The fixed boundary. The fluid next to it is stationary (no-slip).',
+    p7h3: 'Try these three experiments',
+    p7t1: '<strong>Set U = 0.</strong> The top plate stops. Notice the profile collapses, the shear rate becomes zero, and the shear stress vanishes. <em>No relative motion → no viscous stress.</em>',
+    p7t2: '<strong>Halve h.</strong> The shear rate doubles. Same plate speed, but the fluid is squeezed into a thinner gap, so layers must slide past each other faster. τ doubles too.',
+    p7t3: '<strong>Increase μ.</strong> The profile shape does not change — because it is set by geometry and plate speed, not by viscosity. But τ rises: the fluid resists the same deformation more strongly.',
+    p7key: '<strong>Key insight:</strong> the <em>profile shape</em> is set by the geometry and the boundary conditions. The <em>shear stress</em> is set by the viscosity and the shear rate. In Couette flow both are uniform across the gap.',
+
+    p8title: 'What Happens Near a Wall?',
+    p8a: 'Now consider fluid flowing over a <strong>stationary wall</strong>. The fluid directly touching the wall behaves very differently from the fluid farther away.',
+    p8ch1: 'Fluid contacts a solid wall',
+    p8ch2: 'No-slip condition',
+    p8ch3: 'u<sub>fluid at wall</sub> = u<sub>wall</sub>',
+    p8ch4: 'Velocity changes away from the wall',
+    p8ch5: 'du/dy exists',
+    p8ch6: 'Viscous effects → boundary layer',
+    p8callout: 'The wall\'s influence does <strong>not</strong> stop the whole fluid. It simply decreases with distance from the wall. That decreasing influence is exactly what lets a <strong>velocity profile</strong> exist.',
+
+    p9title: 'The No-Slip Condition',
+    eq9lbl: 'The velocity of the fluid at the wall equals the velocity of the wall',
+    p9a: 'This is one of the most important boundary conditions in viscous flow. Notice it does <strong>not</strong> say u = 0 — it says the fluid matches the wall.',
+    sim9T: 'Simulation · The Wall Can Move',
+    sim9H: 'Slide from 0 up to U∞ and watch the profile flatten out',
+    lblWallVel: 'Wall velocity u<sub>wall</sub>',
+    roUWall: 'u at the wall', roUinf: 'Free-stream U∞',
+    roGradWall: 'du/dy at wall', roProf: 'Profile',
+    p9b1: '<strong>Stationary wall:</strong> u<sub>wall</sub> = 0 → the fluid <em>at the wall</em> has zero velocity. It does <strong>not</strong> mean the whole fluid is stationary.',
+    p9b2: '<strong>Moving wall:</strong> u<sub>wall</sub> = U → the fluid at the wall moves at U too.',
+    p9b3: '<strong>Special case:</strong> when u<sub>wall</sub> = U∞, the entire fluid moves at the same speed → the profile is flat → du/dy = 0 → <strong>no shear stress</strong>.',
+
+    p10title: 'No-Slip Inside a Pipe',
+    p10a: 'Exactly the same rule applies inside a pipe. The thin layer of fluid touching the pipe wall <strong>sticks to the wall</strong>, so its velocity must equal the wall velocity — which is zero for a fixed pipe.',
+    eq10lbl: 'No-slip at both walls of the pipe',
+    p10b: 'Because the fluid is held still at the walls but must carry a finite flow rate, the velocity has to be <strong>largest in the middle</strong> and zero at the edges. For slow (laminar) flow this gives the familiar <strong>parabolic profile</strong>:',
+    eq10bLbl: 'r = distance from the centre-line · R = pipe radius',
+    sim10T: 'Simulation · Flow Through a Pipe',
+    sim10H: 'Notice the velocity is exactly zero at both walls',
+    lblUmax: 'Centre-line velocity u<sub>max</sub>',
+    btnTurb: 'Show turbulent profile',
+    roUWallPipe: 'u at the wall', roUmax: 'u at the centre', roGradPipe: 'du/dy at the wall',
+    p10h1: 'Why the no-slip matters in a pipe',
+    p10ch1: 'No-slip at the pipe wall (u = 0)',
+    p10ch2: 'Velocity must rise toward the centre',
+    p10ch3: 'Velocity profile u(r)',
+    p10ch4: 'du/dr ≠ 0 → wall shear stress τ<sub>w</sub>',
+    p10ch5: 'Pressure drop needed to keep the flow going',
+    p10imp: '<strong>Important:</strong> if there were no no-slip, the fluid would slide along the wall like a frictionless plug and there would be no velocity gradient at the wall, no wall shear stress and no need for a pressure gradient to drive the flow. Every real pipe-flow calculation — friction factor, head loss, pumping power — starts from the no-slip condition.',
+
+    p11title: 'Velocity Profile &amp; Velocity Gradient',
+    p11a: 'A <strong>velocity profile</strong> shows how fluid velocity changes with position. For flow over a stationary wall we write:',
+    eq11lbl: 'Velocity depends on distance from the wall',
+    sim11T: 'Simulation · Profile and Gradient',
+    sim11H: 'Toggle the gradient triangle to see du/dy',
+    lblUinf: 'Free-stream U∞',
+    btnGrad: 'Show Δu / Δy',
+    roUWallP: 'u at wall', roUTop: 'u at top', roNearWallGrad: 'Near-wall du/dy',
+    p11b: 'Near the wall u ≈ 0. Far away u ≈ U∞. In between, the velocity changes — so du/dy ≠ 0. That difference in velocity between neighbouring regions is what produces viscous effects.',
+    p11ch1: 'Different velocities between neighbouring regions',
+    p11ch2: 'Velocity gradient du/dy',
+    p11ch3: 'Viscous shear stress τ = μ (du/dy)',
+
+    p12title: 'Wall Shear Stress &amp; Skin-Friction Drag',
+    p12a: 'At the wall, the viscous shear stress is called the <strong>wall shear stress</strong>:',
+    eq12lbl: 'Evaluated exactly at the wall',
+    sim12T: 'Simulation · Near-Wall Region',
+    sim12H: 'Dashed line = tangent to the profile at the wall',
+    lblUinf2: 'Free-stream U∞', lblMu2: 'Viscosity μ',
+    roGradWs: '(du/dy) at wall', roTauW: 'Wall shear τ<sub>w</sub>',
+    p12h1: 'Skin-friction drag',
+    p12b: 'When fluid flows over a solid surface, viscous effects create a <strong>tangential force</strong> between the fluid and the surface. The fluid and the wall exert equal and opposite tangential forces on each other — the wall feels a resisting force called <strong>skin-friction drag</strong>.',
+    p12c: 'Increase either μ or (du/dy)<sub>wall</sub> and the wall shear stress rises — and so does the skin-friction drag.',
+
+    p13title: 'The Boundary Layer',
+    p13callout: '<strong>The boundary layer is the region of fluid close to a solid surface where viscous effects are important and the velocity changes from the wall velocity toward the free-stream velocity.</strong>',
+    sim13T: 'Simulation · Growth Along a Flat Plate',
+    sim13H: 'The layer starts thin at the leading edge and thickens downstream',
+    lblUinf3: 'Free-stream U∞', lblNu: 'Kinematic viscosity ν',
+    btnVelProf: 'Velocity profiles',
+    roDelta: 'δ at trailing edge',
+    p13b: 'At the wall u = 0. Outside the boundary layer u ≈ U∞. Somewhere in between the velocity must change between those two values — that region <em>is</em> the boundary layer.',
+    p13c: 'Higher U∞ → thinner boundary layer. Higher viscosity → thicker boundary layer.',
+
+    p14title: 'Why Does a Boundary Layer Form?',
+    p14ch1: 'Fluid contacts a solid wall',
+    p14ch2: 'No-slip',
+    p14ch3: 'u<sub>fluid at wall</sub> = u<sub>wall</sub>',
+    p14ch4: 'Velocity changes away from the wall',
+    p14ch5: 'du/dy exists',
+    p14ch6: 'Viscous effects',
+    p14ch7: 'Boundary layer',
+    p14a: 'For a stationary wall, u = 0 at the surface, but u → U∞ far from the wall. Therefore there must be a region where the velocity transitions between those two values. That region is the boundary layer.',
+
+    p15title: 'The People-Holding-Hands Analogy',
+    p15a: 'Imagine a <strong>vertical column of people</strong> standing on a moving walkway (the wall). The person at the bottom is gripping the walkway; each person above is holding hands with the one below.',
+    p15b: 'Because the walkway drags the bottom person, and each person drags the one above, the column <strong>leans over</strong> — exactly the way a velocity profile leans over.',
+    sim15T: 'Simulation · Holding Hands (vertical stack)',
+    sim15H: 'Wall at the bottom; people stacked upward like fluid layers',
+    lblWallSpeed: 'Wall (pole) speed',
+    roP1: 'Person 1 (at the wall)', roPTop: 'Top person',
+    thAnalogy: 'Analogy', thFluidMech: 'Fluid mechanics',
+    ta1a: 'Walkway / wall at the bottom', ta1b: 'Solid wall',
+    ta2a: 'Person 1 (bottom)', ta2b: 'Fluid immediately next to the wall',
+    ta3a: 'Persons 2, 3, 4… (above)', ta3b: 'Neighbouring fluid regions, farther from the wall',
+    ta4a: 'Wall–person grip', ta4b: 'Fluid–solid interaction (adhesion)',
+    ta5a: 'Person–person grip', ta5b: 'Fluid–fluid molecular interaction (cohesion)',
+    ta6a: 'Person 1 held by the wall', ta6b: 'No-slip at the wall',
+    ta7a: 'Pull between neighbours', ta7b: 'Momentum transfer',
+    ta8a: 'The column leaning over', ta8b: 'Velocity profile u(y)',
+    ta9a: 'Resistance to the lean', ta9b: 'Viscous behaviour',
+    p15limH: 'Important limitation',
+    p15lim1: 'Do <strong>not</strong> imagine: “if the first molecule stops, every molecule must stop.” That is not what happens.',
+    p15lim2: 'The wall\'s influence <strong>decreases with distance</strong> from the wall. Fluid molecules are not literally holding hands — but neighbouring fluid regions really do interact and transfer momentum.',
+
+    p16title: 'How It All Connects',
+    p16h1: 'At the wall',
+    p16a: 'There is a fluid–solid molecular interaction. This is associated with the idea of <strong>adhesion</strong>.',
+    p16c1: 'Adhesion (fluid–solid)',
+    p16c2: 'Macroscopic result',
+    p16c3: 'u<sub>fluid at wall</sub> = u<sub>wall</sub> &nbsp;(no-slip)',
+    p16h2: 'Inside the fluid',
+    p16b: 'There are fluid–fluid molecular interactions. These allow momentum transfer between neighbouring regions and contribute to viscous behaviour.',
+    p16d1: 'Cohesion (fluid–fluid)',
+    p16d2: 'Momentum transfer',
+    p16d3: 'Viscous resistance',
+    p16h3: 'Putting it together',
+    p16e1: 'No-slip at the wall',
+    p16e2: 'Velocity changes with distance',
+    p16e3: 'Velocity profile u(y) &nbsp;→&nbsp; du/dy',
+    p16e4: 'τ = μ (du/dy)',
+    p16e5: 'Wall shear stress &amp; skin-friction drag',
+    p16e6: 'Boundary layer',
+
+    p17title: 'Exam-Friendly Definitions',
+    defAdhT: 'Adhesion',
+    defAdhD: 'Adhesion is the attraction or interaction between <strong>different</strong> substances — for example, between a fluid and a solid wall.',
+    defCohT: 'Cohesion',
+    defCohD: 'Cohesion is the attraction or interaction between molecules of the <strong>same</strong> substance — for example, between neighbouring water molecules.',
+    defViscT: 'Viscosity',
+    defViscD: 'Viscosity is a fluid\'s resistance to relative motion between neighbouring fluid regions. For a Newtonian fluid, <code>τ = μ (du/dy)</code>.',
+    defNoSlipT: 'No-Slip Condition',
+    defNoSlipD: 'The velocity of the fluid at a solid boundary equals the velocity of that boundary: <code>u<sub>fluid at wall</sub> = u<sub>wall</sub></code>. Inside a fixed pipe this means <code>u = 0</code> at the pipe wall.',
+    defVelProfT: 'Velocity Profile',
+    defVelProfD: 'The velocity profile is the variation of fluid velocity with distance from the wall: <code>u = u(y)</code>. In a laminar pipe it is parabolic: <code>u = u<sub>max</sub>(1 − (r/R)²)</code>.',
+    defVelGradT: 'Velocity Gradient',
+    defVelGradD: '<code>du/dy</code> — the rate at which velocity changes with distance normal to the wall.',
+    defWallShearT: 'Wall Shear Stress',
+    defWallShearD: '<code>τ<sub>w</sub> = μ (du/dy)<sub>wall</sub></code> — the viscous shear stress evaluated at the wall. It is associated with skin-friction drag.',
+    defBLT: 'Boundary Layer',
+    defBLD: 'The region of fluid close to a solid surface where viscous effects are important and the velocity changes from the wall velocity to the free-stream velocity.',
+    p17final1: '<strong>Adhesion = different &nbsp;·&nbsp; Cohesion = same</strong>',
+    p17final2: 'Wall → no-slip → profile → du/dy → τ = μ (du/dy) → <strong>boundary layer</strong>',
+    endNote: '— End of book —',
+
+    cvSolidWall: 'SOLID WALL',
+    cvAdhLabel: 'WATER  ↔  GLASS      (different substances)',
+    cvCohLabel: 'WATER  ↔  WATER      (same substance)',
+    cvAdhLegend: 'adhesion (fluid–solid)',
+    cvCohLegend: 'cohesion (fluid–fluid)',
+    cvWater: 'WATER', cvFluidB: 'FLUID B',
+    cvMuWater: 'μ = 1× water',
+    cvSameTau: 'same shear stress τ applied to both channels',
+    cvFixedPlate: 'FIXED PLATE  ·  u = 0  (no-slip)',
+    cvMovingPlate: 'MOVING PLATE',
+    cvLinearProf: '(linear profile)',
+    cvShearBetween: 'shear between layers',
+    cvElementShear: 'fluid element shears continuously',
+    cvNoShearNoFlow: 'U = 0  →  no shear, no flow',
+    cvUinf: 'u ≈ U∞',
+    cvStationaryWall: 'STATIONARY WALL  ·  u_wall = 0',
+    cvUWall: 'u_wall',
+    cvUW: 'u = u_wall',
+    cvPipeWallTop: 'PIPE WALL  ·  u = 0  (no-slip)',
+    cvPipeWallBot: 'PIPE WALL  ·  u = 0  (no-slip)',
+    cvCentreLine: 'centre-line  ·  u = u_max',
+    cvEdgeLayer: 'edge of the layer — u ≈ U∞',
+    cvFullScale: 'full scale = 2.0 m/s',
+    cvStagnWall: 'STATIONARY WALL  ·  u = 0',
+    cvTangent: 'tangent at the wall — slope = (du/dy)wall',
+    cvSolidWallShort: 'SOLID WALL',
+    cvSkinDrag: 'skin-friction drag on the wall',
+    cvBoundaryLayer: 'boundary layer',
+    cvSolidPlate: 'SOLID PLATE',
+    cvLeadingEdge: 'leading edge',
+    cvFlow: 'flow',
+    cvWallPoleFixed: 'WALL / POLE  ·  fixed  (u = 0)',
+    cvWallPoleMoving: 'WALL / POLE  ·  moving at',
+    cvPersonHeld: 'person 1 is held by the wall  →  no-slip',
+    cvEachPerson: 'each person above drifts at a higher speed  →  the column leans  →  velocity profile',
+    cvExplainU0: 'U = 0  →  no relative motion  →  du/dy = 0  →  τ = 0.  No shear, no viscous stress.',
+    cvExplainU: 'Top plate drags the fluid · each layer slides a little slower than the one above  →  constant du/dy  →  constant τ.',
+    cvShapeLinear: 'linear', cvShapeFlat: 'flat',
+    cvTurbulent: 'steeper · turbulent',
+    cvShowTurb: 'Show turbulent profile',
+    cvShowLaminar: 'Show laminar profile',
+    cvApplyShear: '▶ Apply shear stress',
+    cvRemoveShear: '⏸ Remove shear stress',
+    cvPlay: '▶ Play', cvPause: '⏸ Pause',
+
+    exTag: 'Simulation explained'
+  }
+};
+
+function T(key){
+  return (I18N.en && I18N.en[key] !== undefined) ? I18N.en[key] : key;
+}
+
+/* ============================================================
+   SIM EXPLANATIONS
+   ============================================================ */
+const SIM_EXPLAIN = {
+  cvAdhesion: {
+    title: 'Explanation: Adhesion on a solid surface',
+    text: 'The <strong>bottom row of water molecules</strong> sits right above the glass. Each one is pulled <strong>downwards</strong> towards a surface atom — that dashed orange line is one adhesion bond, fluid to solid.',
+    tips: [
+      'Slide the strength to <code>0</code>: the orange dashed links disappear and the bottom row floats freely.',
+      'Adhesion acts <em>only</em> between the bottom molecules and the wall — not between water molecules.',
+      'Adhesion = attraction between <em>different</em> substances (water ↔ glass).'
+    ]
+  },
+  cvCohesion: {
+    title: 'Explanation: Cohesion between water molecules',
+    text: 'No wall here — every molecule is surrounded by its own kind. Increase cohesion and the blue links become thick and bright: the molecules pull on each other and the group holds together as one body of liquid.',
+    tips: [
+      'Reduce to <code>0</code> and the links fade — molecules would drift apart like a gas.',
+      'Cohesion = attraction between the <em>same</em> substance (water ↔ water).',
+      'This internal “stickiness” is what lets neighbouring fluid layers drag on one another.'
+    ]
+  },
+  cvBoth: {
+    title: 'Explanation: Adhesion and cohesion together',
+    text: 'Real fluids have <strong>both</strong> interactions at the same time. Orange dashed lines always start at the <strong>bottom row of water molecules</strong> and end at a wall atom. Blue solid links always join two water molecules.',
+    tips: [
+      'Switch off <em>adhesion</em>: the bottom row of molecules lifts away from the wall.',
+      'Switch off <em>cohesion</em>: the molecules stop pulling on each other — the fluid loses internal grip.',
+      'Adhesion → no-slip at the wall. Cohesion → viscous behaviour inside the fluid.'
+    ]
+  },
+  cvVisc: {
+    title: 'Explanation: Same push, different fluid',
+    text: 'Both channels get the <strong>same</strong> push (same τ), but the arrows in the top channel are long while those in the bottom channel are short.',
+    tips: [
+      'Water shears easily; the thick fluid barely moves.',
+      'Because τ = μ·(du/dy), a bigger μ must mean a smaller du/dy for the same τ.',
+      'That is exactly what “resistance to relative motion” means.'
+    ]
+  },
+  cvNewton: {
+    title: 'Explanation: Couette flow — every term visible',
+    text: 'This simulation shows all the pieces of <code>τ = μ (du/dy)</code> at once: the linear velocity profile, the fluid particles, the deforming element and the shear-stress couples between layers.',
+    tips: [
+      '<strong>Set U = 0</strong> → profile collapses, τ → 0. No relative motion, no viscous stress.',
+      '<strong>Halve h</strong> → du/dy doubles, τ doubles. Same plate speed, thinner gap.',
+      '<strong>Raise μ</strong> → profile shape unchanged (set by geometry), but τ rises.'
+    ]
+  },
+  cvNoSlip: {
+    title: 'Explanation: The wall can move',
+    text: 'The <em>orange dot</em> marks the fluid right at the wall. Drag the slider and watch that dot move together with the wall — the fluid never slides past it.',
+    tips: [
+      'When <code>u_wall = 0</code>, the profile leans over and τ is largest.',
+      'When <code>u_wall = U∞</code>, the profile becomes perfectly flat, du/dy = 0 and shear stress disappears — rigid-body motion, not shear.',
+      'The no-slip condition always says u<sub>fluid</sub> = u<sub>wall</sub>, never “u = 0” in general.'
+    ]
+  },
+  cvPipe: {
+    title: 'Explanation: No-slip inside a pipe',
+    text: 'The arrows at the very top and bottom of the pipe have <em>zero length</em> — that is the no-slip condition, drawn to scale. The profile widens when you raise the centre-line velocity.',
+    tips: [
+      'The longest arrow is at the centre-line. The profile is a parabola: u = u<sub>max</sub>(1 − (r/R)²).',
+      'Raise <b>u_max</b> and the whole profile grows — the wall velocity stays exactly zero.',
+      'Toggle <b>turbulent</b>: the profile becomes flatter and the wall gradient steeper, but u at the wall is still <strong>zero</strong>.'
+    ]
+  },
+  cvProfile: {
+    title: 'Explanation: Profile and gradient',
+    text: 'The arrow lengths are on a <em>fixed scale</em>, so raising U∞ makes every arrow longer — the profile always starts at zero on the wall (no-slip) and flattens out at U∞.',
+    tips: [
+      'Near the wall u ≈ 0; far away u ≈ U∞.',
+      'Switch on the <b>Δu/Δy triangle</b> to see how the gradient is measured from two nearby points.',
+      'The velocity gradient du/dy is what produces the viscous shear stress τ = μ (du/dy).'
+    ]
+  },
+  cvWallStress: {
+    title: 'Explanation: Wall shear stress and drag',
+    text: 'The orange dashed line is the <em>tangent</em> to the velocity profile where it meets the wall. Its slope is exactly (du/dy)<sub>wall</sub>.',
+    tips: [
+      'Increase U∞: the tangent gets steeper — τ<sub>w</sub> rises.',
+      'Increase μ at fixed U∞: the tangent is unchanged, but τ<sub>w</sub> still rises because τ<sub>w</sub> = μ·(du/dy).',
+      'The row of orange arrows at the bottom is the equal-and-opposite force the fluid exerts on the wall — <b>skin-friction drag</b>.'
+    ]
+  },
+  cvBL: {
+    title: 'Explanation: Boundary-layer growth',
+    text: 'The green wedge is the <b>boundary layer</b>. It is <em>zero</em> thickness at the leading edge and grows downstream because the wall\'s retarding influence has more time and distance to diffuse outward.',
+    tips: [
+      'The small velocity profiles at five stations show: u = 0 on the plate and u ≈ U∞ at the top of the wedge.',
+      'Raise U∞ → the wedge gets thinner.',
+      'Raise ν → the wedge gets thicker.'
+    ]
+  },
+  cvPeople: {
+    title: 'Explanation: The people-holding-hands analogy',
+    text: 'The people are stacked <em>vertically</em>, one above the other — each one represents a different fluid layer at a different distance y from the wall.',
+    tips: [
+      'The <em>orange dashed link</em> at the bottom is the wall–person grip (<b>adhesion</b>). The <em>blue dashed links</em> are the person–person grips (<b>cohesion</b> / internal friction).',
+      'With <code>wall speed = 0</code>, person 1 is held still and each person above drifts right — the column leans. That lean <b>is</b> the velocity profile.',
+      'Push wall speed to <code>1.00</code>: everybody moves at the same speed and the column stays upright — flat profile, du/dy = 0, no viscous stress.'
+    ]
+  }
+};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentIdx = 0;
+let animating = false;
+let pages = [];
+let N = 0;
+let editMode = false;
+let dotEls = [];
+let restoredIdx = 0;
+const FLIP_MS = 950;
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
+const STORAGE_KEY = 'adhesion-book-v3';
+
+(function restoreFromStorage(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data.pages || !data.pages.length) return;
+    const bookEl = document.getElementById('book');
+    bookEl.innerHTML = '';
+    data.pages.forEach(pd => {
+      const p = document.createElement('div');
+      p.className = (pd.cls || 'page').replace(/\s*flipped\s*/g, ' ').trim();
+      p.dataset.titleEn = pd.titleEn || pd.title || '';
+      p.innerHTML = pd.html;
+      bookEl.appendChild(p);
+    });
+    restoredIdx = Math.max(0, Math.min(data.idx || 0, data.pages.length - 1));
+  } catch(e){ console.warn('Restore failed', e); }
+})();
+
+currentIdx = restoredIdx;
+
+/* ============================================================
+   PAGE SETUP
+   ============================================================ */
+pages = [...document.querySelectorAll('.page')];
+N = pages.length;
+
+const dotsEl     = document.getElementById('dots');
+const navTitleEl = document.getElementById('navTitle');
+const pageNumEl  = document.getElementById('pageNum');
+const prevBtn    = document.getElementById('prevBtn');
+const nextBtn    = document.getElementById('nextBtn');
+
+function pageTitle(p){
+  if (!p) return '';
+  return p.dataset.titleEn || '';
+}
+
+function rebuildDots(){
+  dotsEl.innerHTML = '';
+  pages.forEach((p, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.title = pageTitle(p) || ('Page ' + (i + 1));
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+  dotEls = [...dotsEl.children];
+}
+
+function updateZ(){
+  pages.forEach((p, i) => {
+    if (i < currentIdx)         p.style.zIndex = i + 1;
+    else if (i === currentIdx)  p.style.zIndex = N + 100;
+    else                        p.style.zIndex = N - (i - currentIdx) + 10;
+  });
+}
+
+function updateUI(){
+  dotEls.forEach((d, i) => d.classList.toggle('active', i === currentIdx));
+  navTitleEl.textContent = pageTitle(pages[currentIdx]);
+  pageNumEl.textContent = (currentIdx + 1) + ' / ' + N;
+  prevBtn.disabled = currentIdx === 0 || animating;
+  nextBtn.disabled = currentIdx === N - 1 || animating;
+}
+
+function refreshPages(){
+  pages = [...document.querySelectorAll('.page')];
+  N = pages.length;
+  if (currentIdx >= N) currentIdx = N - 1;
+  rebuildDots();
+  updateZ();
+  updateUI();
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function goNext(){
+  if (animating || currentIdx >= N - 1) return;
+  animating = true; updateUI();
+  const oldPage = pages[currentIdx];
+  oldPage.style.zIndex = 6000;
+  oldPage.classList.add('flipped');
+  currentIdx++;
+  updateZ();
+  oldPage.style.zIndex = 6000;
+  setTimeout(() => { animating = false; updateZ(); updateUI(); resizeAll(); }, FLIP_MS + 20);
+}
+function goPrev(){
+  if (animating || currentIdx <= 0) return;
+  animating = true; updateUI();
+  const newIdx = currentIdx - 1;
+  const newPage = pages[newIdx];
+  newPage.style.zIndex = 6000;
+  newPage.classList.remove('flipped');
+  currentIdx = newIdx;
+  setTimeout(() => { animating = false; updateZ(); updateUI(); resizeAll(); }, FLIP_MS + 20);
+}
+function goTo(idx){
+  if (animating || idx === currentIdx || idx < 0 || idx >= N) return;
+  animating = true;
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < idx));
+  currentIdx = idx; updateZ(); updateUI();
+  setTimeout(() => { animating = false; updateUI(); resizeAll(); }, 60);
+}
+prevBtn.addEventListener('click', goPrev);
+nextBtn.addEventListener('click', goNext);
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, button, textarea, select, [contenteditable]')) {
+    if (e.key !== 'Escape') return;
+  }
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); goNext(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'PageUp')                    { e.preventDefault(); goPrev(); }
+  if (e.key === 'Home')  goTo(0);
+  if (e.key === 'End')   goTo(N - 1);
+  if (e.key === 'e' || e.key === 'E') { requestEditToggle(); }
+});
+
+const startBtn = document.getElementById('startBtn');
+if (startBtn) startBtn.addEventListener('click', goNext);
+
+/* ============================================================
+   CANVAS INFRA
+   ============================================================ */
+const canvases = [];
+let DT = 0;
+
+function reg(id, draw){
+  const c = document.getElementById(id);
+  if (!c) return null;
+  const pageEl = c.closest('.page');
+  const pageIdx = pages.indexOf(pageEl);
+  const o = { c, ctx: c.getContext('2d'), draw, w: 0, h: 0, pageIdx };
+  canvases.push(o);
+  return o;
+}
+
+function resizeAll(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvases.forEach(o => {
+    const cw = o.c.clientWidth;
+    const ch = o.c.clientHeight;
+    if (cw === 0 || ch === 0) return;
+    o.w = cw; o.h = ch;
+    o.c.width  = Math.round(cw * dpr);
+    o.c.height = Math.round(ch * dpr);
+    o.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  });
+}
+
+function rr(ctx, x, y, w, h, r){
+  r = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function arrow(ctx, x1, y1, x2, y2, head){
+  head = head || 9;
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath();
+  ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - head * Math.cos(a - 0.4), y2 - head * Math.sin(a - 0.4));
+  ctx.lineTo(x2 - head * Math.cos(a + 0.4), y2 - head * Math.sin(a + 0.4));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function txt(ctx, s, x, y, color, size, align, weight){
+  ctx.fillStyle = color || '#8fa0c0';
+  ctx.font = (weight || 500) + ' ' + (size || 12) + 'px -apple-system, Segoe UI, Roboto, sans-serif';
+  ctx.textAlign = align || 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(s, x, y);
+}
+
+/* ============================================================
+   MOLECULE SCENE (shared)
+   ------------------------------------------------------------
+   FIX: The bottom row of molecules is r = 0 (largest canvas y,
+   closest to the wall). The adhesion pull and the adhesion
+   bonds are both applied to r = 0 — so adhesion links the
+   bottom-most water molecules directly to the wall atoms.
+   ============================================================ */
+function moleculeScene(ctx, w, h, cfg){
+  const t = cfg.t;
+  ctx.clearRect(0, 0, w, h);
+
+  const wallH   = 56;
+  const wallTop = cfg.showWall ? h - wallH : h;
+
+  if (cfg.showWall){
+    const wg = ctx.createLinearGradient(0, wallTop, 0, h);
+    wg.addColorStop(0, '#243352');
+    wg.addColorStop(1, '#111827');
+    ctx.fillStyle = wg;
+    ctx.fillRect(0, wallTop, w, wallH);
+
+    ctx.strokeStyle = '#3d5480';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, wallTop + 1); ctx.lineTo(w, wallTop + 1);
+    ctx.stroke();
+
+    const aw = 34;
+    const nA = Math.max(2, Math.floor(w / aw));
+    for (let i = 0; i < nA; i++){
+      const x = aw * 0.5 + i * aw;
+      const g = ctx.createRadialGradient(x - 2, wallTop + 18, 1, x, wallTop + 20, 8);
+      g.addColorStop(0, '#9dc0ff'); g.addColorStop(1, '#2f6df6');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, wallTop + 20, 7, 0, 7); ctx.fill();
+    }
+    txt(ctx, T('cvSolidWall'), 12, wallTop + 42, '#4a5c80', 11, 'left', 700);
+  }
+
+  const topPad = 34;
+  const bottom = (cfg.showWall ? wallTop : h) - 16;
+  const cols = Math.max(3, Math.round(w / 84));
+  const dx = w / cols;
+  const rows = Math.max(2, Math.min(4, Math.floor((bottom - topPad) / 38)));
+  const dy = (bottom - topPad) / rows;
+
+  // Build the grid. r = 0 is the BOTTOM row (closest to the wall).
+  const pts = [];
+  for (let r = 0; r < rows; r++){
+    for (let c = 0; c < cols; c++){
+      const bx = dx * (c + 0.5);
+      let by = bottom - dy * (r + 0.5);
+      // FIX: only the bottom row (r === 0) is pulled toward the wall
+      if (cfg.showWall && r === 0) by += cfg.pull * 5;
+      const jx = Math.sin(t * 1.6 + r * 1.1 + c * 0.8) * 2.2 * cfg.jiggle;
+      const jy = Math.cos(t * 2.0 + r * 0.6 + c * 1.4) * 2.0 * cfg.jiggle;
+      pts.push({ x: bx + jx, y: by + jy, r, c });
+    }
+  }
+  const at = (r, c) => (r >= 0 && r < rows && c >= 0 && c < cols) ? pts[r * cols + c] : null;
+
+  // Cohesion bonds (fluid–fluid) — every molecule to its neighbours
+  if (cfg.showCoh){
+    ctx.lineCap = 'round';
+    for (let r = 0; r < rows; r++){
+      for (let c = 0; c < cols; c++){
+        const p = at(r, c);
+        const pairs = [at(r, c + 1), at(r + 1, c)];
+        pairs.forEach(q => {
+          if (!q) return;
+          ctx.strokeStyle = 'rgba(77,141,255,' + (0.10 + 0.55 * cfg.coh) + ')';
+          ctx.lineWidth = 1 + 2.2 * cfg.coh;
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+        });
+      }
+    }
+  }
+
+  // Adhesion bonds (fluid–solid) — FIX: connect the BOTTOM row to the wall atoms
+  if (cfg.showWall && cfg.showAdh){
+    for (let c = 0; c < cols; c++){
+      const p = at(0, c);          // FIX: bottom row, not top row
+      if (!p) continue;
+      const ax = dx * (c + 0.5);
+      const ay = wallTop + 20;
+      ctx.strokeStyle = 'rgba(255,138,61,' + (0.18 + 0.72 * cfg.adh) + ')';
+      ctx.lineWidth = 1.2 + 2.6 * cfg.adh;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y + 7); ctx.lineTo(ax, ay - 8);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  // Molecules on top
+  for (const p of pts){
+    const g = ctx.createRadialGradient(p.x - 2.5, p.y - 2.5, 1, p.x, p.y, 8.5);
+    g.addColorStop(0, '#e6f3ff'); g.addColorStop(1, '#4f9ef0');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 7.5, 0, 7); ctx.fill();
+    ctx.strokeStyle = 'rgba(170,215,255,.9)';
+    ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  if (cfg.label){
+    txt(ctx, cfg.label, 12, 16, cfg.labelColor || '#6c7a97', 11.5, 'left', 700);
+  }
+}
+
+/* ============================================================
+   EDIT SYSTEM
+   ============================================================ */
+const editToggle  = document.getElementById('editToggle');
+const editActions = document.getElementById('editActions');
+const titleInput  = document.getElementById('titleInput');
+const addPageBtn  = document.getElementById('addPageBtn');
+const delPageBtn  = document.getElementById('delPageBtn');
+const saveHtmlBtn = document.getElementById('saveHtmlBtn');
+const resetBtn    = document.getElementById('resetBtn');
+const loginModal   = document.getElementById('loginModal');
+const loginUser    = document.getElementById('loginUser');
+const loginPass    = document.getElementById('loginPass');
+const loginError   = document.getElementById('loginError');
+const loginSubmit  = document.getElementById('loginSubmit');
+const loginCancel  = document.getElementById('loginCancel');
+const addModal       = document.getElementById('addModal');
+const newPageTitle   = document.getElementById('newPageTitle');
+const newPageHtml    = document.getElementById('newPageHtml');
+const addModalCancel = document.getElementById('addModalCancel');
+const addModalInsert = document.getElementById('addModalInsert');
+
+function requestEditToggle(){
+  if (editMode) { setEditMode(false); return; }
+  openLogin();
+}
+function openLogin(){
+  loginUser.value = ''; loginPass.value = '';
+  loginError.hidden = true;
+  loginModal.hidden = false;
+  setTimeout(() => loginUser.focus(), 40);
+}
+function closeLogin(){ loginModal.hidden = true; }
+function submitLogin(){
+  const u = loginUser.value.trim();
+  const p = loginPass.value;
+  if (u === EDIT_USER && p === EDIT_PASS){ closeLogin(); setEditMode(true); }
+  else { loginError.hidden = false; loginPass.value = ''; loginPass.focus(); }
+}
+loginSubmit.addEventListener('click', submitLogin);
+loginCancel.addEventListener('click', closeLogin);
+loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeLogin(); });
+[loginUser, loginPass].forEach(el => {
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter'){ e.preventDefault(); submitLogin(); }
+    if (e.key === 'Escape'){ closeLogin(); }
+  });
+});
+
+function applyEditGuards(){
+  if (!editMode) return;
+  document.querySelectorAll('.sim, .sim *, canvas, button, input, select, textarea, .eq, .sim-explain').forEach(el => {
+    el.setAttribute('contenteditable', 'false');
+  });
+}
+
+function setEditMode(on){
+  editMode = on;
+  document.body.classList.toggle('edit-mode', on);
+  pages.forEach(p => {
+    if (on) { p.setAttribute('contenteditable', 'true'); p.spellcheck = false; }
+    else    { p.removeAttribute('contenteditable'); }
+  });
+  document.querySelectorAll('.sim, .sim *, canvas, button, input, select, textarea, .eq, .sim-explain').forEach(el => {
+    if (on) el.setAttribute('contenteditable', 'false');
+    else el.removeAttribute('contenteditable');
+  });
+  editToggle.classList.toggle('active', on);
+  editToggle.title = on ? T('editFabTipExit') : T('editFabTip');
+  editActions.hidden = !on;
+  if (on) {
+    syncTitleInput();
+    if (pages[currentIdx]) pages[currentIdx].scrollTop = 0;
+  } else {
+    saveToStorage();
+  }
+}
+
+function syncTitleInput(){
+  if (!pages[currentIdx]) return;
+  titleInput.value = pageTitle(pages[currentIdx]);
+}
+titleInput.addEventListener('input', () => {
+  if (!pages[currentIdx]) return;
+  pages[currentIdx].dataset.titleEn = titleInput.value;
+  navTitleEl.textContent = titleInput.value;
+  if (dotEls[currentIdx]) dotEls[currentIdx].title = titleInput.value;
+  scheduleSave();
+});
+
+let saveTimer = null;
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveToStorage, 1200); }
+document.getElementById('book').addEventListener('input', () => {
+  if (!editMode) return;
+  scheduleSave();
+});
+
+function saveToStorage(){
+  try {
+    const data = {
+      pages: pages.map(p => ({
+        cls: p.className.replace(/\s*flipped\s*/g, ' ').trim(),
+        titleEn: p.dataset.titleEn || '',
+        html: p.innerHTML
+      })),
+      idx: currentIdx
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e){ console.warn('Storage save failed', e); }
+}
+
+const DEFAULT_NEW_PAGE =
+'<h2><span class="chip">·</span>New chapter</h2>\n' +
+'<p>Write your content here. You can use any HTML tag.</p>\n\n' +
+'<div class="callout">\n  <p><strong>Tip:</strong> reuse the book\'s classes to keep the style consistent.</p>\n</div>\n\n' +
+'<div class="eq">\n  y = mx + c\n  <span class="lbl">An equation block</span>\n</div>\n\n' +
+'<p>Wrap any interactive widget in <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code> so it stays clickable in edit mode.</p>';
+
+function openAddModal(){
+  newPageTitle.value = ''; newPageHtml.value = DEFAULT_NEW_PAGE;
+  addModal.hidden = false;
+  setTimeout(() => newPageTitle.focus(), 30);
+}
+function closeAddModal(){ addModal.hidden = true; }
+function insertNewPage(){
+  const title = newPageTitle.value.trim() || 'New page';
+  const html  = newPageHtml.value;
+  const newPage = document.createElement('div');
+  newPage.className = 'page';
+  newPage.dataset.titleEn = title;
+  newPage.innerHTML = html;
+  const bookEl = document.getElementById('book');
+  const anchor = pages[currentIdx];
+  if (anchor && anchor.nextSibling) bookEl.insertBefore(newPage, anchor.nextSibling);
+  else bookEl.appendChild(newPage);
+  const newIdx = currentIdx + 1;
+  closeAddModal();
+  if (!editMode) setEditMode(true);
+  refreshPages();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < newIdx));
+  currentIdx = newIdx;
+  updateZ(); updateUI(); syncTitleInput(); saveToStorage();
+  setTimeout(() => { if (pages[currentIdx]) pages[currentIdx].scrollTop = 0; resizeAll(); }, 60);
+}
+function deleteCurrentPage(){
+  if (currentIdx === 0) { alert(T('alertCover')); return; }
+  if (!confirm(T('confirmDelete'))) return;
+  pages[currentIdx].remove();
+  const newIdx = Math.max(0, currentIdx - 1);
+  currentIdx = newIdx;
+  refreshPages();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
+  updateZ(); updateUI(); syncTitleInput(); saveToStorage();
+}
+function saveAsHTML(){
+  const clone = document.documentElement.cloneNode(true);
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('[spellcheck]').forEach(el => el.removeAttribute('spellcheck'));
+  clone.classList.remove('edit-mode');
+  clone.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('flipped');
+    p.style.zIndex = ''; p.style.transform = ''; p.style.transition = '';
+  });
+  ['#editToggle','#editActions','#addModal','#loginModal'].forEach(sel => {
+    const el = clone.querySelector(sel); if (el) el.remove();
+  });
+  let html = clone.outerHTML.replace(
+    /const STORAGE_KEY = '[^']+';/,
+    "const STORAGE_KEY = 'adhesion-book-export-" + Date.now() + "';"
+  );
+  const doc = '<!DOCTYPE html>\n' + html;
+  const blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'adhesion-cohesion-viscosity.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  saveToStorage();
+}
+function resetToOriginal(){
+  if (!confirm(T('confirmReset'))) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+  location.reload();
+}
+
+editToggle.addEventListener('click', requestEditToggle);
+addPageBtn.addEventListener('click', openAddModal);
+delPageBtn.addEventListener('click', deleteCurrentPage);
+saveHtmlBtn.addEventListener('click', saveAsHTML);
+resetBtn.addEventListener('click', resetToOriginal);
+addModalCancel.addEventListener('click', closeAddModal);
+addModalInsert.addEventListener('click', insertNewPage);
+addModal.addEventListener('click', (e) => { if (e.target === addModal) closeAddModal(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !addModal.hidden) { closeAddModal(); e.stopPropagation(); }
+});
+
+/* ============================================================
+   SIM STATE
+   ============================================================ */
+const adhSim = { strength: 0.70, t: 0 };
+const cohSim = { strength: 0.80, t: 0 };
+const bothSim = { showAdh: true, showCoh: true };
+const viscSim = { muB: 250, t: 0, particles: [] };
+const newton = {
+  U: 0.5, hmm: 2.0, mu: 0.1, playing: true,
+  showProfile: true, showParticles: true,
+  showElement: true, showStress: true,
+  elementT: 0, particles: []
+};
+const noslip  = { wall: 0, Uinf: 1.0, particles: [] };
+const profSim = { U: 1.0, showGrad: true };
+const wallSim = { U: 2.0, mu: 0.1 };
+const blSim   = { U: 1.0, nu: 0.1, showProfiles: true, showParticles: true, particles: [] };
+const pplSim  = { wall: 0.0, Uinf: 1.0, t: 0, phase: 0, playing: true };
+const pipeSim = { Umax: 1.0, turbulent: false, particles: [] };
+
+(function seedParticles(){
+  viscSim.particles = [];
+  for (let i = 0; i < 46; i++) viscSim.particles.push({ x: Math.random(), yn: Math.random() });
+  newton.particles = [];
+  for (let i = 0; i < 130; i++) newton.particles.push({ x: Math.random(), yn: Math.random() * 0.97 + 0.015 });
+  noslip.particles = [];
+  for (let i = 0; i < 110; i++) noslip.particles.push({ x: Math.random(), yn: Math.random() * 0.97 + 0.015 });
+  blSim.particles = [];
+  for (let i = 0; i < 170; i++) blSim.particles.push({ x: Math.random(), yn: Math.random() });
+  pipeSim.particles = [];
+  for (let i = 0; i < 190; i++) pipeSim.particles.push({ x: Math.random(), yn: Math.random() * 2 - 1 });
+})();
+
+/* ============================================================
+   SIM 1 · ADHESION
+   ------------------------------------------------------------
+   FIX: Cohesion bonds are now switched OFF in this simulation
+   so the only interaction shown is fluid–solid adhesion,
+   drawn from the bottom-most water molecules to the wall.
+   ============================================================ */
+reg('cvAdhesion', function(o){
+  moleculeScene(o.ctx, o.w, o.h, {
+    t: adhSim.t, showWall: true, showAdh: true, showCoh: false,
+    adh: adhSim.strength, coh: 0, jiggle: 1, pull: adhSim.strength,
+    label: T('cvAdhLabel'), labelColor: '#ff8a3d'
+  });
+});
+const adhSlider = document.getElementById('adhSlider');
+if (adhSlider) adhSlider.addEventListener('input', () => {
+  adhSim.strength = +adhSlider.value / 100;
+  document.getElementById('adhVal').textContent = adhSlider.value;
+});
+
+/* ============================================================
+   SIM 2 · COHESION
+   ============================================================ */
+reg('cvCohesion', function(o){
+  moleculeScene(o.ctx, o.w, o.h, {
+    t: cohSim.t, showWall: false, showAdh: false, showCoh: true,
+    adh: 0, coh: cohSim.strength, jiggle: 0.6 + cohSim.strength * 1.2, pull: 0,
+    label: T('cvCohLabel'), labelColor: '#4d8dff'
+  });
+});
+const cohSlider = document.getElementById('cohSlider');
+if (cohSlider) cohSlider.addEventListener('input', () => {
+  cohSim.strength = +cohSlider.value / 100;
+  document.getElementById('cohVal').textContent = cohSlider.value;
+});
+
+/* ============================================================
+   SIM 3 · BOTH
+   ============================================================ */
+reg('cvBoth', function(o){
+  const { ctx, w, h } = o;
+  moleculeScene(ctx, w, h, {
+    t: adhSim.t, showWall: true,
+    showAdh: bothSim.showAdh, showCoh: bothSim.showCoh,
+    adh: 0.9, coh: 0.6, jiggle: 1, pull: 0.7, label: ''
+  });
+  ctx.save();
+  ctx.font = '700 11.5px -apple-system, Segoe UI, Roboto, sans-serif';
+  ctx.textBaseline = 'middle';
+  let lx = 12;
+  const ly = 16;
+  if (bothSim.showAdh){
+    ctx.fillStyle = '#ff8a3d';
+    ctx.beginPath(); ctx.arc(lx + 5, ly, 5, 0, 7); ctx.fill();
+    ctx.textAlign = 'left';
+    ctx.fillText(T('cvAdhLegend'), lx + 16, ly);
+    lx += ctx.measureText(T('cvAdhLegend')).width + 34;
+  }
+  if (bothSim.showCoh){
+    ctx.fillStyle = '#4d8dff';
+    ctx.beginPath(); ctx.arc(lx + 5, ly, 5, 0, 7); ctx.fill();
+    ctx.textAlign = 'left';
+    ctx.fillText(T('cvCohLegend'), lx + 16, ly);
+  }
+  ctx.restore();
+});
+const tgAdh = document.getElementById('tgAdh');
+if (tgAdh) tgAdh.addEventListener('click', () => {
+  bothSim.showAdh = !bothSim.showAdh;
+  tgAdh.classList.toggle('on', bothSim.showAdh);
+});
+const tgCoh = document.getElementById('tgCoh');
+if (tgCoh) tgCoh.addEventListener('click', () => {
+  bothSim.showCoh = !bothSim.showCoh;
+  tgCoh.classList.toggle('on', bothSim.showCoh);
+});
+
+/* ============================================================
+   SIM 4 · VISCOSITY
+   ============================================================ */
+reg('cvVisc', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+  const padX = 20;
+  const x0 = padX, x1 = w - padX;
+  const cw = x1 - x0;
+  const top = 46;
+  const gap = 30;
+  const chH = (h - top - 26 - gap) / 2;
+  const channels = [
+    { label: T('cvWater'), mu: 1, rgb: '77,141,255', hex: '#4d8dff' },
+    { label: T('cvFluidB'), mu: viscSim.muB, rgb: '255,138,61', hex: '#ff8a3d' }
+  ];
+  channels.forEach((ch, idx) => {
+    const cTop = top + idx * (chH + gap);
+    const cBot = cTop + chH;
+    const plateH = 13;
+    const fluidTop = cTop + plateH;
+    const fluidBot = cBot - plateH;
+    const fluidH = fluidBot - fluidTop;
+    const f = Math.pow(1 / ch.mu, 0.30);
+    const maxLen = cw * 0.62 * f;
+    const bg = ctx.createLinearGradient(0, fluidTop, 0, fluidBot);
+    bg.addColorStop(0, 'rgba(' + ch.rgb + ',0.16)');
+    bg.addColorStop(1, 'rgba(' + ch.rgb + ',0.05)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(x0, fluidTop, cw, fluidH);
+    const shift = f * cw * 0.10;
+    const tg = ctx.createLinearGradient(0, cTop, 0, cTop + plateH);
+    tg.addColorStop(0, ch.hex);
+    tg.addColorStop(1, 'rgba(' + ch.rgb + ',0.55)');
+    ctx.fillStyle = tg;
+    rr(ctx, x0 + shift, cTop, cw, plateH, 6); ctx.fill();
+    const bgg = ctx.createLinearGradient(0, cBot - plateH, 0, cBot);
+    bgg.addColorStop(0, '#3b4a68'); bgg.addColorStop(1, '#1d2637');
+    ctx.fillStyle = bgg;
+    rr(ctx, x0, cBot - plateH, cw, plateH, 6); ctx.fill();
+    const levels = 6;
+    for (let i = 1; i <= levels; i++){
+      const yn = i / levels;
+      const y = fluidBot - yn * fluidH;
+      const len = maxLen * yn;
+      if (len < 3) continue;
+      ctx.strokeStyle = 'rgba(' + ch.rgb + ',0.9)';
+      ctx.fillStyle   = 'rgba(' + ch.rgb + ',0.9)';
+      ctx.lineWidth = 2;
+      arrow(ctx, x0 + 8, y, x0 + 8 + len, y, 7);
+    }
+    ctx.fillStyle = 'rgba(' + ch.rgb + ',0.55)';
+    for (const p of viscSim.particles){
+      p.x += p.yn * f * DT * 0.9;
+      if (p.x > 1) p.x -= 1;
+      const X = x0 + 8 + p.x * Math.max(4, cw - 20);
+      const Y = fluidBot - p.yn * fluidH;
+      ctx.beginPath(); ctx.arc(X, Y, 1.7, 0, 7); ctx.fill();
+    }
+    txt(ctx, ch.label, x0 + 4, cTop - 11, ch.hex, 12, 'left', 800);
+    txt(ctx, ch.mu === 1 ? T('cvMuWater') : 'μ = ' + ch.mu + '×',
+        x1 - 4, cTop - 11, '#5f7093', 11, 'right', 600);
+  });
+  txt(ctx, T('cvSameTau'), w / 2, 16, '#6c7a97', 11.5, 'center', 600);
+});
+const muBSlider = document.getElementById('muBSlider');
+function updateVisc(){
+  if (!muBSlider) return;
+  viscSim.muB = +muBSlider.value;
+  document.getElementById('muBVal').textContent = viscSim.muB;
+  const rel = Math.pow(1 / viscSim.muB, 0.30) * 100;
+  document.getElementById('vWater').innerHTML = '100 <small>%</small>';
+  document.getElementById('vB').innerHTML = rel.toFixed(1) + ' <small>%</small>';
+  document.getElementById('vRatio').innerHTML = viscSim.muB + ' <small>×</small>';
+}
+if (muBSlider){ muBSlider.addEventListener('input', updateVisc); updateVisc(); }
+
+/* ============================================================
+   SIM 5 · COUETTE FLOW
+   ============================================================ */
+reg('cvNewton', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+  const padL = Math.max(62, w * 0.11);
+  const padR = Math.max(72, w * 0.13);
+  const padT = 74, padB = 96;
+  const x0 = padL, x1 = w - padR;
+  const yTop = padT, yBot = h - padB;
+  const fluidW = x1 - x0;
+  const fluidH = yBot - yTop;
+  const hMeters = newton.hmm / 1000;
+  const shearRate = newton.U / hMeters;
+  const tau = newton.mu * shearRate;
+  const profileSpan = fluidW * 0.34;
+  const pSpeedScale = 80;
+
+  const fg = ctx.createLinearGradient(0, yTop, 0, yBot);
+  fg.addColorStop(0, 'rgba(77,141,255,.22)');
+  fg.addColorStop(1, 'rgba(15,155,142,.08)');
+  ctx.fillStyle = fg;
+  ctx.fillRect(x0, yTop, fluidW, fluidH);
+
+  const levels = 8;
+  ctx.strokeStyle = 'rgba(140,200,255,.09)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < levels; i++){
+    const y = yBot - (i / levels) * fluidH;
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+  }
+
+  if (newton.showProfile){
+    const pxL = x0 + 8;
+    ctx.strokeStyle = '#7cc4ff'; ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.moveTo(pxL, yBot); ctx.lineTo(pxL + profileSpan, yTop);
+    ctx.stroke();
+    for (let i = 1; i <= levels; i++){
+      const yn = i / levels;
+      const y = yBot - yn * fluidH;
+      const len = yn * profileSpan;
+      if (len < 3) continue;
+      ctx.strokeStyle = 'rgba(124,196,255,.75)';
+      ctx.fillStyle   = 'rgba(124,196,255,.75)';
+      ctx.lineWidth = 1.7;
+      arrow(ctx, pxL, y, pxL + len, y, 6);
+    }
+    txt(ctx, 'u(y) = U · y/h', pxL + profileSpan + 10, yTop + 2, '#7cc4ff', 11.5, 'left', 700);
+    txt(ctx, T('cvLinearProf'), pxL + profileSpan + 10, yTop + 18, '#5f7093', 10.5, 'left', 500);
+  }
+
+  if (newton.showParticles){
+    const dt = newton.playing ? DT : 0;
+    ctx.fillStyle = 'rgba(200,235,255,.78)';
+    for (const p of newton.particles){
+      const v = p.yn * newton.U;
+      p.x += (v * pSpeedScale * dt) / fluidW;
+      if (p.x > 1) p.x -= 1;
+      if (p.x < 0) p.x += 1;
+      const sx = x0 + p.x * fluidW;
+      const sy = yBot - p.yn * fluidH;
+      ctx.beginPath(); ctx.arc(sx, sy, 1.9, 0, 7); ctx.fill();
+    }
+  }
+
+  if (newton.showStress && tau > 0.001){
+    const stressLevels = [0.26, 0.53, 0.80];
+    const midX = x0 + fluidW * 0.60;
+    const len  = Math.min(48, 16 + tau * 0.85);
+    stressLevels.forEach(yn => {
+      const y = yBot - yn * fluidH;
+      ctx.strokeStyle = 'rgba(255,138,61,.30)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(midX - len / 2 - 6, y); ctx.lineTo(midX + len / 2 + 6, y);
+      ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle = '#ff8a3d'; ctx.fillStyle = '#ff8a3d';
+      ctx.lineWidth = 2.1;
+      arrow(ctx, midX - len / 2, y - 5, midX + len / 2, y - 5, 7);
+      arrow(ctx, midX + len / 2, y + 5, midX - len / 2, y + 5, 7);
+    });
+    txt(ctx, 'τ', midX + len / 2 + 14, yBot - 0.53 * fluidH, '#ff8a3d', 14, 'left', 800);
+    txt(ctx, T('cvShearBetween'), midX + len / 2 + 14, yBot - 0.53 * fluidH + 16, '#a06a4a', 10, 'left', 500);
+  }
+
+  if (newton.showElement){
+    const maxLean = Math.min(72, fluidW * 0.14);
+    if (newton.playing){
+      const cycleT = Math.max(1.1, 3.6 - shearRate / 900);
+      newton.elementT += DT / cycleT;
+      if (newton.elementT > 1) newton.elementT = 0;
+    }
+    const lean = newton.elementT * maxLean;
+    let elA = 1;
+    if (newton.elementT > 0.88) elA = (1 - newton.elementT) / 0.12;
+    if (newton.elementT < 0.06) elA = newton.elementT / 0.06;
+    elA = Math.max(0, Math.min(1, elA));
+    const ew = Math.min(78, fluidW * 0.16);
+    const eh = fluidH * 0.30;
+    const ex = x0 + fluidW * 0.16;
+    const eyBottom = yBot - fluidH * 0.08;
+    const eyTop = eyBottom - eh;
+    ctx.save();
+    ctx.globalAlpha = elA;
+    ctx.beginPath();
+    ctx.moveTo(ex, eyBottom); ctx.lineTo(ex + ew, eyBottom);
+    ctx.lineTo(ex + ew + lean, eyTop); ctx.lineTo(ex + lean, eyTop);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,138,61,.16)';
+    ctx.strokeStyle = '#ff8a3d'; ctx.lineWidth = 2;
+    ctx.fill(); ctx.stroke();
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = 'rgba(255,138,61,.30)'; ctx.lineWidth = 1.2;
+    ctx.strokeRect(ex, eyTop, ew, eh);
+    ctx.setLineDash([]);
+    txt(ctx, T('cvElementShear'), ex + ew / 2 + lean / 2, eyTop - 14, '#ff8a3d', 10.5, 'center', 700);
+    ctx.restore();
+  }
+
+  const bg = ctx.createLinearGradient(0, yBot, 0, yBot + 18);
+  bg.addColorStop(0, '#3b4a68'); bg.addColorStop(1, '#1d2637');
+  ctx.fillStyle = bg;
+  rr(ctx, x0 - 12, yBot, fluidW + 24, 18, 6); ctx.fill();
+  ctx.strokeStyle = '#4a5c80'; ctx.lineWidth = 1; ctx.stroke();
+  txt(ctx, T('cvFixedPlate'), x0 - 8, yBot + 32, '#6c7a97', 11, 'left', 700);
+
+  const tg = ctx.createLinearGradient(0, yTop - 18, 0, yTop);
+  tg.addColorStop(0, '#4d8dff'); tg.addColorStop(1, '#2c5db8');
+  ctx.fillStyle = tg;
+  rr(ctx, x0 - 12, yTop - 18, fluidW + 24, 18, 6); ctx.fill();
+  ctx.strokeStyle = '#7cb4ff'; ctx.lineWidth = 1; ctx.stroke();
+
+  ctx.save();
+  ctx.beginPath(); rr(ctx, x0 - 12, yTop - 18, fluidW + 24, 18, 6); ctx.clip();
+  const scroll = (performance.now() / 1000) * newton.U * 90;
+  ctx.strokeStyle = 'rgba(200,225,255,.5)'; ctx.lineWidth = 2;
+  for (let i = -1; i < fluidW / 26 + 2; i++){
+    const px = x0 - 12 + ((i * 26 + scroll) % (fluidW + 40));
+    ctx.beginPath(); ctx.moveTo(px, yTop - 18); ctx.lineTo(px + 9, yTop); ctx.stroke();
+  }
+  ctx.restore();
+  txt(ctx, T('cvMovingPlate'), x1, yTop - 34, '#5f7093', 11, 'right', 700);
+
+  if (newton.U > 0.01){
+    ctx.strokeStyle = '#7cb4ff'; ctx.fillStyle = '#7cb4ff'; ctx.lineWidth = 2.6;
+    arrow(ctx, x0 + 6, yTop - 36, x0 + 6 + newton.U * 90, yTop - 36, 9);
+    txt(ctx, 'U = ' + newton.U.toFixed(2) + ' m/s',
+        x0 + 10 + newton.U * 90, yTop - 36, '#7cb4ff', 12, 'left', 700);
+  } else {
+    txt(ctx, T('cvNoShearNoFlow'), x0 + 6, yTop - 36, '#ff8a3d', 12, 'left', 700);
+  }
+
+  ctx.strokeStyle = 'rgba(140,200,255,.4)'; ctx.lineWidth = 1;
+  const dimX = x1 + 22;
+  ctx.beginPath();
+  ctx.moveTo(dimX, yTop); ctx.lineTo(dimX, yBot);
+  ctx.moveTo(dimX - 5, yTop); ctx.lineTo(dimX + 5, yTop);
+  ctx.moveTo(dimX - 5, yBot); ctx.lineTo(dimX + 5, yBot);
+  ctx.stroke();
+  ctx.save();
+  ctx.translate(dimX + 14, (yTop + yBot) / 2);
+  ctx.rotate(-Math.PI / 2);
+  txt(ctx, 'h = ' + newton.hmm.toFixed(1) + ' mm', 0, 0, '#7f8dab', 11.5, 'center', 600);
+  ctx.restore();
+
+  const explainY = h - 24;
+  let explanation;
+  if (newton.U < 0.005) explanation = T('cvExplainU0');
+  else explanation = T('cvExplainU');
+  txt(ctx, explanation, w / 2, explainY, '#8fa0c0', 11.5, 'center', 500);
+
+  const r1 = document.getElementById('nRate');
+  const r2 = document.getElementById('nTau');
+  const r3 = document.getElementById('nMid');
+  const r4 = document.getElementById('nTime');
+  if (r1) r1.innerHTML = Math.round(shearRate) + ' <small>s⁻¹</small>';
+  if (r2) r2.innerHTML = (tau >= 100 ? tau.toFixed(0) : tau.toFixed(2)) + ' <small>Pa</small>';
+  if (r3) r3.innerHTML = (newton.U / 2).toFixed(3) + ' <small>m/s</small>';
+  if (r4){
+    if (newton.U > 0.001) r4.innerHTML = (hMeters / newton.U).toFixed(3) + ' <small>s</small>';
+    else r4.innerHTML = '∞ <small>s</small>';
+  }
+});
+
+const nUSlider  = document.getElementById('nUSlider');
+const nHSlider  = document.getElementById('nHSlider');
+const nMuSlider = document.getElementById('nMuSlider');
+if (nUSlider) nUSlider.addEventListener('input', () => {
+  newton.U = +nUSlider.value / 100;
+  document.getElementById('nUVal').textContent = newton.U.toFixed(2);
+  newton.elementT = 0;
+});
+if (nHSlider) nHSlider.addEventListener('input', () => {
+  newton.hmm = +nHSlider.value / 10;
+  document.getElementById('nHVal').textContent = newton.hmm.toFixed(1);
+  newton.elementT = 0;
+});
+if (nMuSlider) nMuSlider.addEventListener('input', () => {
+  newton.mu = +nMuSlider.value / 1000;
+  document.getElementById('nMuVal').textContent = newton.mu.toFixed(3);
+});
+
+const nTgProfile = document.getElementById('nTgProfile');
+if (nTgProfile) nTgProfile.addEventListener('click', () => {
+  newton.showProfile = !newton.showProfile;
+  nTgProfile.classList.toggle('on', newton.showProfile);
+});
+const nTgParticles = document.getElementById('nTgParticles');
+if (nTgParticles) nTgParticles.addEventListener('click', () => {
+  newton.showParticles = !newton.showParticles;
+  nTgParticles.classList.toggle('on', newton.showParticles);
+});
+const nTgElement = document.getElementById('nTgElement');
+if (nTgElement) nTgElement.addEventListener('click', () => {
+  newton.showElement = !newton.showElement;
+  nTgElement.classList.toggle('on', newton.showElement);
+});
+const nTgStress = document.getElementById('nTgStress');
+if (nTgStress) nTgStress.addEventListener('click', () => {
+  newton.showStress = !newton.showStress;
+  nTgStress.classList.toggle('on', newton.showStress);
+});
+const nPauseBtn = document.getElementById('nPause');
+function updatePauseBtn(){
+  if (!nPauseBtn) return;
+  nPauseBtn.textContent = newton.playing ? T('cvPause') : T('cvPlay');
+  nPauseBtn.classList.toggle('on', !newton.playing);
+}
+if (nPauseBtn) nPauseBtn.addEventListener('click', () => {
+  newton.playing = !newton.playing; updatePauseBtn();
+});
+
+/* ============================================================
+   SIM 6 · NO-SLIP
+   ============================================================ */
+reg('cvNoSlip', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+  const padL = 56, padR = 34, padT = 44, padB = 70;
+  const x0 = padL, x1 = w - padR;
+  const yBot = h - padB, yTop = padT;
+  const H = yBot - yTop;
+  const Uw = noslip.wall;
+  const Uinf = noslip.Uinf;
+  const Umax = Math.max(1, Uinf);
+  const scale = (x1 - x0) * 0.80 / Umax;
+
+  const fg = ctx.createLinearGradient(0, yTop, 0, yBot);
+  fg.addColorStop(0, 'rgba(77,141,255,.13)');
+  fg.addColorStop(1, 'rgba(15,155,142,.05)');
+  ctx.fillStyle = fg;
+  ctx.fillRect(x0, yTop, x1 - x0, H);
+
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(140,200,255,.30)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x0, yTop + 10); ctx.lineTo(x1, yTop + 10);
+  ctx.stroke(); ctx.setLineDash([]);
+  txt(ctx, T('cvUinf'), x1, yTop + 4, '#5f7093', 11, 'right', 600);
+
+  const levels = 9;
+  for (let i = 0; i <= levels; i++){
+    const yn = i / levels;
+    const y = yBot - yn * H;
+    const u = Uw + (Uinf - Uw) * yn;
+    const len = u * scale;
+    if (Math.abs(len) < 2) continue;
+    ctx.strokeStyle = 'rgba(140,200,255,.75)';
+    ctx.fillStyle   = 'rgba(140,200,255,.75)';
+    ctx.lineWidth = 1.8;
+    arrow(ctx, x0 + 8, y, x0 + 8 + len, y, 7);
+  }
+
+  ctx.strokeStyle = '#7cc4ff'; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i <= 40; i++){
+    const yn = i / 40;
+    const y = yBot - yn * H;
+    const u = Uw + (Uinf - Uw) * yn;
+    const X = x0 + 8 + u * scale;
+    i === 0 ? ctx.moveTo(X, y) : ctx.lineTo(X, y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(180,225,255,.65)';
+  for (const p of noslip.particles){
+    const u = Uw + (Uinf - Uw) * p.yn;
+    p.x += (u * scale * DT) / (x1 - x0);
+    if (p.x > 1) p.x -= 1;
+    if (p.x < 0) p.x += 1;
+    const X = x0 + p.x * (x1 - x0);
+    const Y = yBot - p.yn * H;
+    ctx.beginPath(); ctx.arc(X, Y, 1.8, 0, 7); ctx.fill();
+  }
+
+  const wallY = yBot + 6;
+  const wg = ctx.createLinearGradient(0, wallY, 0, wallY + 18);
+  if (Uw === 0){ wg.addColorStop(0, '#3b4a68'); wg.addColorStop(1, '#1d2637'); }
+  else { wg.addColorStop(0, '#4d8dff'); wg.addColorStop(1, '#234a92'); }
+  ctx.fillStyle = wg;
+  rr(ctx, x0 - 12, wallY, (x1 - x0) + 24, 18, 6); ctx.fill();
+  ctx.strokeStyle = Uw === 0 ? '#4a5c80' : '#7cb4ff'; ctx.lineWidth = 1; ctx.stroke();
+
+  if (Uw > 0.02){
+    const cxm = (x0 + x1) / 2;
+    ctx.strokeStyle = '#7cb4ff'; ctx.fillStyle = '#7cb4ff'; ctx.lineWidth = 2.6;
+    arrow(ctx, cxm - Uw * 60, wallY + 30, cxm + Uw * 60, wallY + 30, 9);
+    txt(ctx, 'u_wall = ' + Uw.toFixed(2) + ' m/s', cxm, wallY + 46, '#7cb4ff', 12, 'center', 700);
+  } else {
+    txt(ctx, T('cvStationaryWall'), (x0 + x1) / 2, wallY + 30, '#6c7a97', 12, 'center', 700);
+  }
+
+  const Xw = x0 + 8 + Uw * scale;
+  ctx.fillStyle = '#ff8a3d';
+  ctx.beginPath(); ctx.arc(Xw, yBot - 3, 5, 0, 7); ctx.fill();
+  txt(ctx, T('cvUW'), Xw + 10, yBot - 20, '#ff8a3d', 11.5, 'left', 700);
+
+  const grad = (Uinf - Uw) / 0.02;
+  const r1 = document.getElementById('wAtWall');
+  const r2 = document.getElementById('wFree');
+  const r3 = document.getElementById('wGrad');
+  const r4 = document.getElementById('wShape');
+  if (r1) r1.innerHTML = Uw.toFixed(2) + ' <small>m/s</small>';
+  if (r2) r2.innerHTML = Uinf.toFixed(2) + ' <small>m/s</small>';
+  if (r3) r3.innerHTML = Math.round(grad) + ' <small>s⁻¹</small>';
+  if (r4) r4.innerHTML = Math.abs(Uinf - Uw) < 0.03 ? T('cvShapeFlat') : T('cvShapeLinear');
+});
+const wSlider = document.getElementById('wSlider');
+if (wSlider) wSlider.addEventListener('input', () => {
+  noslip.wall = +wSlider.value / 100;
+  document.getElementById('wVal').textContent = noslip.wall.toFixed(2);
+});
+
+/* ============================================================
+   SIM 7 · PIPE
+   ------------------------------------------------------------
+   FIX: The visual profile is now scaled against a fixed
+   reference velocity U_REF = 2.0 m/s. When the user raises
+   u_max, the profile grows visibly toward the reference width
+   instead of being normalised away by Umax.
+   ============================================================ */
+const PIPE_U_REF = 2.0; // m/s, full-scale reference for the visual profile
+
+reg('cvPipe', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+  const padL = 70, padR = 44, padT = 56, padB = 72;
+  const x0 = padL, x1 = w - padR;
+  const yTop = padT, yBot = h - padB;
+  const H = yBot - yTop;
+  const R = H / 2;
+  const yC = yTop + R;
+  const turbulent = pipeSim.turbulent;
+  const Umax = pipeSim.Umax;
+  const uOf = (yn) => {
+    if (!turbulent) return Umax * (1 - yn * yn);
+    const a = Math.abs(yn);
+    return Umax * Math.pow(Math.max(0, 1 - a), 1 / 7);
+  };
+
+  const fg = ctx.createLinearGradient(0, yTop, 0, yBot);
+  fg.addColorStop(0, 'rgba(77,141,255,.07)');
+  fg.addColorStop(0.5, 'rgba(77,141,255,.17)');
+  fg.addColorStop(1, 'rgba(77,141,255,.07)');
+  ctx.fillStyle = fg;
+  ctx.fillRect(x0, yTop, x1 - x0, H);
+
+  ctx.fillStyle = 'rgba(190,228,255,.5)';
+  for (const p of pipeSim.particles){
+    p.x += uOf(p.yn) * DT * 0.28;
+    if (p.x > 1){ p.x -= 1; p.yn = Math.random() * 2 - 1; }
+    const X = x0 + p.x * (x1 - x0);
+    const Y = yC + p.yn * R;
+    ctx.beginPath(); ctx.arc(X, Y, 1.6, 0, 7); ctx.fill();
+  }
+
+  const pxL = x0 + 16;
+  const profSpan = (x1 - x0) * 0.30;
+
+  // Profile curve — now normalised by the fixed reference U_REF
+  ctx.strokeStyle = '#7cc4ff'; ctx.lineWidth = 2.6;
+  ctx.beginPath();
+  for (let i = 0; i <= 80; i++){
+    const yn = -1 + 2 * i / 80;
+    const y = yC + yn * R;
+    const X = pxL + (uOf(yn) / PIPE_U_REF) * profSpan;
+    i === 0 ? ctx.moveTo(X, y) : ctx.lineTo(X, y);
+  }
+  ctx.stroke();
+
+  const levels = 12;
+  for (let i = 0; i <= levels; i++){
+    const yn = -1 + 2 * i / levels;
+    const y = yC + yn * R;
+    const len = (uOf(yn) / PIPE_U_REF) * profSpan;
+    if (len < 2) continue;
+    ctx.strokeStyle = 'rgba(124,196,255,.7)';
+    ctx.fillStyle   = 'rgba(124,196,255,.7)';
+    ctx.lineWidth = 1.6;
+    arrow(ctx, pxL, y, pxL + len, y, 6);
+  }
+
+  // Full-scale guide at U_REF
+  ctx.setLineDash([3, 4]);
+  ctx.strokeStyle = 'rgba(124,196,255,.22)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pxL + profSpan, yTop); ctx.lineTo(pxL + profSpan, yBot);
+  ctx.stroke(); ctx.setLineDash([]);
+  txt(ctx, 'full scale = ' + PIPE_U_REF.toFixed(1) + ' m/s',
+      pxL + profSpan, yBot + 22, '#5f7093', 10.5, 'right', 600);
+
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(15,155,142,.5)'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(x0, yC); ctx.lineTo(x1, yC); ctx.stroke();
+  ctx.setLineDash([]);
+
+  const wallT = 12;
+  const wgt = ctx.createLinearGradient(0, yTop - wallT, 0, yTop);
+  wgt.addColorStop(0, '#1d2637'); wgt.addColorStop(1, '#3b4a68');
+  ctx.fillStyle = wgt;
+  rr(ctx, x0 - 14, yTop - wallT, (x1 - x0) + 28, wallT, 5); ctx.fill();
+  ctx.strokeStyle = '#4a5c80'; ctx.lineWidth = 1; ctx.stroke();
+
+  const wgb = ctx.createLinearGradient(0, yBot, 0, yBot + wallT);
+  wgb.addColorStop(0, '#3b4a68'); wgb.addColorStop(1, '#1d2637');
+  ctx.fillStyle = wgb;
+  rr(ctx, x0 - 14, yBot, (x1 - x0) + 28, wallT, 5); ctx.fill();
+  ctx.strokeStyle = '#4a5c80'; ctx.lineWidth = 1; ctx.stroke();
+
+  txt(ctx, T('cvPipeWallTop'), x0 - 8, yTop - wallT - 12, '#ff8a3d', 11, 'left', 700);
+  txt(ctx, T('cvPipeWallBot'), x0 - 8, yBot + wallT + 14, '#ff8a3d', 11, 'left', 700);
+  txt(ctx, T('cvCentreLine'), x1, yC - 12, '#0f9b8e', 11, 'right', 700);
+
+  ctx.fillStyle = '#ff8a3d';
+  ctx.beginPath(); ctx.arc(pxL, yTop, 4.5, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.arc(pxL, yBot, 4.5, 0, 7); ctx.fill();
+
+  const uEl = document.getElementById('pipeUmax');
+  const gEl = document.getElementById('pipeGrad');
+  if (uEl) uEl.innerHTML = Umax.toFixed(2) + ' <small>m/s</small>';
+  if (gEl){
+    if (!turbulent){
+      const gradWall = 2 * Umax / 0.025;
+      gEl.innerHTML = Math.round(gradWall) + ' <small>s⁻¹</small>';
+    } else {
+      gEl.innerHTML = T('cvTurbulent');
+    }
+  }
+});
+const pipeUSlider = document.getElementById('pipeUSlider');
+if (pipeUSlider) pipeUSlider.addEventListener('input', () => {
+  pipeSim.Umax = +pipeUSlider.value / 100;
+  document.getElementById('pipeUVal').textContent = pipeSim.Umax.toFixed(2);
+});
+const pipeTgTurb = document.getElementById('pipeTgTurb');
+function updateTurbBtn(){
+  if (!pipeTgTurb) return;
+  pipeTgTurb.textContent = pipeSim.turbulent ? T('cvShowLaminar') : T('cvShowTurb');
+  pipeTgTurb.classList.toggle('on', pipeSim.turbulent);
+}
+if (pipeTgTurb){
+  pipeTgTurb.addEventListener('click', () => {
+    pipeSim.turbulent = !pipeSim.turbulent; updateTurbBtn();
+  });
+}
+
+/* ============================================================
+   SIM 8 · VELOCITY PROFILE
+   ============================================================ */
+reg('cvProfile', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+  const padL = 62, padR = 40, padT = 46, padB = 60;
+  const x0 = padL, x1 = w - padR;
+  const yBot = h - padB, yTop = padT;
+  const H = yBot - yTop;
+  const U = profSim.U;
+  const U_REF = 2.0;
+  const DELTA = 0.62;
+  const prof = (yn) => yn >= DELTA ? 1 : Math.sin(Math.PI * 0.5 * (yn / DELTA));
+  const plotW = (x1 - x0) * 0.80;
+  const scale = Math.min(1, U / U_REF);
+
+  const fg = ctx.createLinearGradient(0, yTop, 0, yBot);
+  fg.addColorStop(0, 'rgba(77,141,255,.12)');
+  fg.addColorStop(1, 'rgba(15,155,142,.05)');
+  ctx.fillStyle = fg;
+  ctx.fillRect(x0, yTop, x1 - x0, H);
+
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(15,155,142,.5)'; ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(x0, yBot - DELTA * H); ctx.lineTo(x1, yBot - DELTA * H);
+  ctx.stroke(); ctx.setLineDash([]);
+  txt(ctx, T('cvEdgeLayer'), x1, yBot - DELTA * H - 12, '#0f9b8e', 11, 'right', 600);
+
+  ctx.strokeStyle = '#7cc4ff'; ctx.lineWidth = 2.8;
+  ctx.beginPath();
+  for (let i = 0; i <= 60; i++){
+    const yn = i / 60;
+    const y = yBot - yn * H;
+    const X = x0 + 8 + prof(yn) * scale * plotW;
+    i === 0 ? ctx.moveTo(X, y) : ctx.lineTo(X, y);
+  }
+  ctx.stroke();
+
+  const levels = 10;
+  for (let i = 1; i <= levels; i++){
+    const yn = i / levels;
+    const y = yBot - yn * H;
+    const len = prof(yn) * scale * plotW;
+    if (len < 2) continue;
+    ctx.strokeStyle = 'rgba(140,200,255,.8)';
+    ctx.fillStyle   = 'rgba(140,200,255,.8)';
+    ctx.lineWidth = 1.8;
+    arrow(ctx, x0 + 8, y, x0 + 8 + len, y, 7);
+  }
+
+  ctx.setLineDash([3, 4]);
+  ctx.strokeStyle = 'rgba(124,196,255,.22)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x0 + 8 + plotW, yTop); ctx.lineTo(x0 + 8 + plotW, yBot);
+  ctx.stroke(); ctx.setLineDash([]);
+  txt(ctx, T('cvFullScale'), x0 + 8 + plotW, yBot + 26, '#5f7093', 10.5, 'right', 600);
+
+  if (profSim.showGrad){
+    const yA = yBot - 0.14 * H;
+    const yB = yBot - 0.34 * H;
+    const xA = x0 + 8 + prof(0.14) * scale * plotW;
+    const xB = x0 + 8 + prof(0.34) * scale * plotW;
+    ctx.strokeStyle = 'rgba(255,138,61,.9)';
+    ctx.fillStyle   = 'rgba(255,138,61,.9)';
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(xA, yA); ctx.lineTo(xA, yB); ctx.lineTo(xB, yB);
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgba(255,138,61,.9)'; ctx.lineWidth = 1.8;
+    arrow(ctx, xA, yB, xB, yB, 7);
+    txt(ctx, 'Δu', (xA + xB) / 2, yB - 12, '#ff8a3d', 12, 'center', 700);
+    ctx.save();
+    ctx.translate(xA - 14, (yA + yB) / 2);
+    ctx.rotate(-Math.PI / 2);
+    txt(ctx, 'Δy', 0, 0, '#ff8a3d', 12, 'center', 700);
+    ctx.restore();
+    txt(ctx, 'du/dy ≈ Δu/Δy', Math.min(xB + 12, x1), (yA + yB) / 2, '#ff8a3d', 11.5, 'left', 700);
+  }
+
+  const wallY = yBot + 6;
+  const wg = ctx.createLinearGradient(0, wallY, 0, wallY + 18);
+  wg.addColorStop(0, '#3b4a68'); wg.addColorStop(1, '#1d2637');
+  ctx.fillStyle = wg;
+  rr(ctx, x0 - 12, wallY, (x1 - x0) + 24, 18, 6); ctx.fill();
+  txt(ctx, T('cvStagnWall'), (x0 + x1) / 2, wallY + 32, '#6c7a97', 11.5, 'center', 700);
+
+  ctx.strokeStyle = '#2a3550'; ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(x0, yTop - 8); ctx.lineTo(x0, yBot + 4);
+  ctx.stroke();
+  txt(ctx, 'y', x0 - 14, yTop - 2, '#5f7093', 12, 'right', 700);
+  txt(ctx, 'u', x1, yBot + 26, '#5f7093', 12, 'right', 700);
+
+  const pW = document.getElementById('pWall');
+  const pT = document.getElementById('pTop');
+  const pG = document.getElementById('pGrad');
+  if (pW) pW.innerHTML = '0.00 <small>m/s</small>';
+  if (pT) pT.innerHTML = U.toFixed(2) + ' <small>m/s</small>';
+  if (pG){
+    const dyPhys = 0.14 * 0.02;
+    const g = (prof(0.34) - prof(0.14)) * U / dyPhys;
+    pG.innerHTML = Math.round(g) + ' <small>s⁻¹</small>';
+  }
+});
+const pUSlider = document.getElementById('pUSlider');
+if (pUSlider) pUSlider.addEventListener('input', () => {
+  profSim.U = +pUSlider.value / 100;
+  document.getElementById('pUVal').textContent = profSim.U.toFixed(2);
+});
+const pTgGrad = document.getElementById('pTgGrad');
+if (pTgGrad) pTgGrad.addEventListener('click', () => {
+  profSim.showGrad = !profSim.showGrad;
+  pTgGrad.classList.toggle('on', profSim.showGrad);
+});
+
+/* ============================================================
+   SIM 9 · WALL SHEAR STRESS
+   ============================================================ */
+reg('cvWallStress', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+  const padL = 66, padR = 46, padT = 48, padB = 74;
+  const x0 = padL, x1 = w - padR;
+  const yBot = h - padB, yTop = padT;
+  const H = yBot - yTop;
+  const U = wallSim.U;
+  const mu = wallSim.mu;
+  const hPhys = 0.02;
+  const delta = 0.012;
+  const Uscale = 5.0;
+  const plotW = (x1 - x0) * 0.86;
+  const uAt = (ym) => ym >= delta ? U : U * Math.sin(Math.PI * 0.5 * (ym / delta));
+
+  const fg = ctx.createLinearGradient(0, yTop, 0, yBot);
+  fg.addColorStop(0, 'rgba(77,141,255,.12)');
+  fg.addColorStop(1, 'rgba(15,155,142,.05)');
+  ctx.fillStyle = fg;
+  ctx.fillRect(x0, yTop, x1 - x0, H);
+
+  const toX = (u) => x0 + 10 + (u / Uscale) * plotW;
+  const toY = (ym) => yBot - (ym / hPhys) * H;
+
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(15,155,142,.45)'; ctx.lineWidth = 1.3;
+  ctx.beginPath();
+  ctx.moveTo(x0, toY(delta)); ctx.lineTo(x1, toY(delta));
+  ctx.stroke(); ctx.setLineDash([]);
+
+  ctx.strokeStyle = '#7cc4ff'; ctx.lineWidth = 2.8;
+  ctx.beginPath();
+  for (let i = 0; i <= 60; i++){
+    const ym = (i / 60) * hPhys;
+    const X = toX(uAt(ym));
+    const Y = toY(ym);
+    i === 0 ? ctx.moveTo(X, Y) : ctx.lineTo(X, Y);
+  }
+  ctx.stroke();
+
+  for (let i = 1; i <= 9; i++){
+    const ym = (i / 9) * hPhys;
+    const y = toY(ym);
+    const len = toX(uAt(ym)) - (x0 + 10);
+    if (len < 2) continue;
+    ctx.strokeStyle = 'rgba(140,200,255,.75)';
+    ctx.fillStyle   = 'rgba(140,200,255,.75)';
+    ctx.lineWidth = 1.7;
+    arrow(ctx, x0 + 10, y, x0 + 10 + len, y, 7);
+  }
+
+  const grad = U * Math.PI / (2 * delta);
+  ctx.setLineDash([6, 5]);
+  ctx.strokeStyle = '#ff8a3d'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(0));
+  const yTan = Math.min(hPhys, Uscale / grad);
+  ctx.lineTo(toX(grad * yTan), toY(yTan));
+  ctx.stroke(); ctx.setLineDash([]);
+  txt(ctx, T('cvTangent'), Math.min(toX(grad * yTan) + 10, x1), toY(yTan) - 12, '#ff8a3d', 11.5, 'left', 700);
+
+  ctx.fillStyle = '#ff8a3d';
+  ctx.beginPath(); ctx.arc(toX(0), toY(0), 5, 0, 7); ctx.fill();
+  txt(ctx, 'u = 0', toX(0) + 10, toY(0) - 14, '#ff8a3d', 11.5, 'left', 700);
+
+  const wallY = yBot + 6;
+  const wg = ctx.createLinearGradient(0, wallY, 0, wallY + 18);
+  wg.addColorStop(0, '#3b4a68'); wg.addColorStop(1, '#1d2637');
+  ctx.fillStyle = wg;
+  rr(ctx, x0 - 12, wallY, (x1 - x0) + 24, 18, 6); ctx.fill();
+  txt(ctx, T('cvSolidWallShort'), x0 - 6, wallY + 34, '#6c7a97', 11.5, 'left', 700);
+
+  const tau = mu * grad;
+  const dragN = 5;
+  const dlen = Math.min(70, 22 + tau * 0.6);
+  ctx.strokeStyle = '#ff8a3d'; ctx.fillStyle = '#ff8a3d'; ctx.lineWidth = 2.6;
+  for (let i = 0; i < dragN; i++){
+    const xx = x0 + 30 + i * ((x1 - x0 - 60) / (dragN - 1));
+    arrow(ctx, xx + dlen / 2, wallY + 30, xx - dlen / 2, wallY + 30, 8);
+  }
+  txt(ctx, T('cvSkinDrag'), (x0 + x1) / 2, wallY + 50, '#ff8a3d', 11.5, 'center', 700);
+
+  const gEl = document.getElementById('wsGrad');
+  const tEl = document.getElementById('wsTau');
+  if (gEl) gEl.innerHTML = Math.round(grad) + ' <small>s⁻¹</small>';
+  if (tEl) tEl.innerHTML = (tau >= 100 ? tau.toFixed(0) : tau.toFixed(2)) + ' <small>Pa</small>';
+});
+const wsUSlider = document.getElementById('wsUSlider');
+const wsMuSlider = document.getElementById('wsMuSlider');
+if (wsUSlider) wsUSlider.addEventListener('input', () => {
+  wallSim.U = +wsUSlider.value / 10;
+  document.getElementById('wsUVal').textContent = wallSim.U.toFixed(1);
+});
+if (wsMuSlider) wsMuSlider.addEventListener('input', () => {
+  wallSim.mu = +wsMuSlider.value / 100;
+  document.getElementById('wsMuVal').textContent = wallSim.mu.toFixed(3);
+});
+
+/* ============================================================
+   SIM 10 · BOUNDARY LAYER
+   ============================================================ */
+reg('cvBL', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+  const padL = 48, padR = 24, padT = 38, padB = 54;
+  const x0 = padL, x1 = w - padR;
+  const yPlate = h - padB;
+  const yTop = padT;
+  const H = yPlate - yTop;
+  const U = blSim.U;
+  const nu = blSim.nu;
+  const deltaAt = (xn) => {
+    const d = 0.92 * Math.sqrt(Math.max(xn, 0)) * Math.pow(nu / U, 0.25);
+    return Math.min(0.78, Math.max(0.05, d));
+  };
+  const prof = (yn, d) => yn >= d ? 1 : Math.sin(Math.PI * 0.5 * (yn / d));
+
+  const bg = ctx.createLinearGradient(0, yTop, 0, yPlate);
+  bg.addColorStop(0, 'rgba(77,141,255,.10)');
+  bg.addColorStop(1, 'rgba(15,155,142,.04)');
+  ctx.fillStyle = bg;
+  ctx.fillRect(x0, yTop, x1 - x0, H);
+
+  ctx.strokeStyle = 'rgba(140,200,255,.35)';
+  ctx.fillStyle   = 'rgba(140,200,255,.35)';
+  ctx.lineWidth = 1.6;
+  for (let i = 0; i < 6; i++){
+    const y = yTop + 8 + i * 7;
+    arrow(ctx, x0 + 12, y, x0 + 12 + 46 + U * 16, y, 6);
+  }
+  txt(ctx, 'U∞ = ' + U.toFixed(2) + ' m/s', x1, yTop - 12, '#5f7093', 11.5, 'right', 700);
+
+  if (blSim.showParticles){
+    ctx.fillStyle = 'rgba(180,225,255,.6)';
+    for (const p of blSim.particles){
+      const d = deltaAt(p.x);
+      const u = prof(p.yn, d) * U;
+      p.x += u * DT * 0.30;
+      if (p.x > 1){ p.x -= 1; p.yn = Math.random(); }
+      const X = x0 + p.x * (x1 - x0);
+      const Y = yPlate - p.yn * H;
+      ctx.beginPath(); ctx.arc(X, Y, 1.7, 0, 7); ctx.fill();
+    }
+  }
+
+  ctx.strokeStyle = '#0f9b8e'; ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  for (let i = 0; i <= 70; i++){
+    const xn = i / 70;
+    const d = deltaAt(xn);
+    const X = x0 + xn * (x1 - x0);
+    const Y = yPlate - d * H;
+    i === 0 ? ctx.moveTo(X, Y) : ctx.lineTo(X, Y);
+  }
+  ctx.stroke();
+
+  ctx.save();
+  ctx.globalAlpha = 0.13;
+  ctx.fillStyle = '#0f9b8e';
+  ctx.beginPath();
+  ctx.moveTo(x0, yPlate);
+  for (let i = 0; i <= 70; i++){
+    const xn = i / 70;
+    const d = deltaAt(xn);
+    ctx.lineTo(x0 + xn * (x1 - x0), yPlate - d * H);
+  }
+  ctx.lineTo(x1, yPlate);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+
+  txt(ctx, T('cvBoundaryLayer'), (x0 + x1) / 2, yPlate - deltaAt(0.55) * H - 14, '#0f9b8e', 12, 'center', 800);
+
+  if (blSim.showProfiles){
+    const stations = [0.18, 0.36, 0.54, 0.72, 0.90];
+    stations.forEach(xn => {
+      const X = x0 + xn * (x1 - x0);
+      const d = deltaAt(xn);
+      const maxLen = 62;
+      const N2 = 6;
+      for (let k = 1; k <= N2; k++){
+        const yn = (k / N2) * d;
+        const y = yPlate - yn * H;
+        const len = prof(yn, d) * maxLen;
+        if (len < 2) continue;
+        ctx.strokeStyle = 'rgba(124,196,255,.85)';
+        arrow(ctx, X, y, X + len, y, 6);
+      }
+      ctx.strokeStyle = 'rgba(124,196,255,.55)'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      for (let k = 0; k <= 30; k++){
+        const yn = (k / 30) * d;
+        const y = yPlate - yn * H;
+        const X2 = X + prof(yn, d) * maxLen;
+        k === 0 ? ctx.moveTo(X2, y) : ctx.lineTo(X2, y);
+      }
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(124,196,255,.25)';
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.moveTo(X, yPlate); ctx.lineTo(X, yPlate - d * H);
+      ctx.stroke(); ctx.setLineDash([]);
+    });
+  }
+
+  ctx.strokeStyle = '#4a5c80'; ctx.lineWidth = 3.4;
+  ctx.beginPath();
+  ctx.moveTo(x0, yPlate); ctx.lineTo(x1, yPlate);
+  ctx.stroke();
+  txt(ctx, T('cvSolidPlate'), x0, yPlate + 22, '#5f7093', 11.5, 'left', 700);
+
+  ctx.fillStyle = '#ff8a3d';
+  ctx.beginPath(); ctx.arc(x0, yPlate, 4.5, 0, 7); ctx.fill();
+  txt(ctx, T('cvLeadingEdge'), x0 + 10, yPlate + 22, '#ff8a3d', 11, 'left', 600);
+
+  ctx.strokeStyle = '#6c7a97'; ctx.fillStyle = '#6c7a97'; ctx.lineWidth = 1.6;
+  arrow(ctx, x1 - 120, yPlate + 34, x1 - 20, yPlate + 34, 8);
+  txt(ctx, T('cvFlow'), x1 - 70, yPlate + 48, '#6c7a97', 11, 'center', 600);
+
+  const dEl = document.getElementById('blDelta');
+  if (dEl){
+    const dEnd = deltaAt(1);
+    dEl.innerHTML = (dEnd * 20).toFixed(1) + ' <small>mm</small>';
+  }
+});
+const blUSlider = document.getElementById('blUSlider');
+const blNuSlider = document.getElementById('blNuSlider');
+if (blUSlider) blUSlider.addEventListener('input', () => {
+  blSim.U = +blUSlider.value / 100;
+  document.getElementById('blUVal').textContent = blSim.U.toFixed(2);
+});
+if (blNuSlider) blNuSlider.addEventListener('input', () => {
+  blSim.nu = +blNuSlider.value / 100;
+  document.getElementById('blNuVal').textContent = blSim.nu.toFixed(3);
+});
+const blTgProfiles = document.getElementById('blTgProfiles');
+if (blTgProfiles) blTgProfiles.addEventListener('click', () => {
+  blSim.showProfiles = !blSim.showProfiles;
+  blTgProfiles.classList.toggle('on', blSim.showProfiles);
+});
+const blTgParticles = document.getElementById('blTgParticles');
+if (blTgParticles) blTgParticles.addEventListener('click', () => {
+  blSim.showParticles = !blSim.showParticles;
+  blTgParticles.classList.toggle('on', blSim.showParticles);
+});
+
+/* ============================================================
+   SIM 11 · PEOPLE ANALOGY
+   ============================================================ */
+reg('cvPeople', function(o){
+  const { ctx, w, h } = o;
+  ctx.clearRect(0, 0, w, h);
+  const n = 5;
+  const padL = 96, padR = 96;
+  const x0 = padL;
+  const wallTop = h - 62;
+  const topY = 46;
+  const spacing = (wallTop - topY) / (n - 1);
+  const Uw = pplSim.wall;
+  const Uinf = pplSim.Uinf;
+
+  if (pplSim.playing){
+    pplSim.phase += DT * 0.30;
+    if (pplSim.phase > 1.22) pplSim.phase = 0;
+  }
+  const lean = Math.min(pplSim.phase, 1);
+  let alpha = 1;
+  if (pplSim.phase > 0.92) alpha = Math.max(0, (1.22 - pplSim.phase) / 0.30);
+  if (pplSim.phase < 0.08) alpha = Math.min(1, pplSim.phase / 0.08);
+  const maxDisp = (w - padL - padR) * 0.80;
+  const speeds = [];
+  for (let i = 0; i < n; i++) speeds.push(Uw + (Uinf - Uw) * (i / (n - 1)));
+
+  const wallH = 20;
+  const wg = ctx.createLinearGradient(0, wallTop, 0, wallTop + wallH);
+  if (Uw === 0){ wg.addColorStop(0, '#3b4a68'); wg.addColorStop(1, '#1d2637'); }
+  else { wg.addColorStop(0, '#4d8dff'); wg.addColorStop(1, '#234a92'); }
+  ctx.fillStyle = wg;
+  rr(ctx, 18, wallTop, w - 36, wallH, 6); ctx.fill();
+  ctx.strokeStyle = Uw === 0 ? '#4a5c80' : '#7cb4ff'; ctx.lineWidth = 1; ctx.stroke();
+
+  if (Uw > 0.01){
+    ctx.save();
+    ctx.beginPath(); rr(ctx, 18, wallTop, w - 36, wallH, 6); ctx.clip();
+    const scroll = (performance.now() / 1000) * Uw * 90;
+    ctx.strokeStyle = 'rgba(200,225,255,.45)'; ctx.lineWidth = 2;
+    for (let i = -1; i < (w - 36) / 26 + 2; i++){
+      const px = 18 + ((i * 26 + scroll) % (w - 36 + 40));
+      ctx.beginPath(); ctx.moveTo(px, wallTop); ctx.lineTo(px + 9, wallTop + wallH); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  txt(ctx, Uw === 0 ? T('cvWallPoleFixed') : T('cvWallPoleMoving') + ' ' + Uw.toFixed(2) + ' m/s',
+      w / 2, wallTop + wallH + 18, Uw === 0 ? '#6c7a97' : '#7cb4ff', 11.5, 'center', 700);
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.setLineDash([4, 5]);
+  ctx.strokeStyle = 'rgba(140,200,255,.18)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x0, wallTop); ctx.lineTo(x0, topY - 14);
+  ctx.stroke(); ctx.setLineDash([]);
+
+  const pts = [];
+  for (let i = 0; i < n; i++){
+    pts.push({
+      x: x0 + speeds[i] * lean * maxDisp,
+      y: wallTop - 18 - i * spacing,
+      v: speeds[i]
+    });
+  }
+
+  for (let i = 0; i < n - 1; i++){
+    const a = pts[i], b = pts[i + 1];
+    ctx.strokeStyle = 'rgba(124,196,255,.55)'; ctx.lineWidth = 2.4;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y - 4); ctx.lineTo(b.x, b.y + 12);
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+  {
+    const a = pts[0];
+    ctx.strokeStyle = 'rgba(255,138,61,.8)'; ctx.lineWidth = 2.6;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(a.x, wallTop); ctx.lineTo(a.x, a.y + 12);
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  const drawPerson = (px, py, col, headR) => {
+    ctx.strokeStyle = col;
+    ctx.fillStyle = 'rgba(14,20,34,.92)';
+    ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(px, py - 11, headR, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(px, py - 11 + headR); ctx.lineTo(px, py + 12);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(px - 11, py + 2); ctx.lineTo(px, py - 1); ctx.lineTo(px + 11, py + 2);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+  };
+
+  for (let i = 0; i < n; i++){
+    const p = pts[i];
+    let col;
+    if (i === 0) col = '#ff8a3d';
+    else if (i === n - 1) col = '#7cc4ff';
+    else col = '#cfe2ff';
+    drawPerson(p.x, p.y, col, 8);
+    const arrowLen = p.v * maxDisp * 0.55;
+    if (Math.abs(arrowLen) > 3){
+      ctx.strokeStyle = '#7cc4ff'; ctx.fillStyle = '#7cc4ff'; ctx.lineWidth = 1.9;
+      arrow(ctx, p.x + 24, p.y - 4, p.x + 24 + arrowLen, p.y - 4, 7);
+    } else {
+      ctx.fillStyle = '#5f7093';
+      ctx.beginPath(); ctx.arc(p.x + 24, p.y - 4, 3, 0, 7); ctx.fill();
+    }
+    txt(ctx, p.v.toFixed(2), p.x + 24 + Math.max(0, arrowLen) + 12, p.y - 4,
+        p.v === 0 ? '#5f7093' : '#8fa0c0', 11, 'left', 700);
+    txt(ctx, 'y' + (i + 1), p.x - 30, p.y + 2, 'rgba(140,200,255,.45)', 10, 'right', 600);
+  }
+  ctx.restore();
+
+  txt(ctx, T('cvPersonHeld'), w / 2, 20, '#ff8a3d', 11.5, 'center', 700);
+  txt(ctx, T('cvEachPerson'), w / 2, h - 14, '#8fa0c0', 11, 'center', 500);
+
+  const a = document.getElementById('pp1');
+  const b = document.getElementById('pp5');
+  if (a) a.innerHTML = speeds[0].toFixed(2) + ' <small>m/s</small>';
+  if (b) b.innerHTML = speeds[n - 1].toFixed(2) + ' <small>m/s</small>';
+});
+const ppSlider = document.getElementById('ppSlider');
+if (ppSlider) ppSlider.addEventListener('input', () => {
+  pplSim.wall = +ppSlider.value / 100;
+  pplSim.phase = 0;
+  document.getElementById('ppVal').textContent = pplSim.wall.toFixed(2);
+});
+
+/* ============================================================
+   SIM EXPLANATIONS — rendered in English
+   ============================================================ */
+function renderSimExplanations(){
+  document.querySelectorAll('.sim-explain').forEach(el => el.remove());
+
+  document.querySelectorAll('.sim').forEach(sim => {
+    const canvas = sim.querySelector('canvas');
+    if (!canvas) return;
+    const id = canvas.id;
+    const entry = SIM_EXPLAIN[id];
+    if (!entry) return;
+
+    const data = entry;
+    const box = document.createElement('div');
+    box.className = 'sim-explain';
+
+    let html = '<span class="tag-note">' + T('exTag') + '</span>';
+    html += '<h3>' + data.title + '</h3>';
+    html += '<p>' + data.text + '</p>';
+    if (data.tips && data.tips.length){
+      html += '<ul>';
+      data.tips.forEach(t => { html += '<li>' + t + '</li>'; });
+      html += '</ul>';
+    }
+    box.innerHTML = html;
+
+    if (editMode) box.setAttribute('contenteditable', 'false');
+    sim.insertAdjacentElement('afterend', box);
+  });
+}
+
+/* ============================================================
+   APPLY LANGUAGE
+   ============================================================ */
+const HAS_HTML_OR_ENTITY = /<[a-z][^>]*>|&[a-zA-Z]+;|&#\d+;/i;
+
+function applyLanguage(){
+  document.documentElement.lang = 'en';
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = T(el.dataset.i18n);
+    if (HAS_HTML_OR_ENTITY.test(v)) el.innerHTML = v;
+    else el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = T(el.dataset.i18nHtml);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.placeholder = T(el.dataset.i18nPh);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = T(el.dataset.i18nTitle);
+  });
+
+  editToggle.title = editMode ? T('editFabTipExit') : T('editFabTip');
+
+  renderSimExplanations();
+  updateVisc();
+  updatePauseBtn();
+  updateTurbBtn();
+
+  dotEls.forEach((d, i) => {
+    d.title = pageTitle(pages[i]) || ('Page ' + (i + 1));
+  });
+  updateUI();
+  syncTitleInput();
+  if (editMode) applyEditGuards();
+
+  setTimeout(resizeAll, 40);
+}
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+let lastT = performance.now();
+function loop(now){
+  DT = Math.min((now - lastT) / 1000, 0.05);
+  lastT = now;
+  adhSim.t += DT;
+  cohSim.t += DT;
+  viscSim.t += DT;
+  pplSim.t += DT;
+
+  canvases.forEach(o => {
+    if (o.w === 0) return;
+    if (o.pageIdx === -1 || !o.c.isConnected){
+      const pageEl = o.c.closest('.page');
+      o.pageIdx = pages.indexOf(pageEl);
+    }
+    if (o.pageIdx === -1) return;
+    if (Math.abs(o.pageIdx - currentIdx) <= 1) o.draw(o);
+  });
+  requestAnimationFrame(loop);
+}
+
+let resizeRaf = null;
+function requestResize(){
+  if (resizeRaf) cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resizeAll(); });
+}
+window.addEventListener('resize', requestResize);
+window.addEventListener('orientationchange', () => setTimeout(resizeAll, 250));
+
+function boot(){
+  rebuildDots();
+  updateZ();
+  applyLanguage();
+  updateUI();
+  resizeAll();
+  pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
+  setTimeout(resizeAll, 120);
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(() => requestResize());
+  }
+}
+window.addEventListener('load', boot);
+requestAnimationFrame(loop);
+boot();
+</script>
+</body>
+</html>
