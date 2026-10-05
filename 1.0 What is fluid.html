@@ -21,7 +21,8 @@
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
+  html{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{height:100%}
   body{
     margin:0;
     background:
@@ -395,51 +396,189 @@
   }
   .modal-actions button.primary:hover{background:#245ad4}
 
-  /* ============ PHONE ============ */
+  /* ============================================================
+     ============ RESPONSIVE · PHONE / TABLET ==================
+     ============================================================ */
+
+  /* ---- Phones (portrait) ---- */
   @media (max-width:760px){
-    body{line-height:1.7}
+    body{line-height:1.68}
+
     .page{
-      padding:22px 20px 110px;
+      padding:20px 18px calc(100px + env(safe-area-inset-bottom, 0px));
       font-size:16px;
+      overflow-wrap:break-word;
+      word-wrap:break-word;
+      overscroll-behavior-y:contain;
+      -webkit-overflow-scrolling:touch;
     }
-    .page.cover{padding:34px 24px 110px}
+    .page.cover{
+      padding:34px 20px calc(100px + env(safe-area-inset-bottom, 0px));
+    }
 
-    .page h2{font-size:clamp(22px,5.6vw,28px);margin-bottom:16px}
+    /* --- cover --- */
+    .cover .kicker{font-size:11px;letter-spacing:.2em;margin-bottom:14px}
+    .cover h1{font-size:clamp(32px,9.5vw,52px)}
+    .cover p{font-size:16px;margin-top:16px}
+    .cover .pill{
+      font-size:13px;padding:9px 15px;margin-top:24px;
+      line-height:1.55;white-space:normal;max-width:100%;
+    }
+    .cover .start{margin-top:28px;padding:12px 20px;font-size:14.5px}
+
+    /* --- typography --- */
+    .page h2{font-size:clamp(21px,5.6vw,28px);margin-bottom:14px;letter-spacing:-.3px}
     .page h3{font-size:16.5px;margin:20px 0 6px}
-    .chip{min-width:26px;height:26px;font-size:12.5px;margin-right:9px}
+    .page p{margin:12px 0}
+    .page ul{padding-left:20px;margin:12px 0}
+    .chip{min-width:26px;height:26px;font-size:12.5px;margin-right:9px;border-radius:8px}
 
-    .sim{padding:12px;margin:18px 0}
-    .sim canvas{height:220px !important}
-    #cvCards{height:240px !important}
-    #cvStress{height:200px !important}
-    #cvCouette{height:300px !important}
-    #cvSF{height:330px !important}
+    .callout{padding:14px 16px;margin:18px 0;border-radius:11px}
+    .callout p{font-size:15.5px}
+    .callout h3{font-size:16px}
 
-    .controls{grid-template-columns:1fr;gap:10px}
-    .readout .ro .v{font-size:16px}
-    .eq{font-size:17px;padding:14px 16px}
-    .eq .lbl{font-size:11px}
-    .callout{padding:14px 16px;margin:18px 0}
+    .eq{
+      font-size:16px;padding:14px 14px;margin:16px 0;
+      letter-spacing:0;border-radius:12px;overflow-x:auto;
+    }
+    .eq .lbl{font-size:11px;line-height:1.5;margin-top:8px}
+    .eq .frac{margin:0 3px}
 
+    /* --- simulation panels --- */
+    .sim{padding:12px;margin:18px 0;border-radius:14px}
+    .sim-head{gap:6px;margin-bottom:10px}
+    .sim-head .t{font-size:12px;letter-spacing:.08em}
+    .sim-head .hint{font-size:11.5px;flex-basis:100%}
+    .sim canvas{height:230px !important}
+    #cvCards{height:270px !important}
+    #cvDir{height:280px !important}
+    #cvStress{height:230px !important}
+    #cvCouette{height:310px !important}
+    #cvSF{height:340px !important}
+
+    .controls{grid-template-columns:1fr;gap:10px;margin-top:14px}
+    .ctrl label{font-size:12px;margin-bottom:4px}
+    input[type=range]{height:28px}
+
+    .btnrow{gap:8px;margin-top:12px}
+    button.tg{
+      padding:9px 13px;font-size:12.5px;min-height:38px;
+      border-radius:9px;flex:0 1 auto;
+    }
+
+    .readout{gap:8px;margin-top:12px}
+    .ro{flex:1 1 120px;padding:9px 12px;border-radius:9px}
+    .ro .k{font-size:10.5px;letter-spacing:.08em}
+    .ro .v{font-size:17px}
+
+    /* --- chips / tables / chain / definitions --- */
+    .chips{gap:6px;margin:14px 0}
+    .chips span{padding:5px 12px;font-size:13px}
+
+    .tbl-wrap{margin:18px 0;border-radius:12px;-webkit-overflow-scrolling:touch}
     table{font-size:13px;min-width:440px}
     th,td{padding:9px 12px}
+    th{font-size:11.5px;letter-spacing:.02em}
 
-    .chain .node{min-width:0;width:100%;font-size:13.5px;padding:10px 14px}
+    .chain{margin:20px 0}
+    .chain .node{
+      min-width:0;width:100%;font-size:13.5px;padding:10px 14px;
+      border-radius:10px;overflow-wrap:break-word;
+    }
     .chain .split{flex-direction:column;gap:14px;align-items:center}
     .chain .branch{width:100%}
+    .chain .arr{font-size:16px;padding:4px 0}
 
-    .nav-btn{width:30px;height:30px}
-    .nav-title{max-width:120px;font-size:11px}
+    .deflist{gap:12px;margin:18px 0}
+    .def{padding:14px 16px;border-radius:12px}
+    .def .dt{font-size:13px;letter-spacing:.05em}
+    .def .dd{font-size:15.5px}
 
-    .edit-fab{width:34px;height:34px;top:10px;right:10px}
-    .edit-fab svg{width:14px;height:14px}
-    .edit-actions{top:52px;right:10px}
-    .edit-actions input.title-edit{width:130px;font-size:11.5px}
-    .edit-actions button{padding:5px 9px;font-size:11px}
+    /* --- bottom navigation --- */
+    .book-nav{
+      gap:5px;padding:4px 6px;
+      bottom:max(10px, env(safe-area-inset-bottom, 0px));
+      max-width:calc(100vw - 16px);
+    }
+    .nav-btn{width:34px;height:34px;flex:none}
+    .nav-btn svg{width:13px;height:13px}
+    .nav-center{padding:0 2px;gap:2px}
+    .nav-title{max-width:110px;font-size:11px}
+    .dots{
+      max-width:34vw;overflow-x:auto;overflow-y:hidden;padding:3px 1px;
+      scrollbar-width:none;-ms-overflow-style:none;
+      -webkit-overflow-scrolling:touch;
+    }
+    .dots::-webkit-scrollbar{display:none}
+    .dot{width:6px;height:6px;flex:none}
+    .dot.active{width:16px}
+    .page-num{font-size:9.5px}
 
-    .modal{padding:22px 20px}
-    .modal h3{font-size:19px}
+    /* --- edit FAB + edit actions --- */
+    .edit-fab{
+      width:38px;height:38px;
+      top:max(10px, env(safe-area-inset-top, 0px));
+      right:10px;
+    }
+    .edit-fab svg{width:15px;height:15px}
+    .edit-actions{
+      top:calc(max(10px, env(safe-area-inset-top, 0px)) + 46px);
+      right:10px;gap:6px;
+    }
+    .edit-actions input.title-edit{
+      width:150px;font-size:16px;padding:7px 10px;
+    }
+    .edit-actions button{
+      padding:8px 11px;font-size:12px;min-height:36px;
+    }
+
+    /* --- modals --- */
+    .modal-backdrop{padding:14px}
+    .modal{padding:20px 18px;border-radius:16px;max-height:86vh}
+    .modal h3{font-size:18px}
+    .modal .sub{font-size:12.5px}
+    .modal label{font-size:11px;margin:12px 0 5px}
+    .modal input[type=text],.modal input[type=password]{
+      font-size:16px;padding:11px 13px;
+    }
+    .modal textarea{font-size:12px;min-height:180px}
+    .modal-actions{gap:8px;margin-top:18px;padding-top:14px}
+    .modal-actions button{
+      flex:1 1 0;padding:12px 14px;font-size:14px;min-height:44px;
+    }
   }
+
+  /* ---- Very small phones ---- */
+  @media (max-width:380px){
+    .page{padding-left:14px;padding-right:14px}
+    .page.cover{padding-left:16px;padding-right:16px}
+    .nav-title{max-width:78px}
+    .dots{max-width:30vw}
+    .ro{flex:1 1 100%}
+    .cover .pill{font-size:12px;padding:8px 12px}
+    .eq{font-size:15px}
+  }
+
+  /* ---- Landscape phones (short viewport) ---- */
+  @media (orientation:landscape) and (max-height:520px){
+    .page{padding:16px 22px calc(92px + env(safe-area-inset-bottom, 0px));font-size:15.5px}
+    .page.cover{padding:20px 22px calc(92px + env(safe-area-inset-bottom, 0px))}
+    .cover h1{font-size:34px}
+    .cover p{font-size:15px;margin-top:12px}
+    .cover .pill{margin-top:18px;font-size:12px}
+    .cover .start{margin-top:20px;padding:10px 18px}
+
+    .sim canvas{height:190px !important}
+    #cvCards{height:200px !important}
+    #cvDir{height:250px !important}
+    #cvStress{height:190px !important}
+    #cvCouette{height:200px !important}
+    #cvSF{height:250px !important}
+
+    .controls{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+    .readout .ro{flex:1 1 100px}
+  }
+
   @media (prefers-reduced-motion: reduce){
     .page{transition-duration:.35s}
   }
@@ -930,6 +1069,11 @@ function updateUI(){
   pageNumEl.textContent = (currentIdx + 1) + ' / ' + N;
   prevBtn.disabled = currentIdx === 0 || animating;
   nextBtn.disabled = currentIdx === N - 1 || animating;
+  /* keep the active dot visible when the strip scrolls on small screens */
+  const ad = dotEls[currentIdx];
+  if (ad && ad.scrollIntoView) {
+    try { ad.scrollIntoView({ block:'nearest', inline:'center' }); } catch(e){}
+  }
 }
 
 function refreshPages(){
@@ -2243,7 +2387,13 @@ function requestResize(){
 }
 
 window.addEventListener('resize', requestResize);
-window.addEventListener('orientationchange', () => setTimeout(resizeAll, 250));
+window.addEventListener('orientationchange', () => {
+  setTimeout(resizeAll, 120);
+  setTimeout(resizeAll, 320);
+});
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', requestResize);
+}
 
 /* ============================================================
    BOOT
@@ -2255,6 +2405,7 @@ function boot(){
   resizeAll();
   pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
   setTimeout(resizeAll, 120);
+  setTimeout(resizeAll, 400);
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => requestResize());
   }
