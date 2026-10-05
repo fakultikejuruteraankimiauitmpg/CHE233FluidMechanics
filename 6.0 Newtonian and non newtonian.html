@@ -1318,6 +1318,54 @@
   .dot.active{background:var(--shear);width:18px;border-radius:4px}
   .page-num{font-family:var(--mono);font-size:10px;color:#8a8168;letter-spacing:.06em}
 
+  /* ============================================================
+     CHAPTER CORNER BUTTONS  (bottom-left → index.html,
+                              bottom-right → Chapter 1.html)
+     ============================================================ */
+  .chapter-nav-btn{
+    position:fixed;
+    bottom:max(14px, env(safe-area-inset-bottom));
+    z-index:7000;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:9px 16px;
+    border-radius:999px;
+    background:rgba(255,254,251,.95);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border:1px solid #d8d0bd;
+    color:#3a3f4d;
+    font-size:12.5px;
+    font-weight:600;
+    text-decoration:none;
+    box-shadow:0 8px 30px -8px rgba(60,50,20,.25);
+    transition:background .15s, border-color .15s, transform .15s, box-shadow .15s;
+    font-family:inherit;
+    white-space:nowrap;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .chapter-nav-btn:hover{
+    background:#fffef8;
+    border-color:#b9ae93;
+    transform:translateY(-1px);
+    box-shadow:0 12px 34px -10px rgba(60,50,20,.32);
+  }
+  .chapter-nav-btn:active{transform:translateY(0);}
+  .chapter-nav-btn svg{width:13px;height:13px;flex:none;}
+  .chapter-nav-btn.left{left:14px;}
+  .chapter-nav-btn.right{
+    right:14px;
+    color:var(--accent);
+    background:var(--accent-soft);
+    border-color:#cddcff;
+  }
+  .chapter-nav-btn.right:hover{
+    background:#dbe7ff;
+    border-color:#a9c3ff;
+  }
+
   .edit-fab{position:fixed;top:max(14px, env(safe-area-inset-top));right:14px;
     z-index:7500;width:38px;height:38px;border-radius:50%;
     background:rgba(255,254,251,.96);
@@ -1502,6 +1550,13 @@
     .edit-actions button{padding:5px 9px;font-size:11px}
     .modal{padding:22px 20px}
     .modal h3{font-size:19px}
+
+    /* Chapter corner buttons — icon-only on mobile so they sit beside the centred nav */
+    .chapter-nav-btn{padding:0;width:34px;height:34px;justify-content:center;gap:0;border-radius:50%;}
+    .chapter-nav-btn span{display:none;}
+    .chapter-nav-btn svg{width:13px;height:13px;}
+    .chapter-nav-btn.left{left:8px;}
+    .chapter-nav-btn.right{right:8px;}
   }
   @media (prefers-reduced-motion: reduce){
     .page{transition-duration:.35s}
@@ -2452,6 +2507,25 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
   </button>
 </div>
+
+<!-- ============================================================
+     CHAPTER CORNER BUTTONS
+     bottom-left  → back to the chapter list   (index.html)
+     bottom-right → on to the next chapter     (Chapter 1.html)
+     ============================================================ -->
+<a class="chapter-nav-btn left" href="index.html" title="Back to the chapter list">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M19 12H5M11 18l-6-6 6-6"/>
+  </svg>
+  <span>Chapter List</span>
+</a>
+
+<a class="chapter-nav-btn right" href="Chapter 1.html" title="Go to Chapter 1">
+  <span>Chapter 1</span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M5 12h14M13 6l6 6-6 6"/>
+  </svg>
+</a>
 
 <!-- EDIT FAB -->
 <button class="edit-fab" id="editToggle" title="Toggle edit mode (E)">
