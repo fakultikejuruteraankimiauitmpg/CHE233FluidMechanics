@@ -401,6 +401,35 @@
   .dot.active{background:var(--accent);width:18px;border-radius:4px}
   .page-num{font-family:var(--mono);font-size:10px;color:#8a8168;letter-spacing:.06em}
 
+  /* ============ SIDE NAV BUTTONS (bottom-left / bottom-right) ============ */
+  .side-nav-btn{
+    position:fixed;
+    bottom:max(14px, env(safe-area-inset-bottom));
+    z-index:7000;
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(255,254,251,.95);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid #d8d0bd;
+    border-radius:999px;
+    padding:9px 18px;
+    box-shadow:0 8px 30px -8px rgba(60,50,20,.25);
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:700;
+    color:#3a3f4d;
+    text-decoration:none;
+    cursor:pointer;
+    transition:.15s;
+    user-select:none;
+    white-space:nowrap;
+  }
+  .side-nav-btn:hover{background:#fffef8;border-color:#b9ae93;transform:translateY(-1px)}
+  .side-nav-btn svg{width:14px;height:14px}
+  .side-nav-btn.left{left:max(14px, env(safe-area-inset-left))}
+  .side-nav-btn.right{right:max(14px, env(safe-area-inset-right))}
+  .side-nav-btn.right{color:var(--accent);border-color:#cddcff;background:rgba(240,246,255,.96)}
+  .side-nav-btn.right:hover{background:#eaf1ff;border-color:#9fbcff}
+
   /* ============ EDIT BUTTON (small FAB) ============ */
   .edit-fab{
     position:fixed;
@@ -529,10 +558,10 @@
   @media (max-width:760px){
     body{line-height:1.7}
     .page{
-      padding:22px 20px 110px;
+      padding:22px 20px 150px;
       font-size:16px;
     }
-    .page.cover{padding:34px 24px 110px}
+    .page.cover{padding:34px 24px 150px}
 
     .page h2{font-size:clamp(22px,5.6vw,28px);margin-bottom:16px}
     .page h3{font-size:16.5px;margin:20px 0 6px}
@@ -588,6 +617,11 @@
     /* input row on phone */
     .q-input-row{margin-left:0;gap:6px}
     .q-input{font-size:13px;padding:7px 10px;flex:1 1 140px}
+
+    /* side nav buttons on phone */
+    .side-nav-btn{padding:8px 13px;font-size:11.5px;gap:6px}
+    .side-nav-btn svg{width:12px;height:12px}
+    .book-nav{bottom:max(64px, calc(env(safe-area-inset-bottom) + 64px))}
   }
   @media (prefers-reduced-motion: reduce){
     .page{transition-duration:.35s}
@@ -1786,6 +1820,18 @@
 
   </div>
 </div>
+
+<!-- ============== SIDE NAV · BACK TO CHAPTER LIST (bottom-left) ============== -->
+<a class="side-nav-btn left" href="index.html" title="Back to the list of fluid chapters">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+  Chapter List
+</a>
+
+<!-- ============== SIDE NAV · TO CHAPTER 1 (bottom-right) ============== -->
+<a class="side-nav-btn right" href="Chapter 1.html" title="Go to Chapter 1 content">
+  Chapter 1
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+</a>
 
 <!-- ============== NAV BAR ============== -->
 <div class="book-nav">
