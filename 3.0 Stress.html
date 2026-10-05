@@ -258,7 +258,7 @@
     margin-bottom:8px;
   }
 
-  /* ============ NAV BAR ============ */
+  /* ============ NAV BAR (CENTER) ============ */
   .book-nav{
     position:fixed;
     bottom:max(14px, env(safe-area-inset-bottom));
@@ -274,7 +274,7 @@
     box-shadow:0 8px 30px -8px rgba(60,50,20,.25);
     font-family:inherit;
     user-select:none;
-    max-width:calc(100vw - 20px);
+    max-width:calc(100vw - 220px); /* leave space for side buttons */
   }
   .nav-btn{
     display:inline-flex;align-items:center;justify-content:center;
@@ -301,29 +301,46 @@
   .dot.active{background:var(--accent);width:18px;border-radius:4px}
   .page-num{font-family:var(--mono);font-size:10px;color:#8a8168;letter-spacing:.06em}
 
-  /* ============ LANGUAGE TOGGLE (top-left pill) ============ */
-  .lang-fab{
+  /* ============ CHAPTER LINKS (bottom-left / bottom-right) ============ */
+  .chapter-fab{
     position:fixed;
-    top:max(14px, env(safe-area-inset-top));
-    left:14px;
+    bottom:max(14px, env(safe-area-inset-bottom));
     z-index:7500;
-    display:flex;gap:2px;
+    display:inline-flex;align-items:center;gap:8px;
     background:rgba(255,254,251,.96);
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
     border:1px solid #d8d0bd;
     border-radius:999px;
-    padding:3px;
-    box-shadow:0 6px 18px -6px rgba(60,50,20,.28);
+    padding:9px 17px;
     font-family:inherit;
+    font-size:12.5px;
+    font-weight:700;
+    letter-spacing:.01em;
+    color:#3a3f4d;
+    text-decoration:none;
+    white-space:nowrap;
+    cursor:pointer;
+    box-shadow:0 8px 24px -10px rgba(60,50,20,.42);
+    transition:.16s;
     user-select:none;
   }
-  .lang-fab button{
-    border:none;background:transparent;border-radius:999px;
-    padding:5px 13px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
-    color:#6b6350;cursor:pointer;font-family:inherit;transition:.15s;
+  .chapter-fab:hover{background:#fffef8;border-color:#b9ae93;transform:translateY(-1px)}
+  .chapter-fab:active{transform:translateY(0)}
+  .chapter-fab svg{width:15px;height:15px;flex:none}
+  
+  /* Left button — Chapter List */
+  .chapter-fab.left{
+    left:14px;
   }
-  .lang-fab button:hover{color:#3a3f4d}
-  .lang-fab button.active{background:var(--accent);color:#fff}
+  
+  /* Right button — Chapter 1 */
+  .chapter-fab.right{
+    right:14px;
+    background:#fff;
+    color:var(--accent);
+    border-color:#cddcff;
+  }
+  .chapter-fab.right:hover{background:#f4f8ff;border-color:#b0c8ff}
 
   /* ============ EDIT BUTTON (small FAB) ============ */
   .edit-fab{
@@ -448,8 +465,8 @@
   /* ============ PHONE ============ */
   @media (max-width:760px){
     body{line-height:1.7}
-    .page{padding:56px 20px 110px;font-size:16px;}
-    .page.cover{padding:60px 24px 110px}
+    .page{padding:56px 20px 150px;font-size:16px;}
+    .page.cover{padding:60px 24px 150px}
 
     .page h2{font-size:clamp(22px,5.6vw,28px);margin-bottom:16px}
     .page h3{font-size:16.5px;margin:20px 0 6px}
@@ -480,12 +497,19 @@
     .chain .split{flex-direction:column;gap:14px;align-items:center}
     .chain .branch{width:100%}
 
+    /* Stack the controls on very small screens so they don't overlap */
+    .book-nav{
+      bottom:max(64px, calc(env(safe-area-inset-bottom) + 64px));
+      max-width:calc(100vw - 20px);
+    }
     .nav-btn{width:30px;height:30px}
     .nav-title{max-width:120px;font-size:11px}
     .dots{max-width:150px}
 
-    .lang-fab{top:10px;left:10px;padding:2px}
-    .lang-fab button{padding:4px 10px;font-size:11px}
+    .chapter-fab{padding:7px 13px;font-size:11.5px;gap:6px;bottom:max(12px, env(safe-area-inset-bottom))}
+    .chapter-fab svg{width:13px;height:13px}
+    .chapter-fab.left{left:10px}
+    .chapter-fab.right{right:10px}
 
     .edit-fab{width:34px;height:34px;top:10px;right:10px}
     .edit-fab svg{width:14px;height:14px}
@@ -507,157 +531,157 @@
   <div class="book" id="book">
 
     <!-- ============== PAGE 0 · COVER ============== -->
-    <div class="page cover" data-title-en="Cover" data-title-ms="Muka Depan">
-      <div class="kicker" data-i18n="coverKicker">Interactive Fluid Mechanics · Chapter 1.3</div>
-      <h1 data-i18n-html="coverH1">What is<br><em>Stress?</em></h1>
-      <p data-i18n="coverP">Force per unit area, the two components of stress, and why a fluid at rest can only push — never slide. Turn the page and drag the sliders.</p>
-      <div class="pill" data-i18n-html="coverPill"><b>σ</b> = F / A &nbsp;→&nbsp; normal stress &nbsp;+&nbsp; shear stress</div>
+    <div class="page cover" data-title-en="Cover">
+      <div class="kicker">Interactive Fluid Mechanics · Chapter 1.3</div>
+      <h1>What is<br><em>Stress?</em></h1>
+      <p>Force per unit area, the two components of stress, and why a fluid at rest can only push — never slide. Turn the page and drag the sliders.</p>
+      <div class="pill"><b>σ</b> = F / A &nbsp;→&nbsp; normal stress &nbsp;+&nbsp; shear stress</div>
       <button class="start" id="startBtn">
-        <span data-i18n="start">Start reading</span>
+        <span>Start reading</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
     </div>
 
     <!-- ============== PAGE 1 · WHAT IS STRESS ============== -->
-    <div class="page" data-title-en="1 · What is Stress?" data-title-ms="1 · Apakah Tegasan?">
-      <h2><span class="chip">1</span><span data-i18n="p1title">What is Stress?</span></h2>
+    <div class="page" data-title-en="1 · What is Stress?">
+      <h2><span class="chip">1</span><span>What is Stress?</span></h2>
 
-      <p data-i18n-html="p1a"><strong>Stress</strong> is the <em class="term">internal force</em> acting per unit area within a material.</p>
+      <p><strong>Stress</strong> is the <em class="term">internal force</em> acting per unit area within a material.</p>
 
-      <p data-i18n-html="p1b">In simple terms: when an external force is applied to a material, the material develops <strong>internal forces</strong> to oppose the applied force. The intensity of this internal force per unit area is called <strong>stress</strong>.</p>
+      <p>In simple terms: when an external force is applied to a material, the material develops <strong>internal forces</strong> to oppose the applied force. The intensity of this internal force per unit area is called <strong>stress</strong>.</p>
 
       <div class="eq">
         σ = <span class="frac"><span class="num">F</span><span class="den">A</span></span>
-        <span class="lbl" data-i18n="eq1lbl">σ = stress · F = force · A = area</span>
+        <span class="lbl">σ = stress · F = force · A = area</span>
       </div>
 
       <div class="eq">
         Pa = N / m²
-        <span class="lbl" data-i18n="eq2lbl">The SI unit of stress is the pascal</span>
+        <span class="lbl">The SI unit of stress is the pascal</span>
       </div>
 
       <div class="sim">
         <div class="sim-head">
-          <span class="t" data-i18n="simT1">Simulation · Internal force per unit area</span>
-          <span class="hint" data-i18n="simH1">Change the force and the area — watch the internal response</span>
+          <span class="t">Simulation · Internal force per unit area</span>
+          <span class="hint">Change the force and the area — watch the internal response</span>
         </div>
         <canvas id="cvStressIntro" style="height:320px"></canvas>
         <div class="controls">
           <div class="ctrl">
-            <label><span data-i18n="lblF">Applied force F</span> <b><span id="iFVal">500</span> N</b></label>
+            <label><span>Applied force F</span> <b><span id="iFVal">500</span> N</b></label>
             <input type="range" id="iFSlider" min="100" max="2000" step="50" value="500">
           </div>
           <div class="ctrl">
-            <label><span data-i18n="lblA">Area A</span> <b><span id="iAVal">0.50</span> m²</b></label>
+            <label><span>Area A</span> <b><span id="iAVal">0.50</span> m²</b></label>
             <input type="range" id="iASlider" min="10" max="500" step="10" value="50">
           </div>
         </div>
         <div class="readout">
-          <div class="ro"><div class="k" data-i18n="roStress">Stress σ</div><div class="v" id="iOut">1000 <small>Pa</small></div></div>
-          <div class="ro"><div class="k" data-i18n="roForce">Force</div><div class="v" id="iFOut">500 <small>N</small></div></div>
-          <div class="ro"><div class="k" data-i18n="roArea">Area</div><div class="v" id="iAOut">0.50 <small>m²</small></div></div>
+          <div class="ro"><div class="k">Stress σ</div><div class="v" id="iOut">1000 <small>Pa</small></div></div>
+          <div class="ro"><div class="k">Force</div><div class="v" id="iFOut">500 <small>N</small></div></div>
+          <div class="ro"><div class="k">Area</div><div class="v" id="iAOut">0.50 <small>m²</small></div></div>
         </div>
       </div>
 
-      <p data-i18n="p1c">Push harder → stress goes up. Spread the same push over more area → stress goes down.</p>
+      <p>Push harder → stress goes up. Spread the same push over more area → stress goes down.</p>
     </div>
 
     <!-- ============== PAGE 2 · WHY DIVIDE ============== -->
-    <div class="page" data-title-en="2 · Why Divide Force by Area?" data-title-ms="2 · Mengapa Bahagi Daya dengan Luas?">
-      <h2><span class="chip">2</span><span data-i18n="p2title">Why Do We Divide Force by Area?</span></h2>
+    <div class="page" data-title-en="2 · Why Divide Force by Area?">
+      <h2><span class="chip">2</span><span>Why Do We Divide Force by Area?</span></h2>
 
-      <p data-i18n-html="p2a">Consider two surfaces experiencing the <strong>same force</strong>.</p>
+      <p>Consider two surfaces experiencing the <strong>same force</strong>.</p>
 
       <div class="sim">
         <div class="sim-head">
-          <span class="t" data-i18n="simT2">Simulation · Same force, different area</span>
-          <span class="hint" data-i18n="simH2">The internal arrows show how concentrated the force is</span>
+          <span class="t">Simulation · Same force, different area</span>
+          <span class="hint">The internal arrows show how concentrated the force is</span>
         </div>
         <canvas id="cvArea" style="height:300px"></canvas>
       </div>
 
       <div class="callout">
-        <p data-i18n-html="case1"><strong>Case 1 — Large area.</strong> The force is distributed over a large area. Therefore the stress is relatively <strong>small</strong>.</p>
+        <p><strong>Case 1 — Large area.</strong> The force is distributed over a large area. Therefore the stress is relatively <strong>small</strong>.</p>
       </div>
       <div class="callout shear">
-        <p data-i18n-html="case2"><strong>Case 2 — Small area.</strong> The same force acts over a smaller area. Therefore the stress is <strong>larger</strong>.</p>
+        <p><strong>Case 2 — Small area.</strong> The same force acts over a smaller area. Therefore the stress is <strong>larger</strong>.</p>
       </div>
 
       <div class="eq" style="font-size:16px">
-        <span data-i18n-html="eq2Line">Same force + smaller area → greater stress<br>Same force + larger area → smaller stress</span>
-        <span class="lbl" data-i18n="eq2Lbl">This is exactly why we divide by area</span>
+        <span>Same force + smaller area → greater stress<br>Same force + larger area → smaller stress</span>
+        <span class="lbl">This is exactly why we divide by area</span>
       </div>
 
-      <p data-i18n="p2b">A force alone does not tell you how severely a material is loaded. A 500 N force spread over 5 m² is gentle; the same 500 N on a pinhead is destructive.</p>
+      <p>A force alone does not tell you how severely a material is loaded. A 500 N force spread over 5 m² is gentle; the same 500 N on a pinhead is destructive.</p>
     </div>
 
     <!-- ============== PAGE 3 · TWO COMPONENTS ============== -->
-    <div class="page" data-title-en="3 · Two Components of Stress" data-title-ms="3 · Dua Komponen Tegasan">
-      <h2><span class="chip">3</span><span data-i18n="p3title">Two Components of Stress</span></h2>
+    <div class="page" data-title-en="3 · Two Components of Stress">
+      <h2><span class="chip">3</span><span>Two Components of Stress</span></h2>
 
-      <p data-i18n-html="p3a">Stress can be separated according to the <strong>direction</strong> in which the force acts relative to the surface. There are two important types:</p>
+      <p>Stress can be separated according to the <strong>direction</strong> in which the force acts relative to the surface. There are two important types:</p>
 
       <div class="chips">
-        <span class="tag" data-i18n="chip1">1 · Normal stress</span>
-        <span class="tagw" data-i18n="chip2">2 · Shear stress</span>
+        <span class="tag">1 · Normal stress</span>
+        <span class="tagw">2 · Shear stress</span>
       </div>
 
       <div class="callout">
-        <h3 style="margin-top:0;color:var(--accent)" data-i18n="nsH">Normal stress</h3>
-        <p data-i18n-html="nsP">Acts <strong>perpendicular</strong> to a surface. "Normal" here means <em>perpendicular</em> — not "usual" or "ordinary". It can produce <strong>compression</strong> (pushed) or <strong>tension</strong> (pulled).</p>
+        <h3 style="margin-top:0;color:var(--accent)">Normal stress</h3>
+        <p>Acts <strong>perpendicular</strong> to a surface. "Normal" here means <em>perpendicular</em> — not "usual" or "ordinary". It can produce <strong>compression</strong> (pushed) or <strong>tension</strong> (pulled).</p>
       </div>
 
       <div class="callout shear">
-        <h3 style="margin-top:0;color:var(--shear)" data-i18n="ssH">Shear stress</h3>
-        <p data-i18n-html="ssP">Acts <strong>tangentially</strong> or parallel to a surface. It tends to make adjacent layers <strong>slide</strong> relative to each other.</p>
+        <h3 style="margin-top:0;color:var(--shear)">Shear stress</h3>
+        <p>Acts <strong>tangentially</strong> or parallel to a surface. It tends to make adjacent layers <strong>slide</strong> relative to each other.</p>
       </div>
 
       <div class="eq">
-        <span data-i18n="eq3">Normal stress → ⊥ to surface &nbsp;&nbsp;|&nbsp;&nbsp; Shear stress → ∥ to surface</span>
-        <span class="lbl" data-i18n="eq3lbl">Symbols commonly used: σ (normal) and τ (shear)</span>
+        <span>Normal stress → ⊥ to surface &nbsp;&nbsp;|&nbsp;&nbsp; Shear stress → ∥ to surface</span>
+        <span class="lbl">Symbols commonly used: σ (normal) and τ (shear)</span>
       </div>
 
-      <p data-i18n="p3b">The next two pages take each one in turn — then we compare them directly.</p>
+      <p>The next two pages take each one in turn — then we compare them directly.</p>
     </div>
 
     <!-- ============== PAGE 4 · NORMAL STRESS ============== -->
-    <div class="page" data-title-en="4 · Normal Stress" data-title-ms="4 · Tegasan Normal">
-      <h2><span class="chip">4</span><span data-i18n="p4title">Normal Stress</span></h2>
+    <div class="page" data-title-en="4 · Normal Stress">
+      <h2><span class="chip">4</span><span>Normal Stress</span></h2>
 
-      <p data-i18n-html="p4a">Normal stress acts <strong>perpendicular</strong> to a surface — the force is acting at 90° to the surface.</p>
+      <p>Normal stress acts <strong>perpendicular</strong> to a surface — the force is acting at 90° to the surface.</p>
 
       <div class="sim">
         <div class="sim-head">
-          <span class="t" data-i18n="simT4">Simulation · Compression vs Tension</span>
-          <span class="hint" data-i18n="simH4">Switch modes and watch the material respond</span>
+          <span class="t">Simulation · Compression vs Tension</span>
+          <span class="hint">Switch modes and watch the material respond</span>
         </div>
         <canvas id="cvNormal" style="height:330px"></canvas>
         <div class="btnrow">
-          <button class="tg on" id="nComp" data-i18n="btnComp">⬇ Compression</button>
-          <button class="tg" id="nTens" data-i18n="btnTens">⬆ Tension</button>
+          <button class="tg on" id="nComp">⬇ Compression</button>
+          <button class="tg" id="nTens">⬆ Tension</button>
         </div>
       </div>
 
       <div class="callout">
-        <p data-i18n-html="compP"><strong>Compression</strong> — the material is pushed. It shortens in the direction of the force.</p>
+        <p><strong>Compression</strong> — the material is pushed. It shortens in the direction of the force.</p>
       </div>
       <div class="callout shear">
-        <p data-i18n-html="tensP"><strong>Tension</strong> — the material is pulled. It lengthens in the direction of the force.</p>
+        <p><strong>Tension</strong> — the material is pulled. It lengthens in the direction of the force.</p>
       </div>
 
-      <p data-i18n-html="p4b">Either way, the force stays <strong>perpendicular</strong> to the surface. That is what makes it a normal stress.</p>
+      <p>Either way, the force stays <strong>perpendicular</strong> to the surface. That is what makes it a normal stress.</p>
     </div>
 
     <!-- ============== PAGE 5 · SHEAR STRESS ============== -->
-    <div class="page" data-title-en="5 · Shear Stress" data-title-ms="5 · Tegasan Ricih">
-      <h2><span class="chip">5</span><span data-i18n="p5title">Shear Stress</span></h2>
+    <div class="page" data-title-en="5 · Shear Stress">
+      <h2><span class="chip">5</span><span>Shear Stress</span></h2>
 
-      <p data-i18n-html="p5a">Shear stress acts <strong>tangentially</strong> or parallel to a surface — the force is acting <em>along</em> the surface, not into it.</p>
+      <p>Shear stress acts <strong>tangentially</strong> or parallel to a surface — the force is acting <em>along</em> the surface, not into it.</p>
 
       <div class="sim">
         <div class="sim-head">
-          <span class="t" data-i18n="simT5">Simulation · Layers sliding</span>
-          <span class="hint" data-i18n="simH5">The top portion moves relative to the bottom portion</span>
+          <span class="t">Simulation · Layers sliding</span>
+          <span class="hint">The top portion moves relative to the bottom portion</span>
         </div>
         <canvas id="cvShear" style="height:300px"></canvas>
         <div class="btnrow">
@@ -665,22 +689,22 @@
         </div>
       </div>
 
-      <p data-i18n-html="p5b">Shear stress tends to make adjacent layers <strong>slide</strong> relative to each other. This produces <strong>shear deformation</strong>.</p>
+      <p>Shear stress tends to make adjacent layers <strong>slide</strong> relative to each other. This produces <strong>shear deformation</strong>.</p>
 
       <div class="eq">
         τ = <span class="frac"><span class="num">F</span><span class="den">A</span></span>
-        <span class="lbl" data-i18n="eq5lbl">τ = shear stress · F = shear force · A = area · unit: Pa = N/m²</span>
+        <span class="lbl">τ = shear stress · F = shear force · A = area · unit: Pa = N/m²</span>
       </div>
     </div>
 
     <!-- ============== PAGE 6 · NORMAL vs SHEAR ============== -->
-    <div class="page" data-title-en="6 · Normal vs Shear Stress" data-title-ms="6 · Tegasan Normal vs Ricih">
-      <h2><span class="chip">6</span><span data-i18n="p6title">Normal Stress vs Shear Stress</span></h2>
+    <div class="page" data-title-en="6 · Normal vs Shear Stress">
+      <h2><span class="chip">6</span><span>Normal Stress vs Shear Stress</span></h2>
 
       <div class="sim">
         <div class="sim-head">
-          <span class="t" data-i18n="simT6">Simulation · Side by side</span>
-          <span class="hint" data-i18n="simH6">Left: perpendicular · Right: tangential</span>
+          <span class="t">Simulation · Side by side</span>
+          <span class="hint">Left: perpendicular · Right: tangential</span>
         </div>
         <canvas id="cvCompare" style="height:300px"></canvas>
       </div>
@@ -689,55 +713,55 @@
         <table>
           <thead>
             <tr>
-              <th data-i18n="thProp">Property</th>
-              <th class="solid-col" data-i18n="thNormal">Normal Stress</th>
-              <th class="fluid-col" data-i18n="thShear">Shear Stress</th>
+              <th>Property</th>
+              <th class="solid-col">Normal Stress</th>
+              <th class="fluid-col">Shear Stress</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td data-i18n="tr1a">Direction</td>
-              <td data-i18n="tr1b">Perpendicular to surface</td>
-              <td data-i18n="tr1c">Parallel / tangential to surface</td>
+              <td>Direction</td>
+              <td>Perpendicular to surface</td>
+              <td>Parallel / tangential to surface</td>
             </tr>
             <tr>
-              <td data-i18n="tr2a">Main effect</td>
-              <td data-i18n="tr2b">Compression or tension</td>
-              <td data-i18n="tr2c">Sliding / deformation</td>
+              <td>Main effect</td>
+              <td>Compression or tension</td>
+              <td>Sliding / deformation</td>
             </tr>
             <tr>
-              <td data-i18n="tr3a">Symbol commonly used</td>
+              <td>Symbol commonly used</td>
               <td>σ</td>
               <td>τ</td>
             </tr>
             <tr>
-              <td data-i18n="tr4a">Example</td>
-              <td data-i18n="tr4b">Pressure in a fluid at rest</td>
-              <td data-i18n="tr4c">Viscous stress in a flowing fluid</td>
+              <td>Example</td>
+              <td>Pressure in a fluid at rest</td>
+              <td>Viscous stress in a flowing fluid</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <p data-i18n-html="p6a">A simple way to visualise it: normal stress pushes <em>into</em> the surface; shear stress drags <em>along</em> it.</p>
+      <p>A simple way to visualise it: normal stress pushes <em>into</em> the surface; shear stress drags <em>along</em> it.</p>
     </div>
 
     <!-- ============== PAGE 7 · FLUID AT REST ============== -->
-    <div class="page" data-title-en="7 · Fluid at Rest" data-title-ms="7 · Bendalir Rehat">
-      <h2><span class="chip">7</span><span data-i18n="p7title">What Happens in a Fluid at Rest?</span></h2>
+    <div class="page" data-title-en="7 · Fluid at Rest">
+      <h2><span class="chip">7</span><span>What Happens in a Fluid at Rest?</span></h2>
 
-      <p data-i18n="p7a">This is particularly important in fluid mechanics.</p>
+      <p>This is particularly important in fluid mechanics.</p>
 
       <div class="callout shear">
-        <p style="font-size:18px;margin:4px 0" data-i18n-html="p7callout"><strong>A fluid at rest cannot sustain a shear stress.</strong></p>
+        <p style="font-size:18px;margin:4px 0"><strong>A fluid at rest cannot sustain a shear stress.</strong></p>
       </div>
 
-      <p data-i18n-html="p7b"><strong>Why?</strong> Suppose we try to apply a shear stress: the fluid layers begin to move relative to one another. Therefore the fluid is <strong>no longer at rest</strong>.</p>
+      <p><strong>Why?</strong> Suppose we try to apply a shear stress: the fluid layers begin to move relative to one another. Therefore the fluid is <strong>no longer at rest</strong>.</p>
 
       <div class="sim">
         <div class="sim-head">
-          <span class="t" data-i18n="simT7">Simulation · Try to shear a fluid at rest</span>
-          <span class="hint" data-i18n="simH7">Toggle the shear and watch what the fluid does</span>
+          <span class="t">Simulation · Try to shear a fluid at rest</span>
+          <span class="hint">Toggle the shear and watch what the fluid does</span>
         </div>
         <canvas id="cvFluidRest" style="height:340px"></canvas>
         <div class="btnrow">
@@ -746,137 +770,131 @@
       </div>
 
       <div class="eq" style="color:var(--shear)">
-        <span data-i18n="eq7">Fluid at rest → no shear stress</span>
-        <span class="lbl" data-i18n="eq7lbl">The moment it can slide, it is not at rest any more</span>
+        <span>Fluid at rest → no shear stress</span>
+        <span class="lbl">The moment it can slide, it is not at rest any more</span>
       </div>
 
-      <p data-i18n-html="p7c">However — a fluid at rest <strong>can</strong> have normal stress. And that normal stress has a special name.</p>
+      <p>However — a fluid at rest <strong>can</strong> have normal stress. And that normal stress has a special name.</p>
     </div>
 
     <!-- ============== PAGE 8 · PRESSURE ============== -->
-    <div class="page" data-title-en="8 · Pressure" data-title-ms="8 · Tekanan">
-      <h2><span class="chip">8</span><span data-i18n="p8title">Normal Stress in a Fluid at Rest = Pressure</span></h2>
+    <div class="page" data-title-en="8 · Pressure">
+      <h2><span class="chip">8</span><span>Normal Stress in a Fluid at Rest = Pressure</span></h2>
 
-      <p data-i18n-html="p8a">For a fluid at rest, the <strong>normal stress is called pressure</strong>.</p>
+      <p>For a fluid at rest, the <strong>normal stress is called pressure</strong>.</p>
 
       <div class="eq">
         p = <span class="frac"><span class="num">F</span><span class="den">A</span></span>
-        <span class="lbl" data-i18n="eq8lbl">p = pressure · F = normal force · A = area</span>
+        <span class="lbl">p = pressure · F = normal force · A = area</span>
       </div>
 
-      <p data-i18n-html="p8b">Pressure acts <strong>perpendicular</strong> to the surface. For example, water in a tank pushes against the tank walls:</p>
+      <p>Pressure acts <strong>perpendicular</strong> to the surface. For example, water in a tank pushes against the tank walls:</p>
 
       <div class="sim">
         <div class="sim-head">
-          <span class="t" data-i18n="simT8">Simulation · Water pushing on a tank</span>
-          <span class="hint" data-i18n="simH8">Every arrow is perpendicular to the wall it pushes on</span>
+          <span class="t">Simulation · Water pushing on a tank</span>
+          <span class="hint">Every arrow is perpendicular to the wall it pushes on</span>
         </div>
         <canvas id="cvPressure" style="height:320px"></canvas>
         <div class="controls">
           <div class="ctrl">
-            <label><span data-i18n="lblPF">Normal force F</span> <b><span id="pFVal">800</span> N</b></label>
+            <label><span>Normal force F</span> <b><span id="pFVal">800</span> N</b></label>
             <input type="range" id="pFSlider" min="100" max="2000" step="50" value="800">
           </div>
           <div class="ctrl">
-            <label><span data-i18n="lblPA">Wall area A</span> <b><span id="pAVal">2.0</span> m²</b></label>
+            <label><span>Wall area A</span> <b><span id="pAVal">2.0</span> m²</b></label>
             <input type="range" id="pASlider" min="5" max="100" step="5" value="20">
           </div>
         </div>
         <div class="readout">
-          <div class="ro"><div class="k" data-i18n="roPress">Pressure p</div><div class="v" id="pOut">400 <small>Pa</small></div></div>
-          <div class="ro"><div class="k" data-i18n="roDir">Direction</div><div class="v" style="font-size:15px" data-i18n="roDirV">⊥ surface</div></div>
+          <div class="ro"><div class="k">Pressure p</div><div class="v" id="pOut">400 <small>Pa</small></div></div>
+          <div class="ro"><div class="k">Direction</div><div class="v" style="font-size:15px">⊥ surface</div></div>
         </div>
       </div>
 
       <div class="callout teal">
-        <p data-i18n-html="callout8"><strong>Remember the chain:</strong> normal stress on a fluid at rest → pressure. It always pushes perpendicular to the surface, never along it.</p>
+        <p><strong>Remember the chain:</strong> normal stress on a fluid at rest → pressure. It always pushes perpendicular to the surface, never along it.</p>
       </div>
     </div>
 
     <!-- ============== PAGE 9 · CONCEPT CHAIN ============== -->
-    <div class="page" data-title-en="9 · Complete Concept Chain" data-title-ms="9 · Rantaian Konsep Lengkap">
-      <h2><span class="chip">9</span><span data-i18n="p9title">The Complete Concept Chain</span></h2>
+    <div class="page" data-title-en="9 · Complete Concept Chain">
+      <h2><span class="chip">9</span><span>The Complete Concept Chain</span></h2>
 
-      <p data-i18n="p9a">This is the sequence that connects everything in this chapter:</p>
+      <p>This is the sequence that connects everything in this chapter:</p>
 
       <div class="chain">
-        <div class="node" data-i18n="chForce">FORCE</div>
+        <div class="node">FORCE</div>
         <div class="arr">↓</div>
-        <div class="node" data-i18n="chPerArea">Force per unit area</div>
+        <div class="node">Force per unit area</div>
         <div class="arr">↓</div>
-        <div class="node hot" data-i18n="chStress">STRESS &nbsp; σ = F / A</div>
+        <div class="node hot">STRESS &nbsp; σ = F / A</div>
         <div class="arr">↓</div>
         <div class="split">
           <div class="branch">
-            <div class="node cool" data-i18n="chNormal">NORMAL STRESS</div>
+            <div class="node cool">NORMAL STRESS</div>
             <div class="arr">↓</div>
-            <div class="node" data-i18n="chPerp">⊥ to the surface</div>
+            <div class="node">⊥ to the surface</div>
             <div class="arr">↓</div>
-            <div class="node" data-i18n="chCompTens">Compression or tension</div>
+            <div class="node">Compression or tension</div>
             <div class="arr">↓</div>
-            <div class="node cool" data-i18n="chPressure">In a fluid at rest → PRESSURE</div>
+            <div class="node cool">In a fluid at rest → PRESSURE</div>
           </div>
           <div class="branch">
-            <div class="node hot" data-i18n="chShear">SHEAR STRESS</div>
+            <div class="node hot">SHEAR STRESS</div>
             <div class="arr">↓</div>
-            <div class="node" data-i18n="chPar">∥ to the surface</div>
+            <div class="node">∥ to the surface</div>
             <div class="arr">↓</div>
-            <div class="node" data-i18n="chSlide">Layers slide</div>
+            <div class="node">Layers slide</div>
             <div class="arr">↓</div>
-            <div class="node hot" data-i18n="chFlow">FLUID → CONTINUOUS DEFORMATION → FLOW</div>
+            <div class="node hot">FLUID → CONTINUOUS DEFORMATION → FLOW</div>
           </div>
         </div>
       </div>
 
       <div class="callout">
-        <p data-i18n-html="callout9">Shear force → shear stress → layer sliding → continuous deformation → <strong>flow</strong>.</p>
+        <p>Shear force → shear stress → layer sliding → continuous deformation → <strong>flow</strong>.</p>
       </div>
     </div>
 
     <!-- ============== PAGE 10 · EXAM NOTES ============== -->
-    <div class="page" data-title-en="10 · Exam-Ready Notes" data-title-ms="10 · Nota Sedia Peperiksaan">
-      <h2><span class="chip">10</span><span data-i18n="p10title">Exam-Ready Notes</span></h2>
+    <div class="page" data-title-en="10 · Exam-Ready Notes">
+      <h2><span class="chip">10</span><span>Exam-Ready Notes</span></h2>
 
       <div class="deflist">
         <div class="def">
-          <div class="dt" data-i18n="defStressT">Stress</div>
-          <div class="dd" data-i18n-html="defStressD">Stress is the internal force per unit area developed within a material when an external force is applied.
+          <div class="dt">Stress</div>
+          <div class="dd">Stress is the internal force per unit area developed within a material when an external force is applied.
             <br><code>σ = F / A</code> &nbsp; unit: <code>Pa = N/m²</code></div>
         </div>
         <div class="def">
-          <div class="dt" data-i18n="defNormalT">Normal Stress</div>
-          <div class="dd" data-i18n-html="defNormalD">Stress that acts <strong>perpendicular</strong> to a surface. It produces compression or tension. Symbol: <code>σ</code>.</div>
+          <div class="dt">Normal Stress</div>
+          <div class="dd">Stress that acts <strong>perpendicular</strong> to a surface. It produces compression or tension. Symbol: <code>σ</code>.</div>
         </div>
         <div class="def">
-          <div class="dt" data-i18n="defShearT">Shear Stress</div>
-          <div class="dd" data-i18n-html="defShearD">Stress that acts <strong>tangentially or parallel</strong> to a surface, tending to make adjacent layers slide. Symbol: <code>τ</code>, and <code>τ = F / A</code>.</div>
+          <div class="dt">Shear Stress</div>
+          <div class="dd">Stress that acts <strong>tangentially or parallel</strong> to a surface, tending to make adjacent layers slide. Symbol: <code>τ</code>, and <code>τ = F / A</code>.</div>
         </div>
         <div class="def">
-          <div class="dt" data-i18n="defFluidT">Fluid at Rest</div>
-          <div class="dd" data-i18n-html="defFluidD">A fluid at rest <strong>cannot sustain shear stress</strong>. It can, however, have normal stress — and that normal stress is called <strong>pressure</strong>.</div>
+          <div class="dt">Fluid at Rest</div>
+          <div class="dd">A fluid at rest <strong>cannot sustain shear stress</strong>. It can, however, have normal stress — and that normal stress is called <strong>pressure</strong>.</div>
         </div>
       </div>
 
       <div class="callout shear" style="text-align:center">
-        <p style="font-family:Georgia,serif;font-size:19px;margin:6px 0" data-i18n-html="finalA"><strong>Stress = Force / Area</strong></p>
-        <p style="font-family:Georgia,serif;font-size:19px;margin:6px 0" data-i18n-html="finalB">Fluid at rest: <strong>Normal stress = Pressure</strong></p>
+        <p style="font-family:Georgia,serif;font-size:19px;margin:6px 0"><strong>Stress = Force / Area</strong></p>
+        <p style="font-family:Georgia,serif;font-size:19px;margin:6px 0">Fluid at rest: <strong>Normal stress = Pressure</strong></p>
       </div>
 
-      <p style="margin-top:40px;color:var(--muted);font-size:13.5px;text-align:center" data-i18n="endNote">— End of chapter 1.3 —</p>
+      <p style="margin-top:40px;color:var(--muted);font-size:13.5px;text-align:center">— End of chapter 1.3 —</p>
     </div>
 
   </div>
 </div>
 
-<!-- ============== LANGUAGE TOGGLE ============== -->
-<div class="lang-fab" id="langFab" role="group" aria-label="Language">
-  <button type="button" data-lang="en" class="active">EN</button>
-  <button type="button" data-lang="ms">BM</button>
-</div>
-
-<!-- ============== NAV BAR ============== -->
+<!-- ============== NAV BAR (CENTER) ============== -->
 <div class="book-nav">
-  <button class="nav-btn" id="prevBtn" data-i18n-title="prevTip" title="Previous">
+  <button class="nav-btn" id="prevBtn" title="Previous">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
   </button>
 
@@ -886,10 +904,26 @@
     <div class="page-num" id="pageNum">1 / 11</div>
   </div>
 
-  <button class="nav-btn" id="nextBtn" data-i18n-title="nextTip" title="Next">
+  <button class="nav-btn" id="nextBtn" title="Next">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
   </button>
 </div>
+
+<!-- ============== BOTTOM-LEFT · BACK TO CHAPTER LIST ============== -->
+<a class="chapter-fab left" href="index.html" title="Back to the list of Fluid Mechanics chapters">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 12H5M11 18l-6-6 6-6"/>
+  </svg>
+  <span>Chapter List</span>
+</a>
+
+<!-- ============== BOTTOM-RIGHT · BACK TO CHAPTER 1 ============== -->
+<a class="chapter-fab right" href="Chapter 1.html" title="Back to Chapter 1 content">
+  <span>Chapter 1</span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14M13 6l6 6-6 6"/>
+  </svg>
+</a>
 
 <!-- ============== EDIT FAB ============== -->
 <button class="edit-fab" id="editToggle" title="Toggle edit mode (E)">
@@ -898,42 +932,42 @@
 
 <!-- ============== EDIT ACTIONS ============== -->
 <div class="edit-actions" id="editActions" hidden>
-  <input type="text" class="title-edit" id="titleInput" placeholder="Page title…" data-i18n-ph="titlePh" title="Page title">
+  <input type="text" class="title-edit" id="titleInput" placeholder="Page title…" title="Page title">
   <button id="addPageBtn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-    <span data-i18n="actAdd">Add</span>
+    <span>Add</span>
   </button>
   <button id="delPageBtn" class="danger">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-    <span data-i18n="actDel">Delete</span>
+    <span>Delete</span>
   </button>
   <button id="saveHtmlBtn" class="primary">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-    <span data-i18n="actSave">Save</span>
+    <span>Save</span>
   </button>
   <button id="resetBtn" class="danger">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 019-9 9 9 0 016.36 2.64L21 8M21 3v5h-5M21 12a9 9 0 01-9 9 9 9 0 01-6.36-2.64L3 16M3 21v-5h5"/></svg>
-    <span data-i18n="actReset">Reset</span>
+    <span>Reset</span>
   </button>
 </div>
 
 <!-- ============== LOGIN MODAL ============== -->
 <div class="modal-backdrop" id="loginModal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-    <h3 id="loginTitle" data-i18n="loginTitle">Log in to edit</h3>
-    <p class="sub" data-i18n="loginSub">Enter your credentials to unlock the editor.</p>
+    <h3 id="loginTitle">Log in to edit</h3>
+    <p class="sub">Enter your credentials to unlock the editor.</p>
 
-    <label for="loginUser" data-i18n="loginUserLbl">Username</label>
+    <label for="loginUser">Username</label>
     <input type="text" id="loginUser" autocomplete="username" autocapitalize="none" spellcheck="false">
 
-    <label for="loginPass" data-i18n="loginPassLbl">Password</label>
+    <label for="loginPass">Password</label>
     <input type="password" id="loginPass" autocomplete="current-password">
 
-    <div class="login-error" id="loginError" hidden data-i18n="loginErr">Invalid username or password.</div>
+    <div class="login-error" id="loginError" hidden>Invalid username or password.</div>
 
     <div class="modal-actions">
-      <button id="loginCancel" data-i18n="cancel">Cancel</button>
-      <button class="primary" id="loginSubmit" data-i18n="loginBtn">Log in</button>
+      <button id="loginCancel">Cancel</button>
+      <button class="primary" id="loginSubmit">Log in</button>
     </div>
   </div>
 </div>
@@ -941,22 +975,22 @@
 <!-- ============== ADD PAGE MODAL ============== -->
 <div class="modal-backdrop" id="addModal" hidden>
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="addTitle">
-    <h3 id="addTitle" data-i18n="addTitle">Add a new page</h3>
-    <p class="sub" data-i18n-html="addSub">Paste any HTML — headings, paragraphs, callouts, even your own <code style="font-family:var(--mono);background:#f0ece0;padding:1px 6px;border-radius:5px;font-size:12px">&lt;canvas&gt;</code> or a new simulation block.</p>
+    <h3 id="addTitle">Add a new page</h3>
+    <p class="sub">Paste any HTML — headings, paragraphs, callouts, even your own <code style="font-family:var(--mono);background:#f0ece0;padding:1px 6px;border-radius:5px;font-size:12px">&lt;canvas&gt;</code> or a new simulation block.</p>
 
-    <label for="newPageTitle" data-i18n="addTitleLbl">Page title (shown in the navigation)</label>
-    <input type="text" id="newPageTitle" placeholder="e.g. 11 · Viscosity" data-i18n-ph="addTitlePh">
+    <label for="newPageTitle">Page title (shown in the navigation)</label>
+    <input type="text" id="newPageTitle" placeholder="e.g. 11 · Viscosity">
 
-    <label for="newPageHtml" data-i18n="addHtmlLbl">Page HTML</label>
+    <label for="newPageHtml">Page HTML</label>
     <textarea id="newPageHtml" spellcheck="false"></textarea>
 
-    <p class="hint" data-i18n-html="addHint">
+    <p class="hint">
       Tip: reuse the book's classes — <code>callout</code>, <code>callout shear</code>, <code>eq</code>, <code>chips</code>, <code>tbl-wrap</code>, <code>chain</code>, <code>deflist</code> — and wrap interactive bits in a <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code>.
     </p>
 
     <div class="modal-actions">
-      <button id="addModalCancel" data-i18n="cancel">Cancel</button>
-      <button class="primary" id="addModalInsert" data-i18n="addInsert">Add page</button>
+      <button id="addModalCancel">Cancel</button>
+      <button class="primary" id="addModalInsert">Add page</button>
     </div>
   </div>
 </div>
@@ -969,562 +1003,276 @@ const EDIT_USER = 'fluid';
 const EDIT_PASS = 'che233';
 
 /* ============================================================
-   LANGUAGE
+   STRINGS  (English only)
    ============================================================ */
-const LANG_KEY = 'stress-book-lang';
-let LANG = (function(){
-  try { return localStorage.getItem(LANG_KEY) === 'ms' ? 'ms' : 'en'; }
-  catch(e){ return 'en'; }
-})();
+const STR = {
+  /* ---- UI ---- */
+  start: 'Start reading',
+  prevTip: 'Previous',
+  nextTip: 'Next',
+  editFabTip: 'Toggle edit mode (E)',
+  editFabTipExit: 'Exit edit mode (E)',
+  titlePh: 'Page title…',
+  actAdd: 'Add', actDel: 'Delete', actSave: 'Save', actReset: 'Reset',
+  loginTitle: 'Log in to edit',
+  loginSub: 'Enter your credentials to unlock the editor.',
+  loginUserLbl: 'Username',
+  loginPassLbl: 'Password',
+  loginErr: 'Invalid username or password.',
+  cancel: 'Cancel',
+  loginBtn: 'Log in',
+  addTitle: 'Add a new page',
+  addSub: 'Paste any HTML — headings, paragraphs, callouts, even your own <code style="font-family:var(--mono);background:#f0ece0;padding:1px 6px;border-radius:5px;font-size:12px">&lt;canvas&gt;</code> or a new simulation block.',
+  addTitleLbl: 'Page title (shown in the navigation)',
+  addTitlePh: 'e.g. 11 · Viscosity',
+  addHtmlLbl: 'Page HTML',
+  addHint: 'Tip: reuse the book\'s classes — <code>callout</code>, <code>callout shear</code>, <code>eq</code>, <code>chips</code>, <code>tbl-wrap</code>, <code>chain</code>, <code>deflist</code> — and wrap interactive bits in a <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code>.',
+  addInsert: 'Add page',
+  confirmDelete: 'Delete this page? You can undo by clicking Reset, but that wipes every edit.',
+  alertCover: 'The cover page cannot be deleted.',
+  confirmReset: 'Clear all edits and reload the original file? This cannot be undone.',
 
-const I18N = {
-  en: {
-    /* ---- UI ---- */
-    start: 'Start reading',
-    prevTip: 'Previous',
-    nextTip: 'Next',
-    editFabTip: 'Toggle edit mode (E)',
-    editFabTipExit: 'Exit edit mode (E)',
-    titlePh: 'Page title…',
-    actAdd: 'Add', actDel: 'Delete', actSave: 'Save', actReset: 'Reset',
-    loginTitle: 'Log in to edit',
-    loginSub: 'Enter your credentials to unlock the editor.',
-    loginUserLbl: 'Username',
-    loginPassLbl: 'Password',
-    loginErr: 'Invalid username or password.',
-    cancel: 'Cancel',
-    loginBtn: 'Log in',
-    addTitle: 'Add a new page',
-    addSub: 'Paste any HTML — headings, paragraphs, callouts, even your own <code style="font-family:var(--mono);background:#f0ece0;padding:1px 6px;border-radius:5px;font-size:12px">&lt;canvas&gt;</code> or a new simulation block.',
-    addTitleLbl: 'Page title (shown in the navigation)',
-    addTitlePh: 'e.g. 11 · Viscosity',
-    addHtmlLbl: 'Page HTML',
-    addHint: 'Tip: reuse the book\'s classes — <code>callout</code>, <code>callout shear</code>, <code>eq</code>, <code>chips</code>, <code>tbl-wrap</code>, <code>chain</code>, <code>deflist</code> — and wrap interactive bits in a <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code>.',
-    addInsert: 'Add page',
-    confirmDelete: 'Delete this page? You can undo by clicking Reset, but that wipes every edit.',
-    alertCover: 'The cover page cannot be deleted.',
-    confirmReset: 'Clear all edits and reload the original file? This cannot be undone.',
+  /* ---- COVER ---- */
+  coverKicker: 'Interactive Fluid Mechanics · Chapter 1.3',
+  coverH1: 'What is<br><em>Stress?</em>',
+  coverP: 'Force per unit area, the two components of stress, and why a fluid at rest can only push — never slide. Turn the page and drag the sliders.',
+  coverPill: '<b>σ</b> = F / A &nbsp;→&nbsp; normal stress &nbsp;+&nbsp; shear stress',
 
-    /* ---- COVER ---- */
-    coverKicker: 'Interactive Fluid Mechanics · Chapter 1.3',
-    coverH1: 'What is<br><em>Stress?</em>',
-    coverP: 'Force per unit area, the two components of stress, and why a fluid at rest can only push — never slide. Turn the page and drag the sliders.',
-    coverPill: '<b>σ</b> = F / A &nbsp;→&nbsp; normal stress &nbsp;+&nbsp; shear stress',
+  /* ---- PAGE 1 ---- */
+  p1title: 'What is Stress?',
+  p1a: '<strong>Stress</strong> is the <em class="term">internal force</em> acting per unit area within a material.',
+  p1b: 'In simple terms: when an external force is applied to a material, the material develops <strong>internal forces</strong> to oppose the applied force. The intensity of this internal force per unit area is called <strong>stress</strong>.',
+  eq1lbl: 'σ = stress · F = force · A = area',
+  eq2lbl: 'The SI unit of stress is the pascal',
+  simT1: 'Simulation · Internal force per unit area',
+  simH1: 'Change the force and the area — watch the internal response',
+  lblF: 'Applied force F',
+  lblA: 'Area A',
+  roStress: 'Stress σ',
+  roForce: 'Force',
+  roArea: 'Area',
+  p1c: 'Push harder → stress goes up. Spread the same push over more area → stress goes down.',
 
-    /* ---- PAGE 1 ---- */
-    p1title: 'What is Stress?',
-    p1a: '<strong>Stress</strong> is the <em class="term">internal force</em> acting per unit area within a material.',
-    p1b: 'In simple terms: when an external force is applied to a material, the material develops <strong>internal forces</strong> to oppose the applied force. The intensity of this internal force per unit area is called <strong>stress</strong>.',
-    eq1lbl: 'σ = stress · F = force · A = area',
-    eq2lbl: 'The SI unit of stress is the pascal',
-    simT1: 'Simulation · Internal force per unit area',
-    simH1: 'Change the force and the area — watch the internal response',
-    lblF: 'Applied force F',
-    lblA: 'Area A',
-    roStress: 'Stress σ',
-    roForce: 'Force',
-    roArea: 'Area',
-    p1c: 'Push harder → stress goes up. Spread the same push over more area → stress goes down.',
+  /* ---- PAGE 2 ---- */
+  p2title: 'Why Do We Divide Force by Area?',
+  p2a: 'Consider two surfaces experiencing the <strong>same force</strong>.',
+  simT2: 'Simulation · Same force, different area',
+  simH2: 'The internal arrows show how concentrated the force is',
+  case1: '<strong>Case 1 — Large area.</strong> The force is distributed over a large area. Therefore the stress is relatively <strong>small</strong>.',
+  case2: '<strong>Case 2 — Small area.</strong> The same force acts over a smaller area. Therefore the stress is <strong>larger</strong>.',
+  eq2Line: 'Same force + smaller area → greater stress<br>Same force + larger area → smaller stress',
+  eq2Lbl: 'This is exactly why we divide by area',
+  p2b: 'A force alone does not tell you how severely a material is loaded. A 500 N force spread over 5 m² is gentle; the same 500 N on a pinhead is destructive.',
 
-    /* ---- PAGE 2 ---- */
-    p2title: 'Why Do We Divide Force by Area?',
-    p2a: 'Consider two surfaces experiencing the <strong>same force</strong>.',
-    simT2: 'Simulation · Same force, different area',
-    simH2: 'The internal arrows show how concentrated the force is',
-    case1: '<strong>Case 1 — Large area.</strong> The force is distributed over a large area. Therefore the stress is relatively <strong>small</strong>.',
-    case2: '<strong>Case 2 — Small area.</strong> The same force acts over a smaller area. Therefore the stress is <strong>larger</strong>.',
-    eq2Line: 'Same force + smaller area → greater stress<br>Same force + larger area → smaller stress',
-    eq2Lbl: 'This is exactly why we divide by area',
-    p2b: 'A force alone does not tell you how severely a material is loaded. A 500 N force spread over 5 m² is gentle; the same 500 N on a pinhead is destructive.',
+  /* ---- PAGE 3 ---- */
+  p3title: 'Two Components of Stress',
+  p3a: 'Stress can be separated according to the <strong>direction</strong> in which the force acts relative to the surface. There are two important types:',
+  chip1: '1 · Normal stress',
+  chip2: '2 · Shear stress',
+  nsH: 'Normal stress',
+  nsP: 'Acts <strong>perpendicular</strong> to a surface. "Normal" here means <em>perpendicular</em> — not "usual" or "ordinary". It can produce <strong>compression</strong> (pushed) or <strong>tension</strong> (pulled).',
+  ssH: 'Shear stress',
+  ssP: 'Acts <strong>tangentially</strong> or parallel to a surface. It tends to make adjacent layers <strong>slide</strong> relative to each other.',
+  eq3: 'Normal stress → ⊥ to surface &nbsp;&nbsp;|&nbsp;&nbsp; Shear stress → ∥ to surface',
+  eq3lbl: 'Symbols commonly used: σ (normal) and τ (shear)',
+  p3b: 'The next two pages take each one in turn — then we compare them directly.',
 
-    /* ---- PAGE 3 ---- */
-    p3title: 'Two Components of Stress',
-    p3a: 'Stress can be separated according to the <strong>direction</strong> in which the force acts relative to the surface. There are two important types:',
-    chip1: '1 · Normal stress',
-    chip2: '2 · Shear stress',
-    nsH: 'Normal stress',
-    nsP: 'Acts <strong>perpendicular</strong> to a surface. "Normal" here means <em>perpendicular</em> — not "usual" or "ordinary". It can produce <strong>compression</strong> (pushed) or <strong>tension</strong> (pulled).',
-    ssH: 'Shear stress',
-    ssP: 'Acts <strong>tangentially</strong> or parallel to a surface. It tends to make adjacent layers <strong>slide</strong> relative to each other.',
-    eq3: 'Normal stress → ⊥ to surface &nbsp;&nbsp;|&nbsp;&nbsp; Shear stress → ∥ to surface',
-    eq3lbl: 'Symbols commonly used: σ (normal) and τ (shear)',
-    p3b: 'The next two pages take each one in turn — then we compare them directly.',
+  /* ---- PAGE 4 ---- */
+  p4title: 'Normal Stress',
+  p4a: 'Normal stress acts <strong>perpendicular</strong> to a surface — the force is acting at 90° to the surface.',
+  simT4: 'Simulation · Compression vs Tension',
+  simH4: 'Switch modes and watch the material respond',
+  btnComp: '⬇ Compression',
+  btnTens: '⬆ Tension',
+  compP: '<strong>Compression</strong> — the material is pushed. It shortens in the direction of the force.',
+  tensP: '<strong>Tension</strong> — the material is pulled. It lengthens in the direction of the force.',
+  p4b: 'Either way, the force stays <strong>perpendicular</strong> to the surface. That is what makes it a normal stress.',
 
-    /* ---- PAGE 4 ---- */
-    p4title: 'Normal Stress',
-    p4a: 'Normal stress acts <strong>perpendicular</strong> to a surface — the force is acting at 90° to the surface.',
-    simT4: 'Simulation · Compression vs Tension',
-    simH4: 'Switch modes and watch the material respond',
-    btnComp: '⬇ Compression',
-    btnTens: '⬆ Tension',
-    compP: '<strong>Compression</strong> — the material is pushed. It shortens in the direction of the force.',
-    tensP: '<strong>Tension</strong> — the material is pulled. It lengthens in the direction of the force.',
-    p4b: 'Either way, the force stays <strong>perpendicular</strong> to the surface. That is what makes it a normal stress.',
+  /* ---- PAGE 5 ---- */
+  p5title: 'Shear Stress',
+  p5a: 'Shear stress acts <strong>tangentially</strong> or parallel to a surface — the force is acting <em>along</em> the surface, not into it.',
+  simT5: 'Simulation · Layers sliding',
+  simH5: 'The top portion moves relative to the bottom portion',
+  btnPause: '⏸ Pause',
+  btnPlay: '▶ Play',
+  p5b: 'Shear stress tends to make adjacent layers <strong>slide</strong> relative to each other. This produces <strong>shear deformation</strong>.',
+  eq5lbl: 'τ = shear stress · F = shear force · A = area · unit: Pa = N/m²',
 
-    /* ---- PAGE 5 ---- */
-    p5title: 'Shear Stress',
-    p5a: 'Shear stress acts <strong>tangentially</strong> or parallel to a surface — the force is acting <em>along</em> the surface, not into it.',
-    simT5: 'Simulation · Layers sliding',
-    simH5: 'The top portion moves relative to the bottom portion',
-    btnPause: '⏸ Pause',
-    btnPlay: '▶ Play',
-    p5b: 'Shear stress tends to make adjacent layers <strong>slide</strong> relative to each other. This produces <strong>shear deformation</strong>.',
-    eq5lbl: 'τ = shear stress · F = shear force · A = area · unit: Pa = N/m²',
+  /* ---- PAGE 6 ---- */
+  p6title: 'Normal Stress vs Shear Stress',
+  simT6: 'Simulation · Side by side',
+  simH6: 'Left: perpendicular · Right: tangential',
+  thProp: 'Property', thNormal: 'Normal Stress', thShear: 'Shear Stress',
+  tr1a: 'Direction', tr1b: 'Perpendicular to surface', tr1c: 'Parallel / tangential to surface',
+  tr2a: 'Main effect', tr2b: 'Compression or tension', tr2c: 'Sliding / deformation',
+  tr3a: 'Symbol commonly used',
+  tr4a: 'Example', tr4b: 'Pressure in a fluid at rest', tr4c: 'Viscous stress in a flowing fluid',
+  p6a: 'A simple way to visualise it: normal stress pushes <em>into</em> the surface; shear stress drags <em>along</em> it.',
 
-    /* ---- PAGE 6 ---- */
-    p6title: 'Normal Stress vs Shear Stress',
-    simT6: 'Simulation · Side by side',
-    simH6: 'Left: perpendicular · Right: tangential',
-    thProp: 'Property', thNormal: 'Normal Stress', thShear: 'Shear Stress',
-    tr1a: 'Direction', tr1b: 'Perpendicular to surface', tr1c: 'Parallel / tangential to surface',
-    tr2a: 'Main effect', tr2b: 'Compression or tension', tr2c: 'Sliding / deformation',
-    tr3a: 'Symbol commonly used',
-    tr4a: 'Example', tr4b: 'Pressure in a fluid at rest', tr4c: 'Viscous stress in a flowing fluid',
-    p6a: 'A simple way to visualise it: normal stress pushes <em>into</em> the surface; shear stress drags <em>along</em> it.',
+  /* ---- PAGE 7 ---- */
+  p7title: 'What Happens in a Fluid at Rest?',
+  p7a: 'This is particularly important in fluid mechanics.',
+  p7callout: '<strong>A fluid at rest cannot sustain a shear stress.</strong>',
+  p7b: '<strong>Why?</strong> Suppose we try to apply a shear stress: the fluid layers begin to move relative to one another. Therefore the fluid is <strong>no longer at rest</strong>.',
+  simT7: 'Simulation · Try to shear a fluid at rest',
+  simH7: 'Toggle the shear and watch what the fluid does',
+  btnApplyShear: '▶ Apply shear stress',
+  btnRemoveShear: '⏸ Remove shear stress',
+  eq7: 'Fluid at rest → no shear stress',
+  eq7lbl: 'The moment it can slide, it is not at rest any more',
+  p7c: 'However — a fluid at rest <strong>can</strong> have normal stress. And that normal stress has a special name.',
 
-    /* ---- PAGE 7 ---- */
-    p7title: 'What Happens in a Fluid at Rest?',
-    p7a: 'This is particularly important in fluid mechanics.',
-    p7callout: '<strong>A fluid at rest cannot sustain a shear stress.</strong>',
-    p7b: '<strong>Why?</strong> Suppose we try to apply a shear stress: the fluid layers begin to move relative to one another. Therefore the fluid is <strong>no longer at rest</strong>.',
-    simT7: 'Simulation · Try to shear a fluid at rest',
-    simH7: 'Toggle the shear and watch what the fluid does',
-    btnApplyShear: '▶ Apply shear stress',
-    btnRemoveShear: '⏸ Remove shear stress',
-    eq7: 'Fluid at rest → no shear stress',
-    eq7lbl: 'The moment it can slide, it is not at rest any more',
-    p7c: 'However — a fluid at rest <strong>can</strong> have normal stress. And that normal stress has a special name.',
+  /* ---- PAGE 8 ---- */
+  p8title: 'Normal Stress in a Fluid at Rest = Pressure',
+  p8a: 'For a fluid at rest, the <strong>normal stress is called pressure</strong>.',
+  eq8lbl: 'p = pressure · F = normal force · A = area',
+  p8b: 'Pressure acts <strong>perpendicular</strong> to the surface. For example, water in a tank pushes against the tank walls:',
+  simT8: 'Simulation · Water pushing on a tank',
+  simH8: 'Every arrow is perpendicular to the wall it pushes on',
+  lblPF: 'Normal force F',
+  lblPA: 'Wall area A',
+  roPress: 'Pressure p',
+  roDir: 'Direction',
+  roDirV: '⊥ surface',
+  callout8: '<strong>Remember the chain:</strong> normal stress on a fluid at rest → pressure. It always pushes perpendicular to the surface, never along it.',
 
-    /* ---- PAGE 8 ---- */
-    p8title: 'Normal Stress in a Fluid at Rest = Pressure',
-    p8a: 'For a fluid at rest, the <strong>normal stress is called pressure</strong>.',
-    eq8lbl: 'p = pressure · F = normal force · A = area',
-    p8b: 'Pressure acts <strong>perpendicular</strong> to the surface. For example, water in a tank pushes against the tank walls:',
-    simT8: 'Simulation · Water pushing on a tank',
-    simH8: 'Every arrow is perpendicular to the wall it pushes on',
-    lblPF: 'Normal force F',
-    lblPA: 'Wall area A',
-    roPress: 'Pressure p',
-    roDir: 'Direction',
-    roDirV: '⊥ surface',
-    callout8: '<strong>Remember the chain:</strong> normal stress on a fluid at rest → pressure. It always pushes perpendicular to the surface, never along it.',
+  /* ---- PAGE 9 ---- */
+  p9title: 'The Complete Concept Chain',
+  p9a: 'This is the sequence that connects everything in this chapter:',
+  chForce: 'FORCE',
+  chPerArea: 'Force per unit area',
+  chStress: 'STRESS &nbsp; σ = F / A',
+  chNormal: 'NORMAL STRESS',
+  chPerp: '⊥ to the surface',
+  chCompTens: 'Compression or tension',
+  chPressure: 'In a fluid at rest → PRESSURE',
+  chShear: 'SHEAR STRESS',
+  chPar: '∥ to the surface',
+  chSlide: 'Layers slide',
+  chFlow: 'FLUID → CONTINUOUS DEFORMATION → FLOW',
+  callout9: 'Shear force → shear stress → layer sliding → continuous deformation → <strong>flow</strong>.',
 
-    /* ---- PAGE 9 ---- */
-    p9title: 'The Complete Concept Chain',
-    p9a: 'This is the sequence that connects everything in this chapter:',
-    chForce: 'FORCE',
-    chPerArea: 'Force per unit area',
-    chStress: 'STRESS &nbsp; σ = F / A',
-    chNormal: 'NORMAL STRESS',
-    chPerp: '⊥ to the surface',
-    chCompTens: 'Compression or tension',
-    chPressure: 'In a fluid at rest → PRESSURE',
-    chShear: 'SHEAR STRESS',
-    chPar: '∥ to the surface',
-    chSlide: 'Layers slide',
-    chFlow: 'FLUID → CONTINUOUS DEFORMATION → FLOW',
-    callout9: 'Shear force → shear stress → layer sliding → continuous deformation → <strong>flow</strong>.',
+  /* ---- PAGE 10 ---- */
+  p10title: 'Exam-Ready Notes',
+  defStressT: 'Stress',
+  defStressD: 'Stress is the internal force per unit area developed within a material when an external force is applied.<br><code>σ = F / A</code> &nbsp; unit: <code>Pa = N/m²</code>',
+  defNormalT: 'Normal Stress',
+  defNormalD: 'Stress that acts <strong>perpendicular</strong> to a surface. It produces compression or tension. Symbol: <code>σ</code>.',
+  defShearT: 'Shear Stress',
+  defShearD: 'Stress that acts <strong>tangentially or parallel</strong> to a surface, tending to make adjacent layers slide. Symbol: <code>τ</code>, and <code>τ = F / A</code>.',
+  defFluidT: 'Fluid at Rest',
+  defFluidD: 'A fluid at rest <strong>cannot sustain shear stress</strong>. It can, however, have normal stress — and that normal stress is called <strong>pressure</strong>.',
+  finalA: '<strong>Stress = Force / Area</strong>',
+  finalB: 'Fluid at rest: <strong>Normal stress = Pressure</strong>',
+  endNote: '— End of chapter 1.3 —',
 
-    /* ---- PAGE 10 ---- */
-    p10title: 'Exam-Ready Notes',
-    defStressT: 'Stress',
-    defStressD: 'Stress is the internal force per unit area developed within a material when an external force is applied.<br><code>σ = F / A</code> &nbsp; unit: <code>Pa = N/m²</code>',
-    defNormalT: 'Normal Stress',
-    defNormalD: 'Stress that acts <strong>perpendicular</strong> to a surface. It produces compression or tension. Symbol: <code>σ</code>.',
-    defShearT: 'Shear Stress',
-    defShearD: 'Stress that acts <strong>tangentially or parallel</strong> to a surface, tending to make adjacent layers slide. Symbol: <code>τ</code>, and <code>τ = F / A</code>.',
-    defFluidT: 'Fluid at Rest',
-    defFluidD: 'A fluid at rest <strong>cannot sustain shear stress</strong>. It can, however, have normal stress — and that normal stress is called <strong>pressure</strong>.',
-    finalA: '<strong>Stress = Force / Area</strong>',
-    finalB: 'Fluid at rest: <strong>Normal stress = Pressure</strong>',
-    endNote: '— End of chapter 1.3 —',
+  /* ---- CANVAS TEXT ---- */
+  cvMaterial: 'MATERIAL',
+  cvInternal: 'internal force opposes the applied force',
+  cvAreaA: 'area A',
+  cvLargeArea: 'LARGE AREA',
+  cvLargeSub: 'same force spread out → low stress',
+  cvSmallArea: 'SMALL AREA',
+  cvSmallSub: 'same force concentrated → high stress',
+  cvSameForce: 'SAME FORCE  F',
+  cvCompression: 'COMPRESSION',
+  cvTension: 'TENSION',
+  cvCompSub: 'material is pushed — it shortens',
+  cvTensSub: 'material is pulled — it lengthens',
+  cvNormalNote: 'force acts at 90° to the surface  →  NORMAL STRESS',
+  cvShearForce: 'F (shear force)',
+  cvShearSlid: 'layers have slid relative to one another',
+  cvShearAligned: 'before shear — layers aligned',
+  cvNormalStress: 'NORMAL STRESS',
+  cvForcePerp: 'force ⊥ surface',
+  cvCompTens: '→ compression / tension',
+  cvShearStress: 'SHEAR STRESS',
+  cvForcePar: 'force ∥ surface',
+  cvSliding: '→ sliding',
+  cvFixed: 'FIXED BOUNDARY',
+  cvShearApplied: 'shear applied',
+  cvNoShear: 'no shear',
+  cvSlideMsg: 'layers are sliding → the fluid is NOT at rest',
+  cvRestMsg: 'fluid at rest → no shear stress',
+  cvWall: 'WALL',
+  cvWaterPush: 'water in a tank pushes against the walls',
 
-    /* ---- CANVAS TEXT ---- */
-    cvMaterial: 'MATERIAL',
-    cvInternal: 'internal force opposes the applied force',
-    cvAreaA: 'area A',
-    cvLargeArea: 'LARGE AREA',
-    cvLargeSub: 'same force spread out → low stress',
-    cvSmallArea: 'SMALL AREA',
-    cvSmallSub: 'same force concentrated → high stress',
-    cvSameForce: 'SAME FORCE  F',
-    cvCompression: 'COMPRESSION',
-    cvTension: 'TENSION',
-    cvCompSub: 'material is pushed — it shortens',
-    cvTensSub: 'material is pulled — it lengthens',
-    cvNormalNote: 'force acts at 90° to the surface  →  NORMAL STRESS',
-    cvShearForce: 'F (shear force)',
-    cvShearSlid: 'layers have slid relative to one another',
-    cvShearAligned: 'before shear — layers aligned',
-    cvNormalStress: 'NORMAL STRESS',
-    cvForcePerp: 'force ⊥ surface',
-    cvCompTens: '→ compression / tension',
-    cvShearStress: 'SHEAR STRESS',
-    cvForcePar: 'force ∥ surface',
-    cvSliding: '→ sliding',
-    cvFixed: 'FIXED BOUNDARY',
-    cvShearApplied: 'shear applied',
-    cvNoShear: 'no shear',
-    cvSlideMsg: 'layers are sliding → the fluid is NOT at rest',
-    cvRestMsg: 'fluid at rest → no shear stress',
-    cvWall: 'WALL',
-    cvWaterPush: 'water in a tank pushes against the walls',
-
-    /* ---- SIM EXPLANATION ---- */
-    exTag: 'Simulation explained'
-  },
-
-  ms: {
-    /* ---- UI ---- */
-    start: 'Mula membaca',
-    prevTip: 'Sebelum',
-    nextTip: 'Seterusnya',
-    editFabTip: 'Tukar mod sunting (E)',
-    editFabTipExit: 'Keluar mod sunting (E)',
-    titlePh: 'Tajuk halaman…',
-    actAdd: 'Tambah', actDel: 'Padam', actSave: 'Simpan', actReset: 'Set semula',
-    loginTitle: 'Log masuk untuk menyunting',
-    loginSub: 'Masukkan kelayakan anda untuk membuka editor.',
-    loginUserLbl: 'Nama pengguna',
-    loginPassLbl: 'Kata laluan',
-    loginErr: 'Nama pengguna atau kata laluan tidak sah.',
-    cancel: 'Batal',
-    loginBtn: 'Log masuk',
-    addTitle: 'Tambah halaman baharu',
-    addSub: 'Tampal apa-apa HTML — tajuk, perenggan, kotak, malah <code style="font-family:var(--mono);background:#f0ece0;padding:1px 6px;border-radius:5px;font-size:12px">&lt;canvas&gt;</code> anda sendiri atau blok simulasi baharu.',
-    addTitleLbl: 'Tajuk halaman (dipaparkan dalam navigasi)',
-    addTitlePh: 'cth. 11 · Kelikatan',
-    addHtmlLbl: 'HTML halaman',
-    addHint: 'Petua: guna semula kelas buku ini — <code>callout</code>, <code>callout shear</code>, <code>eq</code>, <code>chips</code>, <code>tbl-wrap</code>, <code>chain</code>, <code>deflist</code> — dan bungkus bahagian interaktif dalam <code>&lt;div class="sim"&gt;…&lt;/div&gt;</code>.',
-    addInsert: 'Tambah halaman',
-    confirmDelete: 'Padam halaman ini? Anda boleh undur dengan klik Set semula, tetapi itu menghapuskan semua suntingan.',
-    alertCover: 'Halaman muka depan tidak boleh dipadam.',
-    confirmReset: 'Kosongkan semua suntingan dan muat semula fail asal? Tindakan ini tidak boleh diundur.',
-
-    /* ---- COVER ---- */
-    coverKicker: 'Mekanik Bendalir Interaktif · Bab 1.3',
-    coverH1: 'Apakah<br><em>Tegasan?</em>',
-    coverP: 'Daya per unit luas, dua komponen tegasan, dan mengapa bendalir dalam keadaan rehat hanya boleh menolak — tidak pernah menggelongsor. Buka halaman dan gerakkan slider.',
-    coverPill: '<b>σ</b> = F / A &nbsp;→&nbsp; tegasan normal &nbsp;+&nbsp; tegasan ricih',
-
-    /* ---- PAGE 1 ---- */
-    p1title: 'Apakah Tegasan?',
-    p1a: '<strong>Tegasan</strong> ialah <em class="term">daya dalaman</em> yang bertindak per unit luas dalam sesuatu bahan.',
-    p1b: 'Secara mudah: apabila daya luar dikenakan pada sesuatu bahan, bahan itu menjana <strong>daya dalaman</strong> untuk menentang daya yang dikenakan. Keamatan daya dalaman per unit luas inilah yang dipanggil <strong>tegasan</strong>.',
-    eq1lbl: 'σ = tegasan · F = daya · A = luas',
-    eq2lbl: 'Unit SI bagi tegasan ialah pascal',
-    simT1: 'Simulasi · Daya dalaman per unit luas',
-    simH1: 'Ubah daya dan luas — perhatikan tindak balas dalaman',
-    lblF: 'Daya dikenakan F',
-    lblA: 'Luas A',
-    roStress: 'Tegasan σ',
-    roForce: 'Daya',
-    roArea: 'Luas',
-    p1c: 'Tolak lebih kuat → tegasan meningkat. Sebarkan tolakan yang sama pada luas yang lebih besar → tegasan menurun.',
-
-    /* ---- PAGE 2 ---- */
-    p2title: 'Mengapa Kita Bahagikan Daya dengan Luas?',
-    p2a: 'Pertimbangkan dua permukaan yang mengalami <strong>daya yang sama</strong>.',
-    simT2: 'Simulasi · Daya sama, luas berbeza',
-    simH2: 'Anak panah dalaman menunjukkan betapa pekatnya daya itu',
-    case1: '<strong>Kes 1 — Luas besar.</strong> Daya tersebar pada luas yang besar. Oleh itu tegasan menjadi <strong>kecil</strong>.',
-    case2: '<strong>Kes 2 — Luas kecil.</strong> Daya yang sama bertindak pada luas yang lebih kecil. Oleh itu tegasan menjadi <strong>lebih besar</strong>.',
-    eq2Line: 'Daya sama + luas lebih kecil → tegasan lebih besar<br>Daya sama + luas lebih besar → tegasan lebih kecil',
-    eq2Lbl: 'Inilah sebabnya kita bahagikan dengan luas',
-    p2b: 'Daya sahaja tidak memberitahu anda betapa teruknya bahan itu dibebani. Daya 500 N pada 5 m² adalah lembut; 500 N yang sama pada kepala pin adalah merosakkan.',
-
-    /* ---- PAGE 3 ---- */
-    p3title: 'Dua Komponen Tegasan',
-    p3a: 'Tegasan boleh dipisahkan mengikut <strong>arah</strong> daya bertindak relatif kepada permukaan. Terdapat dua jenis penting:',
-    chip1: '1 · Tegasan normal',
-    chip2: '2 · Tegasan ricih',
-    nsH: 'Tegasan normal',
-    nsP: 'Bertindak <strong>serenjang</strong> dengan permukaan. "Normal" di sini bermaksud <em>serenjang</em> — bukan "biasa". Ia boleh menghasilkan <strong>mampatan</strong> (ditolak) atau <strong>tegangan</strong> (ditarik).',
-    ssH: 'Tegasan ricih',
-    ssP: 'Bertindak <strong>secara tangen</strong> atau selari dengan permukaan. Ia cenderung menyebabkan lapisan bersebelahan <strong>menggelongsor</strong> antara satu sama lain.',
-    eq3: 'Tegasan normal → ⊥ permukaan &nbsp;&nbsp;|&nbsp;&nbsp; Tegasan ricih → ∥ permukaan',
-    eq3lbl: 'Simbol biasa digunakan: σ (normal) dan τ (ricih)',
-    p3b: 'Dua halaman seterusnya membincangkan setiap satu — kemudian kita bandingkan secara terus.',
-
-    /* ---- PAGE 4 ---- */
-    p4title: 'Tegasan Normal',
-    p4a: 'Tegasan normal bertindak <strong>serenjang</strong> dengan permukaan — daya bertindak pada 90° terhadap permukaan.',
-    simT4: 'Simulasi · Mampatan vs Tegangan',
-    simH4: 'Tukar mod dan perhatikan tindak balas bahan',
-    btnComp: '⬇ Mampatan',
-    btnTens: '⬆ Tegangan',
-    compP: '<strong>Mampatan</strong> — bahan ditolak. Ia memendek dalam arah daya.',
-    tensP: '<strong>Tegangan</strong> — bahan ditarik. Ia memanjang dalam arah daya.',
-    p4b: 'Dalam kedua-dua kes, daya kekal <strong>serenjang</strong> dengan permukaan. Itulah yang menjadikannya tegasan normal.',
-
-    /* ---- PAGE 5 ---- */
-    p5title: 'Tegasan Ricih',
-    p5a: 'Tegasan ricih bertindak <strong>secara tangen</strong> atau selari dengan permukaan — daya bertindak <em>sepanjang</em> permukaan, bukan ke dalamnya.',
-    simT5: 'Simulasi · Lapisan menggelongsor',
-    simH5: 'Bahagian atas bergerak relatif kepada bahagian bawah',
-    btnPause: '⏸ Jeda',
-    btnPlay: '▶ Main',
-    p5b: 'Tegasan ricih cenderung menyebabkan lapisan bersebelahan <strong>menggelongsor</strong> antara satu sama lain. Ini menghasilkan <strong>ubah bentuk ricih</strong>.',
-    eq5lbl: 'τ = tegasan ricih · F = daya ricih · A = luas · unit: Pa = N/m²',
-
-    /* ---- PAGE 6 ---- */
-    p6title: 'Tegasan Normal vs Tegasan Ricih',
-    simT6: 'Simulasi · Bersebelahan',
-    simH6: 'Kiri: serenjang · Kanan: tangen',
-    thProp: 'Sifat', thNormal: 'Tegasan Normal', thShear: 'Tegasan Ricih',
-    tr1a: 'Arah', tr1b: 'Serenjang dengan permukaan', tr1c: 'Selari / tangen dengan permukaan',
-    tr2a: 'Kesan utama', tr2b: 'Mampatan atau tegangan', tr2c: 'Gelongsoran / ubah bentuk',
-    tr3a: 'Simbol biasa digunakan',
-    tr4a: 'Contoh', tr4b: 'Tekanan dalam bendalir rehat', tr4c: 'Tegasan likat dalam bendalir mengalir',
-    p6a: 'Cara mudah untuk membayangkannya: tegasan normal menolak <em>ke dalam</em> permukaan; tegasan ricih menyeret <em>sepanjang</em> permukaan.',
-
-    /* ---- PAGE 7 ---- */
-    p7title: 'Apakah Yang Berlaku dalam Bendalir Rehat?',
-    p7a: 'Ini amat penting dalam mekanik bendalir.',
-    p7callout: '<strong>Bendalir dalam keadaan rehat tidak boleh menanggung tegasan ricih.</strong>',
-    p7b: '<strong>Mengapa?</strong> Katakan kita cuba mengenakan tegasan ricih: lapisan bendalir mula bergerak antara satu sama lain. Oleh itu bendalir itu <strong>tidak lagi dalam keadaan rehat</strong>.',
-    simT7: 'Simulasi · Cuba ricih bendalir dalam keadaan rehat',
-    simH7: 'Tukar ricih dan lihat apa yang berlaku kepada bendalir',
-    btnApplyShear: '▶ Kenakan tegasan ricih',
-    btnRemoveShear: '⏸ Alihkan tegasan ricih',
-    eq7: 'Bendalir rehat → tiada tegasan ricih',
-    eq7lbl: 'Sebaik sahaja ia boleh menggelongsor, ia tidak lagi rehat',
-    p7c: 'Walau bagaimanapun — bendalir rehat <strong>boleh</strong> mempunyai tegasan normal. Dan tegasan normal itu mempunyai nama khas.',
-
-    /* ---- PAGE 8 ---- */
-    p8title: 'Tegasan Normal dalam Bendalir Rehat = Tekanan',
-    p8a: 'Bagi bendalir dalam keadaan rehat, <strong>tegasan normal dipanggil tekanan</strong>.',
-    eq8lbl: 'p = tekanan · F = daya normal · A = luas',
-    p8b: 'Tekanan bertindak <strong>serenjang</strong> dengan permukaan. Contohnya, air dalam tangki menolak dinding tangki:',
-    simT8: 'Simulasi · Air menolak tangki',
-    simH8: 'Setiap anak panah serenjang dengan dinding yang ditolaknya',
-    lblPF: 'Daya normal F',
-    lblPA: 'Luas dinding A',
-    roPress: 'Tekanan p',
-    roDir: 'Arah',
-    roDirV: '⊥ permukaan',
-    callout8: '<strong>Ingat rantaian ini:</strong> tegasan normal pada bendalir rehat → tekanan. Ia sentiasa menolak serenjang dengan permukaan, tidak pernah sepanjangnya.',
-
-    /* ---- PAGE 9 ---- */
-    p9title: 'Rantaian Konsep Lengkap',
-    p9a: 'Inilah urutan yang menghubungkan semua dalam bab ini:',
-    chForce: 'DAYA',
-    chPerArea: 'Daya per unit luas',
-    chStress: 'TEGASAN &nbsp; σ = F / A',
-    chNormal: 'TEGASAN NORMAL',
-    chPerp: '⊥ dengan permukaan',
-    chCompTens: 'Mampatan atau tegangan',
-    chPressure: 'Dalam bendalir rehat → TEKANAN',
-    chShear: 'TEGASAN RICIH',
-    chPar: '∥ dengan permukaan',
-    chSlide: 'Lapisan menggelongsor',
-    chFlow: 'BENDALIR → UBAH BENTUK BERTERUSAN → ALIRAN',
-    callout9: 'Daya ricih → tegasan ricih → gelongsoran lapisan → ubah bentuk berterusan → <strong>aliran</strong>.',
-
-    /* ---- PAGE 10 ---- */
-    p10title: 'Nota Sedia Peperiksaan',
-    defStressT: 'Tegasan',
-    defStressD: 'Tegasan ialah daya dalaman per unit luas yang terhasil dalam sesuatu bahan apabila daya luar dikenakan.<br><code>σ = F / A</code> &nbsp; unit: <code>Pa = N/m²</code>',
-    defNormalT: 'Tegasan Normal',
-    defNormalD: 'Tegasan yang bertindak <strong>serenjang</strong> dengan permukaan. Ia menghasilkan mampatan atau tegangan. Simbol: <code>σ</code>.',
-    defShearT: 'Tegasan Ricih',
-    defShearD: 'Tegasan yang bertindak <strong>secara tangen atau selari</strong> dengan permukaan, cenderung menyebabkan lapisan bersebelahan menggelongsor. Simbol: <code>τ</code>, dan <code>τ = F / A</code>.',
-    defFluidT: 'Bendalir Rehat',
-    defFluidD: 'Bendalir dalam keadaan rehat <strong>tidak boleh menanggung tegasan ricih</strong>. Namun ia boleh mempunyai tegasan normal — dan tegasan normal itu dipanggil <strong>tekanan</strong>.',
-    finalA: '<strong>Tegasan = Daya / Luas</strong>',
-    finalB: 'Bendalir rehat: <strong>Tegasan normal = Tekanan</strong>',
-    endNote: '— Tamat bab 1.3 —',
-
-    /* ---- CANVAS TEXT ---- */
-    cvMaterial: 'BAHAN',
-    cvInternal: 'daya dalaman menentang daya yang dikenakan',
-    cvAreaA: 'luas A',
-    cvLargeArea: 'LUAS BESAR',
-    cvLargeSub: 'daya sama tersebar → tegasan rendah',
-    cvSmallArea: 'LUAS KECIL',
-    cvSmallSub: 'daya sama tertumpu → tegasan tinggi',
-    cvSameForce: 'DAYA SAMA  F',
-    cvCompression: 'MAMPATAN',
-    cvTension: 'TEGANGAN',
-    cvCompSub: 'bahan ditolak — ia memendek',
-    cvTensSub: 'bahan ditarik — ia memanjang',
-    cvNormalNote: 'daya bertindak pada 90° terhadap permukaan  →  TEGASAN NORMAL',
-    cvShearForce: 'F (daya ricih)',
-    cvShearSlid: 'lapisan telah menggelongsor antara satu sama lain',
-    cvShearAligned: 'sebelum ricih — lapisan sejajar',
-    cvNormalStress: 'TEGASAN NORMAL',
-    cvForcePerp: 'daya ⊥ permukaan',
-    cvCompTens: '→ mampatan / tegangan',
-    cvShearStress: 'TEGASAN RICIH',
-    cvForcePar: 'daya ∥ permukaan',
-    cvSliding: '→ gelongsoran',
-    cvFixed: 'SEMPADAN TETAP',
-    cvShearApplied: 'ricih dikenakan',
-    cvNoShear: 'tiada ricih',
-    cvSlideMsg: 'lapisan menggelongsor → bendalir TIDAK dalam keadaan rehat',
-    cvRestMsg: 'bendalir rehat → tiada tegasan ricih',
-    cvWall: 'DINDING',
-    cvWaterPush: 'air dalam tangki menolak dinding tangki',
-
-    /* ---- SIM EXPLANATION ---- */
-    exTag: 'Penerangan Simulasi'
-  }
+  /* ---- SIM EXPLANATION ---- */
+  exTag: 'Simulation explained'
 };
 
 function T(key){
-  const loc = I18N[LANG] || I18N.en;
-  if (loc[key] !== undefined) return loc[key];
-  if (I18N.en[key] !== undefined) return I18N.en[key];
-  return key;
+  return (STR[key] !== undefined) ? STR[key] : key;
 }
 
 /* ============================================================
-   SIM EXPLANATION CONTENT (bilingual)
+   SIM EXPLANATION CONTENT
    ============================================================ */
 const SIM_EXPLAIN = {
   cvStressIntro: {
-    en: {
-      title: 'Explanation: Stress = Force per unit area',
-      text: 'This simulation shows how <strong>stress</strong> arises inside a material. When an external force (orange arrow above) is applied, the material develops <strong>internal forces</strong> (blue arrows inside) to oppose it. That internal force per unit area is the stress, <code>σ = F/A</code>.',
-      tips: [
-        'Increase the force F → the internal arrows grow and the stress rises.',
-        'Increase the area A → the same force is spread wider, so the stress falls.',
-        'Watch the σ readout at the top: it changes every time you move a slider.'
-      ]
-    },
-    ms: {
-      title: 'Penerangan: Tegasan = Daya per unit luas',
-      text: 'Simulasi ini menunjukkan bagaimana <strong>tegasan</strong> terhasil dalam bahan. Apabila daya luar (anak panah jingga di atas) dikenakan, bahan menjana <strong>daya dalaman</strong> (anak panah biru di dalam) untuk menentangnya. Daya dalaman per unit luas itulah tegasan, iaitu <code>σ = F/A</code>.',
-      tips: [
-        'Naikkan daya F → anak panah daya dalaman bertambah besar dan tegasan meningkat.',
-        'Naikkan luas A → daya yang sama tersebar lebih luas, jadi tegasan menurun.',
-        'Perhatikan bacaan σ di bahagian atas: nilainya berubah setiap kali slider digerakkan.'
-      ]
-    }
+    title: 'Explanation: Stress = Force per unit area',
+    text: 'This simulation shows how <strong>stress</strong> arises inside a material. When an external force (orange arrow above) is applied, the material develops <strong>internal forces</strong> (blue arrows inside) to oppose it. That internal force per unit area is the stress, <code>σ = F/A</code>.',
+    tips: [
+      'Increase the force F → the internal arrows grow and the stress rises.',
+      'Increase the area A → the same force is spread wider, so the stress falls.',
+      'Watch the σ readout at the top: it changes every time you move a slider.'
+    ]
   },
   cvArea: {
-    en: {
-      title: 'Explanation: Why divide force by area?',
-      text: 'The <strong>same</strong> force is applied to two different areas. On the left, a large area: the force is spread out, the internal arrows are sparse and short → low stress. On the right, a small area: the force is concentrated, the internal arrows are dense and long → high stress.',
-      tips: [
-        'Same force + smaller area = greater stress.',
-        'Same force + larger area = smaller stress.',
-        'That is exactly why we <strong>divide force by area</strong> — to measure how "concentrated" the force is on a surface.'
-      ]
-    },
-    ms: {
-      title: 'Penerangan: Mengapa bahagi daya dengan luas?',
-      text: 'Daya yang <strong>sama</strong> dikenakan pada dua luas yang berbeza. Di sebelah kiri, luas besar: daya tersebar, anak panah dalaman jarang dan pendek → tegasan rendah. Di sebelah kanan, luas kecil: daya terkumpul, anak panah dalaman rapat dan panjang → tegasan tinggi.',
-      tips: [
-        'Daya yang sama + luas lebih kecil = tegasan lebih besar.',
-        'Daya yang sama + luas lebih besar = tegasan lebih kecil.',
-        'Inilah sebabnya kita <strong>bahagikan daya dengan luas</strong> — untuk mengukur betapa "pekat" daya itu bertindak pada permukaan.'
-      ]
-    }
+    title: 'Explanation: Why divide force by area?',
+    text: 'The <strong>same</strong> force is applied to two different areas. On the left, a large area: the force is spread out, the internal arrows are sparse and short → low stress. On the right, a small area: the force is concentrated, the internal arrows are dense and long → high stress.',
+    tips: [
+      'Same force + smaller area = greater stress.',
+      'Same force + larger area = smaller stress.',
+      'That is exactly why we <strong>divide force by area</strong> — to measure how "concentrated" the force is on a surface.'
+    ]
   },
   cvNormal: {
-    en: {
-      title: 'Explanation: Normal stress — compression & tension',
-      text: 'Normal stress acts <strong>perpendicular (90°)</strong> to the surface. Note the right-angle marker at the corner of the block — it emphasises that the force acts perpendicular, not parallel. Symbol: <code>σ</code>.',
-      tips: [
-        '<strong>Compression</strong> mode: the force pushes into the surface → the material shortens.',
-        '<strong>Tension</strong> mode: the force pulls away from the surface → the material lengthens.',
-        'In both modes the force stays <strong>perpendicular</strong> to the surface — that is what makes it a normal stress.'
-      ]
-    },
-    ms: {
-      title: 'Penerangan: Tegasan normal — mampatan & tegangan',
-      text: 'Tegasan normal bertindak <strong>serenjang (90°)</strong> dengan permukaan. Perhatikan penanda sudut tepat di penjuru blok — ia menegaskan daya bertindak serenjang, bukan selari. Simbol: <code>σ</code>.',
-      tips: [
-        'Mod <strong>mampatan</strong>: daya menolak masuk ke permukaan → bahan memendek (memampat).',
-        'Mod <strong>tegangan</strong>: daya menarik keluar dari permukaan → bahan memanjang (meregang).',
-        'Dalam kedua-dua mod, arah daya tetap <strong>serenjang</strong> dengan permukaan — itulah yang menjadikannya tegasan normal.'
-      ]
-    }
+    title: 'Explanation: Normal stress — compression & tension',
+    text: 'Normal stress acts <strong>perpendicular (90°)</strong> to the surface. Note the right-angle marker at the corner of the block — it emphasises that the force acts perpendicular, not parallel. Symbol: <code>σ</code>.',
+    tips: [
+      '<strong>Compression</strong> mode: the force pushes into the surface → the material shortens.',
+      '<strong>Tension</strong> mode: the force pulls away from the surface → the material lengthens.',
+      'In both modes the force stays <strong>perpendicular</strong> to the surface — that is what makes it a normal stress.'
+    ]
   },
   cvShear: {
-    en: {
-      title: 'Explanation: Shear stress — layers sliding',
-      text: 'Shear stress acts <strong>parallel or tangential</strong> to the surface (the orange arrow on the right). When a shear force is applied, the top layer tends to move relative to the bottom layer. This is called <strong>shear deformation</strong>.',
-      tips: [
-        'The larger the shear force, the larger the displacement between layers.',
-        'Notice the dashed vertical line on the left: it marks the original position. As the layers move, they shift away from it.',
-        'Formula: <code>τ = F/A</code>, unit Pa = N/m². Symbol: <code>τ</code>.'
-      ]
-    },
-    ms: {
-      title: 'Penerangan: Tegasan ricih — lapisan menggelongsor',
-      text: 'Tegasan ricih bertindak <strong>selari atau tangen</strong> dengan permukaan (anak panah jingga di sisi kanan). Apabila daya ricih dikenakan, lapisan atas cenderung bergerak relatif kepada lapisan bawah. Inilah yang dipanggil <strong>ubah bentuk ricih</strong>.',
-      tips: [
-        'Semakin besar daya ricih, semakin besar anjakan antara lapisan.',
-        'Perhatikan garis putus-putus menegak di sebelah kiri: ia menunjukkan kedudukan asal. Apabila lapisan bergerak, ia beralih dari garis itu.',
-        'Formula: <code>τ = F/A</code>, unit Pa = N/m². Simbol: <code>τ</code>.'
-      ]
-    }
+    title: 'Explanation: Shear stress — layers sliding',
+    text: 'Shear stress acts <strong>parallel or tangential</strong> to the surface (the orange arrow on the right). When a shear force is applied, the top layer tends to move relative to the bottom layer. This is called <strong>shear deformation</strong>.',
+    tips: [
+      'The larger the shear force, the larger the displacement between layers.',
+      'Notice the dashed vertical line on the left: it marks the original position. As the layers move, they shift away from it.',
+      'Formula: <code>τ = F/A</code>, unit Pa = N/m². Symbol: <code>τ</code>.'
+    ]
   },
   cvCompare: {
-    en: {
-      title: 'Explanation: Normal stress vs Shear stress',
-      text: 'A direct comparison of the two types of stress in one simulation.',
-      tips: [
-        '<strong>Left — Normal stress:</strong> the force acts perpendicular to the surface (down and up). It produces compression or tension.',
-        '<strong>Right — Shear stress:</strong> the force acts parallel to the surface. The top slides left and right while the bottom stays fixed → layers slide.',
-        'The key difference: <strong>the direction of the force relative to the surface</strong>. Perpendicular = normal, parallel = shear.'
-      ]
-    },
-    ms: {
-      title: 'Penerangan: Tegasan normal vs Tegasan ricih',
-      text: 'Perbandingan secara terus antara dua jenis tegasan dalam satu simulasi.',
-      tips: [
-        '<strong>Kiri — Tegasan normal:</strong> daya bertindak serenjang dengan permukaan (masuk ke bawah dan ke atas). Menghasilkan mampatan atau tegangan.',
-        '<strong>Kanan — Tegasan ricih:</strong> daya bertindak selari dengan permukaan. Bahagian atas bergelongsor ke kiri-kanan sambil bahagian bawah kekal → lapisan menggelongsor.',
-        'Perbezaan utama: <strong>arah daya relatif kepada permukaan</strong>. Serenjang = normal, selari = ricih.'
-      ]
-    }
+    title: 'Explanation: Normal stress vs Shear stress',
+    text: 'A direct comparison of the two types of stress in one simulation.',
+    tips: [
+      '<strong>Left — Normal stress:</strong> the force acts perpendicular to the surface (down and up). It produces compression or tension.',
+      '<strong>Right — Shear stress:</strong> the force acts parallel to the surface. The top slides left and right while the bottom stays fixed → layers slide.',
+      'The key difference: <strong>the direction of the force relative to the surface</strong>. Perpendicular = normal, parallel = shear.'
+    ]
   },
   cvFluidRest: {
-    en: {
-      title: 'Explanation: A fluid at rest cannot sustain shear stress',
-      text: 'Press "Apply shear stress" and watch what happens to the fluid particles. Once shear is applied, the particles start moving and the fluid layers slide — the fluid is <strong>no longer at rest</strong>.',
-      tips: [
-        'The vertical grid lines that start to slant = the fluid layers are sliding.',
-        'When the shear is removed, there is no layer motion — the fluid is still again.',
-        'Conclusion: <strong>a fluid at rest cannot sustain shear stress</strong>, because the moment it does, it starts to flow and is no longer at rest.',
-        'However, a fluid at rest can sustain <strong>normal stress</strong> — which is called pressure.'
-      ]
-    },
-    ms: {
-      title: 'Penerangan: Cecair rehat tidak boleh menanggung tegasan ricih',
-      text: 'Tekan butang "Kenakan tegasan ricih" dan perhatikan apa yang berlaku kepada zarah-zarah cecair. Apabila ricih dikenakan, zarah mula bergerak dan lapisan cecair menggelongsor — cecair <strong>tidak lagi dalam keadaan rehat</strong>.',
-      tips: [
-        'Baris grid menegak yang mula senget = lapisan cecair sedang menggelongsor.',
-        'Apabila ricih dialihkan, tiada pergerakan lapisan — cecair kembali diam.',
-        'Kesimpulan: <strong>cecair dalam keadaan rehat tidak boleh menanggung tegasan ricih</strong>, kerana sebaik sahaja ia menanggungnya, ia mula mengalir dan tidak lagi rehat.',
-        'Walau bagaimanapun, cecair rehat boleh menanggung <strong>tegasan normal</strong> — yang dipanggil tekanan.'
-      ]
-    }
+    title: 'Explanation: A fluid at rest cannot sustain shear stress',
+    text: 'Press "Apply shear stress" and watch what happens to the fluid particles. Once shear is applied, the particles start moving and the fluid layers slide — the fluid is <strong>no longer at rest</strong>.',
+    tips: [
+      'The vertical grid lines that start to slant = the fluid layers are sliding.',
+      'When the shear is removed, there is no layer motion — the fluid is still again.',
+      'Conclusion: <strong>a fluid at rest cannot sustain shear stress</strong>, because the moment it does, it starts to flow and is no longer at rest.',
+      'However, a fluid at rest can sustain <strong>normal stress</strong> — which is called pressure.'
+    ]
   },
   cvPressure: {
-    en: {
-      title: 'Explanation: Pressure = normal stress in a fluid at rest',
-      text: 'The fluid in the tank pushes on the walls <strong>perpendicularly</strong>. Every pressure arrow is at a right angle to the wall — never parallel. Formula: <code>p = F/A</code>, where F is the normal force and A is the wall area.',
-      tips: [
-        'Increase the force F → the pressure rises (the arrows get longer).',
-        'Increase the area A → the pressure falls (the force is spread out).',
-        'Note the direction of the arrows: always <strong>perpendicular</strong> to the walls and the tank floor.',
-        'This is why pressure in a fluid always acts normal to a surface, never sliding along it.'
-      ]
-    },
-    ms: {
-      title: 'Penerangan: Tekanan = Tegasan normal dalam cecair rehat',
-      text: 'Cecair dalam tangki menolak dinding secara <strong>serenjang</strong>. Setiap anak panah tekanan bersudut tepat dengan dinding — tidak pernah selari. Formula: <code>p = F/A</code>, di mana F ialah daya normal dan A ialah luas dinding.',
-      tips: [
-        'Naikkan daya F → tekanan meningkat (anak panah menjadi lebih panjang).',
-        'Naikkan luas A → tekanan menurun (daya tersebar).',
-        'Perhatikan arah anak panah: sentiasa <strong>berserenjang</strong> dengan dinding dan dasar tangki.',
-        'Inilah sebabnya tekanan dalam bendalir sentiasa bertindak tegak lurus terhadap permukaan, tidak pernah menggelongsor di sepanjangnya.'
-      ]
-    }
+    title: 'Explanation: Pressure = normal stress in a fluid at rest',
+    text: 'The fluid in the tank pushes on the walls <strong>perpendicularly</strong>. Every pressure arrow is at a right angle to the wall — never parallel. Formula: <code>p = F/A</code>, where F is the normal force and A is the wall area.',
+    tips: [
+      'Increase the force F → the pressure rises (the arrows get longer).',
+      'Increase the area A → the pressure falls (the force is spread out).',
+      'Note the direction of the arrows: always <strong>perpendicular</strong> to the walls and the tank floor.',
+      'This is why pressure in a fluid always acts normal to a surface, never sliding along it.'
+    ]
   }
 };
 
@@ -1557,7 +1305,6 @@ const STORAGE_KEY = 'stress-book-v3';
       const p = document.createElement('div');
       p.className = (pd.cls || 'page').replace(/\s*flipped\s*/g, ' ').trim();
       p.dataset.titleEn = pd.titleEn || pd.title || '';
-      p.dataset.titleMs = pd.titleMs || pd.title || '';
       p.innerHTML = pd.html;
       bookEl.appendChild(p);
     });
@@ -1581,9 +1328,7 @@ const nextBtn    = document.getElementById('nextBtn');
 
 function pageTitle(p){
   if (!p) return '';
-  const en = p.dataset.titleEn || '';
-  const ms = p.dataset.titleMs || '';
-  return (LANG === 'ms') ? (ms || en) : (en || ms);
+  return p.dataset.titleEn || '';
 }
 
 function rebuildDots(){
@@ -1869,8 +1614,7 @@ function syncTitleInput(){
 
 titleInput.addEventListener('input', () => {
   if (!pages[currentIdx]) return;
-  if (LANG === 'ms') pages[currentIdx].dataset.titleMs = titleInput.value;
-  else               pages[currentIdx].dataset.titleEn = titleInput.value;
+  pages[currentIdx].dataset.titleEn = titleInput.value;
   navTitleEl.textContent = titleInput.value;
   if (dotEls[currentIdx]) dotEls[currentIdx].title = titleInput.value;
   scheduleSave();
@@ -1893,7 +1637,6 @@ function saveToStorage(){
       pages: pages.map(p => ({
         cls: p.className.replace(/\s*flipped\s*/g, ' ').trim(),
         titleEn: p.dataset.titleEn || '',
-        titleMs: p.dataset.titleMs || '',
         html: p.innerHTML
       })),
       idx: currentIdx
@@ -1933,7 +1676,6 @@ function insertNewPage(){
   const newPage = document.createElement('div');
   newPage.className = 'page';
   newPage.dataset.titleEn = title;
-  newPage.dataset.titleMs = title;
   newPage.innerHTML = html;
 
   const bookEl = document.getElementById('book');
@@ -2644,7 +2386,7 @@ if (pFSlider && pASlider){
 }
 
 /* ============================================================
-   SIM EXPLANATIONS — rendered per language
+   SIM EXPLANATIONS — rendered once (English)
    ============================================================ */
 function renderSimExplanations(){
   document.querySelectorAll('.sim-explain').forEach(el => el.remove());
@@ -2652,11 +2394,9 @@ function renderSimExplanations(){
   document.querySelectorAll('.sim').forEach(sim => {
     const canvas = sim.querySelector('canvas');
     if (!canvas) return;
-    const id = canvas.id;
-    const entry = SIM_EXPLAIN[id];
-    if (!entry) return;
+    const data = SIM_EXPLAIN[canvas.id];
+    if (!data) return;
 
-    const data = entry[LANG] || entry.en;
     const box = document.createElement('div');
     box.className = 'sim-explain';
 
@@ -2676,13 +2416,10 @@ function renderSimExplanations(){
 }
 
 /* ============================================================
-   APPLY LANGUAGE
+   APPLY STATIC TEXT (English)
    ============================================================ */
-function applyLanguage(lang){
-  LANG = (lang === 'ms') ? 'ms' : 'en';
-  try { localStorage.setItem(LANG_KEY, LANG); } catch(e){}
-
-  document.documentElement.lang = LANG;
+function applyText(){
+  document.documentElement.lang = 'en';
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
     el.textContent = T(el.dataset.i18n);
@@ -2712,21 +2449,8 @@ function applyLanguage(lang){
   syncTitleInput();
   if (editMode) applyEditGuards();
 
-  /* language pill state */
-  document.querySelectorAll('#langFab button').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === LANG);
-  });
-
   setTimeout(resizeAll, 40);
 }
-
-document.querySelectorAll('#langFab button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.dataset.lang === LANG) return;
-    if (editMode) { setEditMode(false); }
-    applyLanguage(btn.dataset.lang);
-  });
-});
 
 /* ============================================================
    MAIN LOOP
@@ -2774,7 +2498,7 @@ window.addEventListener('orientationchange', () => setTimeout(resizeAll, 250));
 function boot(){
   rebuildDots();
   updateZ();
-  applyLanguage(LANG);
+  applyText();
   updateUI();
   resizeAll();
   pages.forEach((p, i) => p.classList.toggle('flipped', i < currentIdx));
