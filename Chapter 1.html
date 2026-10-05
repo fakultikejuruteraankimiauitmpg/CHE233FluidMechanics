@@ -420,6 +420,49 @@
   .progress-fab svg{width:14px;height:14px;opacity:.75}
   .progress-fab b{color:var(--shear);font-family:var(--mono);font-weight:800}
 
+  /* ============ CHAPTER LIST BUTTON (bottom-left) ============ */
+  .chapter-fab{
+    position:fixed;
+    bottom:max(14px, env(safe-area-inset-bottom));
+    left:14px;
+    z-index:7400;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    height:42px;
+    padding:0 17px;
+    background:rgba(255,254,251,.96);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid #d8d0bd;
+    border-radius:999px;
+    box-shadow:0 8px 24px -8px rgba(60,50,20,.30);
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:800;
+    letter-spacing:.05em;
+    color:#3a3f4d;
+    text-decoration:none;
+    white-space:nowrap;
+    user-select:none;
+    transition:transform .16s ease, box-shadow .16s ease,
+               background .16s ease, border-color .16s ease;
+  }
+  .chapter-fab svg{
+    width:16px;height:16px;color:var(--shear);flex:none;
+    transition:transform .16s ease;
+  }
+  .chapter-fab:hover{
+    background:#fff;
+    border-color:#b9ae93;
+    transform:translateY(-2px);
+    box-shadow:0 13px 30px -8px rgba(60,50,20,.38);
+  }
+  .chapter-fab:hover svg{transform:translateX(-2px)}
+  .chapter-fab:active{
+    transform:translateY(1px);
+    box-shadow:0 4px 12px -4px rgba(60,50,20,.35);
+  }
+
   /* ============ MOBILE ============ */
   @media (max-width:760px){
     body{line-height:1.7}
@@ -451,7 +494,19 @@
     .dots{max-width:180px}
 
     .progress-fab{height:34px;padding:0 12px;font-size:11px;top:10px;right:10px}
+
+    /* place the chapter-list button ABOVE the nav bar so they never collide */
+    .chapter-fab{
+      left:10px;
+      bottom:calc(62px + env(safe-area-inset-bottom));
+      height:36px;
+      padding:0 13px;
+      font-size:11.5px;
+      gap:7px;
+    }
+    .chapter-fab svg{width:14px;height:14px}
   }
+
   @media (prefers-reduced-motion: reduce){
     .page{transition-duration:.35s}
   }
@@ -1009,6 +1064,14 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V6a2 2 0 012-2h12a2 2 0 012 2v13.5M4 19.5L20 6M4 19.5h16"/></svg>
   <b id="progCount">0</b>/8
 </div>
+
+<!-- ============== CHAPTER LIST BUTTON (bottom-left) ============== -->
+<a class="chapter-fab" href="index.html" title="Return to the list of Fluid Mechanics chapters" aria-label="Return to the list of Fluid Mechanics chapters">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 12H5M11 18l-6-6 6-6"/>
+  </svg>
+  Chapter List
+</a>
 
 <!-- ============== NAV BAR ============== -->
 <div class="book-nav">
