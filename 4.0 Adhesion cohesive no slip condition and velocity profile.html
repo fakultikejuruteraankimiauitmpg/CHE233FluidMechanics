@@ -293,6 +293,33 @@
   .dot.active{background:var(--accent);width:18px;border-radius:4px}
   .page-num{font-family:var(--mono);font-size:10px;color:#8a8168;letter-spacing:.06em}
 
+  /* ===== CHAPTER JUMP BUTTONS (bottom-left / bottom-right) ===== */
+  .chapter-jump{
+    position:fixed;
+    bottom:max(18px, calc(env(safe-area-inset-bottom) + 4px));
+    z-index:7000;
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(255,254,251,.95);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid #d8d0bd;
+    border-radius:999px;
+    padding:9px 18px;
+    font-size:13.5px;font-weight:700;color:#3a3f4d;
+    text-decoration:none;
+    box-shadow:0 8px 30px -8px rgba(60,50,20,.25);
+    font-family:inherit;
+    user-select:none;
+    transition:.18s;
+    white-space:nowrap;
+  }
+  .chapter-jump:hover{
+    background:#fffef8;border-color:#b9ae93;transform:translateY(-1px);
+  }
+  .chapter-jump svg{width:14px;height:14px;flex:none}
+  .chapter-jump.left{left:max(14px, env(safe-area-inset-left));}
+  .chapter-jump.right{right:max(14px, env(safe-area-inset-right));}
+  .chapter-jump.left span,.chapter-jump.right span{display:inline;}
+
   .edit-fab{
     position:fixed;
     top:max(14px, env(safe-area-inset-top));
@@ -448,6 +475,17 @@
     .nav-title{max-width:120px;font-size:11px}
     .dot{width:6px;height:6px}
     .dot.active{width:14px}
+
+    /* Chapter jump buttons — smaller on mobile */
+    .chapter-jump{
+      padding:7px 12px;font-size:11.5px;
+      bottom:max(14px, calc(env(safe-area-inset-bottom) + 2px));
+    }
+    .chapter-jump svg{width:12px;height:12px}
+    .chapter-jump.left{left:max(8px, env(safe-area-inset-left));}
+    .chapter-jump.right{right:max(8px, env(safe-area-inset-right));}
+    /* Hide the label text on very narrow screens, keep only arrow + short word */
+    .chapter-jump.left span.long,.chapter-jump.right span.long{display:none}
 
     .edit-fab{width:34px;height:34px;top:10px;right:10px}
     .edit-fab svg{width:14px;height:14px}
@@ -1220,6 +1258,17 @@
   </div>
 </div>
 
+<!-- ============== CHAPTER JUMP BUTTONS (bottom-left / bottom-right) ============== -->
+<a class="chapter-jump left" href="index.html" title="Back to Chapter List">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+  <span>Chapter List</span>
+</a>
+
+<a class="chapter-jump right" href="Chapter 1.html" title="Go to Chapter 1">
+  <span>Chapter 1</span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+</a>
+
 <!-- ============== NAV BAR ============== -->
 <div class="book-nav">
   <button class="nav-btn" id="prevBtn" data-i18n-title="prevTip" title="Previous">
@@ -1957,11 +2006,6 @@ function txt(ctx, s, x, y, color, size, align, weight){
 
 /* ============================================================
    MOLECULE SCENE (shared)
-   ------------------------------------------------------------
-   FIX: The bottom row of molecules is r = 0 (largest canvas y,
-   closest to the wall). The adhesion pull and the adhesion
-   bonds are both applied to r = 0 — so adhesion links the
-   bottom-most water molecules directly to the wall atoms.
    ============================================================ */
 function moleculeScene(ctx, w, h, cfg){
   const t = cfg.t;
@@ -2002,13 +2046,11 @@ function moleculeScene(ctx, w, h, cfg){
   const rows = Math.max(2, Math.min(4, Math.floor((bottom - topPad) / 38)));
   const dy = (bottom - topPad) / rows;
 
-  // Build the grid. r = 0 is the BOTTOM row (closest to the wall).
   const pts = [];
   for (let r = 0; r < rows; r++){
     for (let c = 0; c < cols; c++){
       const bx = dx * (c + 0.5);
       let by = bottom - dy * (r + 0.5);
-      // FIX: only the bottom row (r === 0) is pulled toward the wall
       if (cfg.showWall && r === 0) by += cfg.pull * 5;
       const jx = Math.sin(t * 1.6 + r * 1.1 + c * 0.8) * 2.2 * cfg.jiggle;
       const jy = Math.cos(t * 2.0 + r * 0.6 + c * 1.4) * 2.0 * cfg.jiggle;
@@ -2017,7 +2059,6 @@ function moleculeScene(ctx, w, h, cfg){
   }
   const at = (r, c) => (r >= 0 && r < rows && c >= 0 && c < cols) ? pts[r * cols + c] : null;
 
-  // Cohesion bonds (fluid–fluid) — every molecule to its neighbours
   if (cfg.showCoh){
     ctx.lineCap = 'round';
     for (let r = 0; r < rows; r++){
@@ -2034,10 +2075,9 @@ function moleculeScene(ctx, w, h, cfg){
     }
   }
 
-  // Adhesion bonds (fluid–solid) — FIX: connect the BOTTOM row to the wall atoms
   if (cfg.showWall && cfg.showAdh){
     for (let c = 0; c < cols; c++){
-      const p = at(0, c);          // FIX: bottom row, not top row
+      const p = at(0, c);
       if (!p) continue;
       const ax = dx * (c + 0.5);
       const ay = wallTop + 20;
@@ -2051,7 +2091,6 @@ function moleculeScene(ctx, w, h, cfg){
     }
   }
 
-  // Molecules on top
   for (const p of pts){
     const g = ctx.createRadialGradient(p.x - 2.5, p.y - 2.5, 1, p.x, p.y, 8.5);
     g.addColorStop(0, '#e6f3ff'); g.addColorStop(1, '#4f9ef0');
@@ -2299,10 +2338,6 @@ const pipeSim = { Umax: 1.0, turbulent: false, particles: [] };
 
 /* ============================================================
    SIM 1 · ADHESION
-   ------------------------------------------------------------
-   FIX: Cohesion bonds are now switched OFF in this simulation
-   so the only interaction shown is fluid–solid adhesion,
-   drawn from the bottom-most water molecules to the wall.
    ============================================================ */
 reg('cvAdhesion', function(o){
   moleculeScene(o.ctx, o.w, o.h, {
@@ -2789,13 +2824,8 @@ if (wSlider) wSlider.addEventListener('input', () => {
 
 /* ============================================================
    SIM 7 · PIPE
-   ------------------------------------------------------------
-   FIX: The visual profile is now scaled against a fixed
-   reference velocity U_REF = 2.0 m/s. When the user raises
-   u_max, the profile grows visibly toward the reference width
-   instead of being normalised away by Umax.
    ============================================================ */
-const PIPE_U_REF = 2.0; // m/s, full-scale reference for the visual profile
+const PIPE_U_REF = 2.0;
 
 reg('cvPipe', function(o){
   const { ctx, w, h } = o;
@@ -2833,7 +2863,6 @@ reg('cvPipe', function(o){
   const pxL = x0 + 16;
   const profSpan = (x1 - x0) * 0.30;
 
-  // Profile curve — now normalised by the fixed reference U_REF
   ctx.strokeStyle = '#7cc4ff'; ctx.lineWidth = 2.6;
   ctx.beginPath();
   for (let i = 0; i <= 80; i++){
@@ -2856,7 +2885,6 @@ reg('cvPipe', function(o){
     arrow(ctx, pxL, y, pxL + len, y, 6);
   }
 
-  // Full-scale guide at U_REF
   ctx.setLineDash([3, 4]);
   ctx.strokeStyle = 'rgba(124,196,255,.22)'; ctx.lineWidth = 1;
   ctx.beginPath();
